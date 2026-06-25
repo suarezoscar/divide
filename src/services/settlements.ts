@@ -4,7 +4,6 @@ import {
   getDocs,
   query,
   where,
-  orderBy,
   Timestamp,
   type DocumentData,
 } from "firebase/firestore";
@@ -48,9 +47,11 @@ export async function createSettlement(
 export async function getGroupSettlements(groupId: string): Promise<Settlement[]> {
   const q = query(
     collection(db, "settlements"),
-    where("groupId", "==", groupId),
-    orderBy("date", "desc")
+    where("groupId", "==", groupId)
   );
   const snap = await getDocs(q);
-  return snap.docs.map((d) => docToSettlement(d.id, d.data()));
+  const settlements = snap.docs.map((d) => docToSettlement(d.id, d.data()));
+  // Sort in client to avoid needing a composite index
+  settlements.sort((a, b) => b.date.toMillis() - a.date.toMillis());
+  return settlements;
 }

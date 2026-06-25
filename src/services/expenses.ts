@@ -8,7 +8,6 @@ import {
   deleteDoc,
   query,
   where,
-  orderBy,
   Timestamp,
   type DocumentData,
 } from "firebase/firestore";
@@ -56,11 +55,13 @@ export async function createExpense(
 export async function getGroupExpenses(groupId: string): Promise<Expense[]> {
   const q = query(
     collection(db, "expenses"),
-    where("groupId", "==", groupId),
-    orderBy("date", "desc")
+    where("groupId", "==", groupId)
   );
   const snap = await getDocs(q);
-  return snap.docs.map((d) => docToExpense(d.id, d.data()));
+  const expenses = snap.docs.map((d) => docToExpense(d.id, d.data()));
+  // Sort in client to avoid needing a composite index
+  expenses.sort((a, b) => b.date.toMillis() - a.date.toMillis());
+  return expenses;
 }
 
 export async function getExpense(expenseId: string): Promise<Expense | null> {

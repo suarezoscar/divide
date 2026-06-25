@@ -7,7 +7,6 @@ import {
   updateDoc,
   query,
   where,
-  orderBy,
   Timestamp,
   type DocumentData,
 } from "firebase/firestore";
@@ -51,11 +50,13 @@ export async function createGroup(
 export async function getUserGroups(userId: string): Promise<Group[]> {
   const q = query(
     collection(db, "groups"),
-    where("createdBy", "==", userId),
-    orderBy("createdAt", "desc")
+    where("createdBy", "==", userId)
   );
   const snap = await getDocs(q);
-  return snap.docs.map((d) => docToGroup(d.id, d.data()));
+  const groups = snap.docs.map((d) => docToGroup(d.id, d.data()));
+  // Sort in client to avoid needing a composite index
+  groups.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
+  return groups;
 }
 
 export async function getGroup(groupId: string): Promise<Group | null> {
