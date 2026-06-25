@@ -11,7 +11,7 @@ import type { Member } from "../types";
 import styles from "./DashboardPage.module.css";
 
 export function DashboardPage() {
-  const { groups, loading, create } = useGroups();
+  const { groups, loading, error, create } = useGroups();
   const navigate = useNavigate();
 
   const [showCreate, setShowCreate] = useState(false);
@@ -19,20 +19,29 @@ export function DashboardPage() {
   const [description, setDescription] = useState("");
   const [memberNames, setMemberNames] = useState<string[]>([""]);
   const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState("");
 
   const handleCreate = async () => {
     if (!name.trim()) return;
     setCreating(true);
-    const members: Member[] = memberNames
-      .filter((n) => n.trim())
-      .map((n) => ({ id: crypto.randomUUID(), name: n.trim() }));
-    const g = await create(name.trim(), description.trim(), members);
-    setCreating(false);
-    setShowCreate(false);
-    setName("");
-    setDescription("");
-    setMemberNames([""]);
-    if (g) navigate(`/group/${g.id}`);
+    setCreateError("");
+    try {
+      const members: Member[] = memberNames
+        .filter((n) => n.trim())
+        .map((n) => ({ id: crypto.randomUUID(), name: n.trim() }));
+      const g = await create(name.trim(), description.trim(), members);
+      setShowCreate(false);
+      setName("");
+      setDescription("");
+      setMemberNames([""]);
+      if (g) navigate(`/group/${g.id}`);
+    } catch (err) {
+      setCreateError(
+        err instanceof Error ? err.message : "Error al crear el grupo. ¿Está Firestore configurado?"
+      );
+    } finally {
+      setCreating(false);
+    }
   };
 
   const addMemberField = () => setMemberNames((prev) => [...prev, ""]);
@@ -43,6 +52,19 @@ export function DashboardPage() {
 
   if (loading) {
     return <p style={{ textAlign: "center", padding: 40, color: "#6B7280" }}>Cargando grupos…</p>;
+  }
+
+  if (error) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.header}>
+          <h1>Tus grupos</h1>
+        </div>
+        <Card className={styles.empty}>
+          <p style={{ color: "#EF4444" }}>{error}</p>
+        </Card>
+      </div>
+    );
   }
 
   return (
@@ -120,6 +142,8 @@ export function DashboardPage() {
               <Plus size={14} /> Añadir miembro
             </Button>
           </div>
+
+          {createError && <p style={{ color: "#EF4444", fontSize: 13, textAlign: "center" }}>{createError}</p>}
 
           <Button onClick={handleCreate} disabled={creating || !name.trim()} size="lg" style={{ width: "100%" }}>
             {creating ? "Creando…" : "Crear grupo"}
