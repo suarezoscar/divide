@@ -1,0 +1,56 @@
+import {
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  Timestamp,
+  type DocumentData,
+} from "firebase/firestore";
+import { db } from "./firebase";
+import type { Settlement } from "../types";
+
+function docToSettlement(id: string, data: DocumentData): Settlement {
+  return {
+    id,
+    groupId: data.groupId,
+    from: data.from,
+    to: data.to,
+    amount: data.amount,
+    date: data.date,
+  };
+}
+
+export async function createSettlement(
+  groupId: string,
+  from: string,
+  to: string,
+  amount: number
+): Promise<Settlement> {
+  const ref = await addDoc(collection(db, "settlements"), {
+    groupId,
+    from,
+    to,
+    amount,
+    date: Timestamp.now(),
+  });
+  return {
+    id: ref.id,
+    groupId,
+    from,
+    to,
+    amount,
+    date: Timestamp.now(),
+  };
+}
+
+export async function getGroupSettlements(groupId: string): Promise<Settlement[]> {
+  const q = query(
+    collection(db, "settlements"),
+    where("groupId", "==", groupId),
+    orderBy("date", "desc")
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => docToSettlement(d.id, d.data()));
+}

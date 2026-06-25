@@ -1,0 +1,53 @@
+.shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.nav {
+  height: 56px;
+  background: #fff;
+  border-bottom: 1px solid #E5E7EB;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  flex-shrink: 0;
+}
+
+.navLeft {
+  display: flex;
+  align-items: center;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1A1A2E;
+  text-decoration: none;
+}
+
+.back {
+  font-size: 15px;
+  font-weight: 500;
+  color: #07819C;
+  text-decoration: none;
+}
+
+.back:hover {
+  opacity: 0.8;
+}
+
+.main {
+  flex: 1;
+  padding: 20px;
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+}

@@ -1,0 +1,56 @@
+.card {
+  padding: 20px;
+}
+
+.title {
+  font-size: 16px;
+  margin-bottom: 14px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.debtRow {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  background: #F5F5F7;
+  border-radius: 12px;
+}
+
+.debtMembers {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.member {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1A1A2E;
+}
+
+.debtActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.debtAmount {
+  font-size: 18px;
+  font-weight: 700;
+  color: #07819C;
+}
+
+.empty {
+  text-align: center;
+  padding: 24px;
+  color: #10B981;
+}
