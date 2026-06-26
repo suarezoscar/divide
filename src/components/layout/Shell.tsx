@@ -49,7 +49,7 @@ export function Shell() {
       </main>
 
       <footer className={styles.footer}>
-        <span>Divide v{APP_VERSION}</span>
+        <span>Divide v{APP_VERSION} · Oscar Suarez</span>
       </footer>
     </div>
   );

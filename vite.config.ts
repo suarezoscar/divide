@@ -1,13 +1,16 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vitest/config'
+import { execSync } from 'node:child_process'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
-import pkg from './package.json' with { type: 'json' }
+
+const commitCount = execSync('git rev-list --count HEAD').toString().trim();
+const APP_VERSION = `1.0.${commitCount}`;
 
 // https://vite.dev/config/
 export default defineConfig({
   define: {
-    '__APP_VERSION__': JSON.stringify(pkg.version),
+    '__APP_VERSION__': JSON.stringify(APP_VERSION),
   },
   plugins: [
     react(),
