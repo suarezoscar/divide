@@ -5,6 +5,7 @@ import {
   doc,
   getDoc,
   updateDoc,
+  deleteDoc,
   arrayUnion,
   query,
   where,
@@ -126,4 +127,22 @@ export async function getGroupByInviteCode(code: string): Promise<Group | null> 
   const snap = await getDocs(q);
   if (snap.empty) return null;
   return docToGroup(snap.docs[0].id, snap.docs[0].data());
+}
+
+export async function deleteGroup(groupId: string): Promise<void> {
+  // 1. Delete all expenses for this group
+  const expensesSnap = await getDocs(
+    query(collection(db, "expenses"), where("groupId", "==", groupId))
+  );
+  const expenseDeletions = expensesSnap.docs.map((d) => deleteDoc(doc(db, "expenses", d.id)));
+
+  // 2. Delete all settlements for this group
+  const settlementsSnap = await getDocs(
+    query(collection(db, "settlements"), where("groupId", "==", groupId))
+  );
+  const settlementDeletions = settlementsSnap.docs.map((d) => deleteDoc(doc(db, "settlements", d.id)));
+
+  // 3. Wait for all deletions, then delete the group itself
+  await Promise.all([...expenseDeletions, ...settlementDeletions]);
+  await deleteDoc(doc(db, "groups", groupId));
 }

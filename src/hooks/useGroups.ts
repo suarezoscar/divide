@@ -82,5 +82,9 @@ export function useGroup(groupId: string) {
     );
   };
 
-  return { group, loading, updateMembers, removeMember };
+  const removeGroup = async () => {
+    await groupsService.deleteGroup(groupId);
+  };
+
+  return { group, loading, updateMembers, removeMember, removeGroup };
 }

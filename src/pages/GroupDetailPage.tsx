@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useGroup } from "../hooks/useGroups";
+import { useAuth } from "../hooks/useAuth";
 import { useExpenses } from "../hooks/useExpenses";
 import { useBalances } from "../hooks/useBalances";
 import { useNotifications } from "../hooks/useNotifications";
@@ -27,7 +28,8 @@ type Tab = "expenses" | "balances" | "members";
 export function GroupDetailPage() {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
-  const { group, loading, updateMembers, removeMember } = useGroup(groupId!);
+  const { user } = useAuth();
+  const { group, loading, updateMembers, removeMember, removeGroup } = useGroup(groupId!);
   const { expenses, loading: expLoading, remove, changes, clearChanges } = useExpenses(groupId!);
   const { notify, permission, request } = useNotifications();
   const [notifsOn, setNotifsOn] = useState(() => localStorage.getItem(`notif-${groupId}`) !== "off");
@@ -106,6 +108,13 @@ export function GroupDetailPage() {
   // Delete dialogs
   const [deleteExpenseId, setDeleteExpenseId] = useState<string | null>(null);
   const [deleteMemberId, setDeleteMemberId] = useState<string | null>(null);
+  const [showDeleteGroup, setShowDeleteGroup] = useState(false);
+
+  const handleDeleteGroup = async () => {
+    await removeGroup();
+    showToast("Grupo eliminado", "success");
+    navigate("/dashboard", { replace: true });
+  };
 
   // Invite modal
   const [showInvite, setShowInvite] = useState(false);
@@ -152,6 +161,12 @@ export function GroupDetailPage() {
             <Plus size={16} />
             Añadir gasto
           </Button>
+          {user?.uid === group.createdBy && (
+            <Button size="sm" variant="ghost" onClick={() => setShowDeleteGroup(true)} aria-label="Eliminar grupo"
+              style={{ color: "#DC2626" }}>
+              <Trash2 size={16} />
+            </Button>
+          )}
         </div>
       </div>
 
@@ -352,6 +367,16 @@ export function GroupDetailPage() {
         title="¿Quitar a este miembro?"
         message="El miembro se eliminará del grupo actual. Los gastos anteriores se conservan en el historial."
         confirmLabel="Quitar miembro"
+        variant="danger"
+      />
+
+      <ConfirmDialog
+        open={showDeleteGroup}
+        onClose={() => setShowDeleteGroup(false)}
+        onConfirm={handleDeleteGroup}
+        title="¿Eliminar este grupo?"
+        message="Se eliminarán el grupo, todos sus gastos y todos los pagos registrados. Esta acción no se puede deshacer."
+        confirmLabel="Eliminar grupo"
         variant="danger"
       />
     </div>
