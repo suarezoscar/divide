@@ -4,12 +4,15 @@ import { Button } from "../ui/Button";
 import { Divide, LogOut } from "lucide-react";
 import styles from "./Shell.module.css";
 
+const APP_VERSION = import.meta.env.VITE_APP_VERSION ?? "1.0.0";
+
 export function Shell() {
   const { logout } = useAuth();
   const { pathname } = useLocation();
 
   const isGroupDetail = pathname.includes("/group/");
   const isAddExpense = pathname.includes("/expense/new");
+  const isDashboard = pathname === "/dashboard";
 
   return (
     <div className={styles.shell}>
@@ -20,7 +23,16 @@ export function Shell() {
               ← Grupos
             </Link>
           ) : (
-            <Link to="/dashboard" className={styles.brand}>
+            <Link
+              to="/dashboard"
+              className={styles.brand}
+              onClick={(e) => {
+                if (isDashboard) {
+                  e.preventDefault();
+                  window.location.reload();
+                }
+              }}
+            >
               <Divide size={22} color="#07819C" />
               <span>Divide</span>
             </Link>
@@ -35,6 +47,10 @@ export function Shell() {
       <main className={styles.main}>
         <Outlet />
       </main>
+
+      <footer className={styles.footer}>
+        <span>Divide v{APP_VERSION}</span>
+      </footer>
     </div>
   );
 }
