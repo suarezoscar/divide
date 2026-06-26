@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useGroup } from "../hooks/useGroups";
 import { useExpenses } from "../hooks/useExpenses";
 import { Button } from "../components/ui/Button";
@@ -19,19 +19,14 @@ export function AddExpensePage() {
 
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
-  const [paidBy, setPaidBy] = useState("");
+  const [paidBy, setPaidBy] = useState(() => group?.members[0]?.id ?? "");
   const [splitMode, setSplitMode] = useState<SplitMode>("even");
   const [customSplits, setCustomSplits] = useState<Record<string, string>>({});
-  const [includedMembers, setIncludedMembers] = useState<Set<string>>(new Set());
+  const [includedMembers, setIncludedMembers] = useState<Set<string>>(
+    () => new Set(group?.members.map((m) => m.id) ?? [])
+  );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (group && group.members.length > 0) {
-      setPaidBy(group.members[0].id);
-      setIncludedMembers(new Set(group.members.map((m) => m.id)));
-    }
-  }, [group]);
 
   if (loading) return <p style={{ textAlign: "center", padding: 40 }}>Cargando…</p>;
   if (!group) return <p style={{ textAlign: "center", padding: 40, color: "#EF4444" }}>Grupo no encontrado</p>;

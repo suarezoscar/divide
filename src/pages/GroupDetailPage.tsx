@@ -94,8 +94,10 @@ export function GroupDetailPage() {
             </Card>
           ) : (
             <div className={styles.expenseList}>
-              {expenses.map((exp) => {
-                const payer = group.members.find((m) => m.id === exp.paidBy);
+              {(() => {
+                const memberById = new Map(group.members.map((m) => [m.id, m]));
+                return expenses.map((exp) => {
+                const payer = memberById.get(exp.paidBy);
                 return (
                   <Card key={exp.id} className={styles.expenseCard}>
                     <div className={styles.expenseRow}>
@@ -121,7 +123,7 @@ export function GroupDetailPage() {
                     </div>
                     <div className={styles.splits}>
                       {exp.splits.map((s) => {
-                        const member = group.members.find((m) => m.id === s.memberId);
+                        const member = memberById.get(s.memberId);
                         return (
                           <div key={s.memberId} className={styles.splitRow}>
                             <Avatar name={member?.name ?? s.memberId} size="sm" />
@@ -133,7 +135,7 @@ export function GroupDetailPage() {
                     </div>
                   </Card>
                 );
-              })}
+              })})()}
             </div>
           )}
         </div>

@@ -52,6 +52,5 @@ export async function getGroupSettlements(groupId: string): Promise<Settlement[]
   const snap = await getDocs(q);
   const settlements = snap.docs.map((d) => docToSettlement(d.id, d.data()));
   // Sort in client to avoid needing a composite index
-  settlements.sort((a, b) => b.date.toMillis() - a.date.toMillis());
-  return settlements;
+  return settlements.toSorted((a, b) => b.date.toMillis() - a.date.toMillis());
 }

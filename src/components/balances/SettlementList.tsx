@@ -37,10 +37,12 @@ export function SettlementList({ debts, members, onSettle }: Props) {
     <Card className={styles.card}>
       <h3 className={styles.title}>Pagos necesarios</h3>
       <div className={styles.list}>
-        {debts.map((d, i) => {
+        {(() => {
+          const memberById = new Map(members.map((m) => [m.id, m]));
+          return debts.map((d, i) => {
           const key = `${d.from}-${d.to}`;
-          const fromMember = members.find((m) => m.id === d.from);
-          const toMember = members.find((m) => m.id === d.to);
+          const fromMember = memberById.get(d.from);
+          const toMember = memberById.get(d.to);
 
           return (
             <div key={i} className={styles.debtRow}>
@@ -69,7 +71,7 @@ export function SettlementList({ debts, members, onSettle }: Props) {
               </div>
             </div>
           );
-        })}
+        })})()}
       </div>
     </Card>
   );

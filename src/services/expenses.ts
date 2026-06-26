@@ -60,8 +60,7 @@ export async function getGroupExpenses(groupId: string): Promise<Expense[]> {
   const snap = await getDocs(q);
   const expenses = snap.docs.map((d) => docToExpense(d.id, d.data()));
   // Sort in client to avoid needing a composite index
-  expenses.sort((a, b) => b.date.toMillis() - a.date.toMillis());
-  return expenses;
+  return expenses.toSorted((a, b) => b.date.toMillis() - a.date.toMillis());
 }
 
 export async function getExpense(expenseId: string): Promise<Expense | null> {

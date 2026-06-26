@@ -55,8 +55,7 @@ export async function getUserGroups(userId: string): Promise<Group[]> {
   const snap = await getDocs(q);
   const groups = snap.docs.map((d) => docToGroup(d.id, d.data()));
   // Sort in client to avoid needing a composite index
-  groups.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
-  return groups;
+  return groups.toSorted((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
 }
 
 export async function getGroup(groupId: string): Promise<Group | null> {
