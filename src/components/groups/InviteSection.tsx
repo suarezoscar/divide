@@ -71,7 +71,7 @@ export function InviteSection({ groupId, open, onClose }: Props) {
 
         <div className={styles.linkRow}>
           <code className={styles.link}>{joinUrl}</code>
-          <Button size="sm" variant="ghost" onClick={handleCopy(joinUrl, setCopied)} title="Copiar enlace">
+          <Button size="sm" variant="ghost" onClick={handleCopy(joinUrl, setCopied)} aria-label="Copiar enlace">
             {copied ? <Check size={16} color="#10B981" /> : <Copy size={16} />}
           </Button>
         </div>
@@ -87,7 +87,7 @@ export function InviteSection({ groupId, open, onClose }: Props) {
             </div>
             <div className={styles.codeRow}>
               <code className={styles.code}>{inviteCode}</code>
-              <Button size="sm" variant="ghost" onClick={handleCopy(inviteCode, setCodeCopied)} title="Copiar código">
+              <Button size="sm" variant="ghost" onClick={handleCopy(inviteCode, setCodeCopied)} aria-label="Copiar código">
                 {codeCopied ? <Check size={16} color="#10B981" /> : <Copy size={16} />}
               </Button>
             </div>

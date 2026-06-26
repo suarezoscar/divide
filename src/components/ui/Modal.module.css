@@ -40,16 +40,25 @@
   background: none;
   border: none;
   font-size: 18px;
-  color: #9CA3AF;
+  color: #6B7280;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 10px 12px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: 8px;
   transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .close:hover {
   background: #f3f4f6;
   color: #1A1A2E;
+}
+.close:active {
+  background: #e5e7eb;
+  transform: scale(0.95);
 }
 
 .body {
@@ -64,4 +73,26 @@
 @keyframes slideUp {
   from { transform: translateY(12px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
+}
+
+/* Mobile: full-width modal */
+@media (max-width: 480px) {
+  .overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal {
+    max-width: 100%;
+    border-radius: 20px 20px 0 0;
+    max-height: 85vh;
+  }
+
+  .header {
+    padding: 18px 20px 0;
+  }
+
+  .body {
+    padding: 18px 20px 24px;
+  }
 }

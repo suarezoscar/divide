@@ -10,18 +10,18 @@ export const colors = {
   surfaceHover: "#FAFAFA",
 
   text: "#1A1A2E",
-  textSecondary: "#6B7280",
-  textMuted: "#9CA3AF",
+  textSecondary: "#4B5563",
+  textMuted: "#6B7280",
 
   border: "#E5E7EB",
   divider: "#F3F4F6",
 
-  success: "#10B981",
+  success: "#059669",
   warning: "#F59E0B",
   danger: "#EF4444",
 
-  sent: "#EF4444", // red — money owed (you owe)
-  received: "#10B981", // green — money owed to you
+  sent: "#DC2626",    // red — money owed (you owe)
+  received: "#059669", // green — money owed to you
 } as const;
 
 export const spacing = {

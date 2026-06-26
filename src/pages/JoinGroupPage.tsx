@@ -142,6 +142,7 @@ export function JoinGroupPage() {
           <div className={styles.claimToggle}>
             <button
               type="button"
+              aria-pressed={!claimExisting}
               className={`${styles.claimBtn} ${!claimExisting ? styles.claimActive : ""}`}
               onClick={() => setClaimExisting(false)}
             >
@@ -149,6 +150,7 @@ export function JoinGroupPage() {
             </button>
             <button
               type="button"
+              aria-pressed={claimExisting}
               className={`${styles.claimBtn} ${claimExisting ? styles.claimActive : ""}`}
               onClick={() => setClaimExisting(true)}
             >
@@ -183,7 +185,7 @@ export function JoinGroupPage() {
               required
             />
           )}
-          {error && <p className={styles.error}>{error}</p>}
+          {error && <p className={styles.error} role="alert">{error}</p>}
           <Button type="submit" size="lg" disabled={joining || !canSubmit} style={{ width: "100%" }}>
             {joining ? "Uniéndose…" : "Unirse al grupo"}
           </Button>

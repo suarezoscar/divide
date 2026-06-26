@@ -6,6 +6,7 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { GroupDetailPage } from "./pages/GroupDetailPage";
 import { AddExpensePage } from "./pages/AddExpensePage";
 import { JoinGroupPage } from "./pages/JoinGroupPage";
+import { ToastContainer } from "./components/ui/Toast";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -46,6 +47,7 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <AppRoutes />
+        <ToastContainer />
       </AuthProvider>
     </BrowserRouter>
   );

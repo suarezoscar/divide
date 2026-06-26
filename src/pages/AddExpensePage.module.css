@@ -57,6 +57,11 @@
   border-color: #07819C;
 }
 
+.payerBtn:active {
+  background: rgba(7, 129, 156, 0.1);
+  transform: scale(0.97);
+}
+
 .payerActive {
   border-color: #07819C;
   background: rgba(7, 129, 156, 0.06);
@@ -93,6 +98,11 @@
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.15s;
+  min-height: 36px;
+}
+
+.splitToggleBtn:active {
+  transform: scale(0.95);
 }
 
 .splitToggleActive {
@@ -173,9 +183,9 @@
 
 /* Member inclusion / exclusion */
 .checkbox {
-  width: 22px;
-  height: 22px;
-  border: 2px solid #D1D5DB;
+  width: 44px;
+  height: 44px;
+  border: 2px solid #9CA3AF;
   border-radius: 6px;
   background: #fff;
   cursor: pointer;

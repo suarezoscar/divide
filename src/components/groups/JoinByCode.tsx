@@ -130,6 +130,7 @@ export function JoinByCode({ open, onClose }: Props) {
             <div className={styles.claimToggle}>
               <button
                 type="button"
+                aria-pressed={!claimExisting}
                 className={`${styles.claimBtn} ${!claimExisting ? styles.claimActive : ""}`}
                 onClick={() => setClaimExisting(false)}
               >
@@ -137,6 +138,7 @@ export function JoinByCode({ open, onClose }: Props) {
               </button>
               <button
                 type="button"
+                aria-pressed={claimExisting}
                 className={`${styles.claimBtn} ${claimExisting ? styles.claimActive : ""}`}
                 onClick={() => setClaimExisting(true)}
               >
@@ -172,7 +174,7 @@ export function JoinByCode({ open, onClose }: Props) {
           </>
         )}
 
-        {error && <p className={styles.error}>{error}</p>}
+        {error && <p className={styles.error} role="alert">{error}</p>}
 
         {group && (
           <Button onClick={handleJoin} disabled={joining || !canSubmit} size="lg" style={{ width: "100%" }}>

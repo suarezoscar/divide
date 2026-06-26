@@ -32,6 +32,7 @@ export function Avatar({ name, size = "md" }: AvatarProps) {
       className={`${styles.avatar} ${styles[size]}`}
       style={{ background: hashColor(name) }}
       title={name}
+      aria-hidden="true"
     >
       {initials(name)}
     </div>

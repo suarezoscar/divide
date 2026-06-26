@@ -7,6 +7,7 @@ import { Input } from "../components/ui/Input";
 import { Modal } from "../components/ui/Modal";
 import { Avatar } from "../components/ui/Avatar";
 import { JoinByCode } from "../components/groups/JoinByCode";
+import { DashboardSkeleton } from "../components/ui/Skeleton";
 import { Plus, Users, LogIn } from "lucide-react";
 import type { Member } from "../types";
 import styles from "./DashboardPage.module.css";
@@ -53,7 +54,7 @@ export function DashboardPage() {
   };
 
   if (loading) {
-    return <p style={{ textAlign: "center", padding: 40, color: "#6B7280" }}>Cargando grupos…</p>;
+    return <DashboardSkeleton />;
   }
 
   if (error) {

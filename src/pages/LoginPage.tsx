@@ -74,7 +74,7 @@ export function LoginPage() {
             placeholder="••••••"
             required
           />
-          {error && <p className={styles.error}>{error}</p>}
+          {error && <p className={styles.error} role="alert">{error}</p>}
           <Button type="submit" size="lg" style={{ width: "100%" }}>
             {isRegister ? "Crear cuenta" : "Iniciar sesión"}
           </Button>

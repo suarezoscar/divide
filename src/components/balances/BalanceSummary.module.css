@@ -4,7 +4,9 @@
 
 .title {
   font-size: 16px;
+  font-weight: 600;
   margin-bottom: 14px;
+  color: #1A1A2E;
 }
 
 .list {
@@ -32,7 +34,7 @@
 }
 
 .positive {
-  color: #10B981;
+  color: #059669;
 }
 
 .negative {

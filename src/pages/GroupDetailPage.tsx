@@ -11,6 +11,7 @@ import { Input } from "../components/ui/Input";
 import { BalanceSummary } from "../components/balances/BalanceSummary";
 import { SettlementList } from "../components/balances/SettlementList";
 import { InviteSection } from "../components/groups/InviteSection";
+import { GroupDetailSkeleton } from "../components/ui/Skeleton";
 import { Plus, Receipt, Users, ArrowRightLeft, Share } from "lucide-react";
 import { formatCurrency, formatDate } from "../utils/format";
 import type { Member } from "../types";
@@ -50,7 +51,7 @@ export function GroupDetailPage() {
   };
 
   if (loading) {
-    return <p style={{ textAlign: "center", padding: 40, color: "#6B7280" }}>Cargando…</p>;
+    return <GroupDetailSkeleton />;
   }
 
   if (!group) {
@@ -80,10 +81,12 @@ export function GroupDetailPage() {
       </div>
 
       {/* Tabs */}
-      <div className={styles.tabs}>
+      <div className={styles.tabs} role="tablist">
         {tabs.map((t) => (
           <button
             key={t.key}
+            role="tab"
+            aria-selected={tab === t.key}
             className={`${styles.tab} ${tab === t.key ? styles.tabActive : ""}`}
             onClick={() => setTab(t.key)}
           >
@@ -121,6 +124,7 @@ export function GroupDetailPage() {
                         <span className={styles.expenseAmount}>{formatCurrency(exp.amount)}</span>
                         <button
                           className={styles.deleteBtn}
+                          aria-label="Eliminar gasto"
                           onClick={(e) => {
                             e.stopPropagation();
                             if (confirm("¿Eliminar este gasto?")) remove(exp.id);

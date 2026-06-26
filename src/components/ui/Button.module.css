@@ -10,6 +10,7 @@
   cursor: pointer;
   transition: all 0.15s ease;
   line-height: 1;
+  min-height: 44px;
 }
 
 .btn:disabled {
@@ -19,12 +20,12 @@
 
 /* ── sizes ── */
 .sm {
-  padding: 8px 14px;
+  padding: 10px 16px;
   font-size: 13px;
 }
 
 .md {
-  padding: 12px 20px;
+  padding: 12px 22px;
   font-size: 15px;
 }
 
@@ -41,6 +42,10 @@
 .primary:hover:not(:disabled) {
   background: #056475;
 }
+.primary:active:not(:disabled) {
+  background: #034958;
+  transform: scale(0.97);
+}
 
 .secondary {
   background: #fff;
@@ -50,12 +55,33 @@
 .secondary:hover:not(:disabled) {
   background: #f0f9fb;
 }
+.secondary:active:not(:disabled) {
+  background: #d5f0f5;
+  transform: scale(0.97);
+}
 
 .ghost {
   background: transparent;
-  color: #6B7280;
+  color: #4B5563;
 }
 .ghost:hover:not(:disabled) {
   background: #f3f4f6;
   color: #1A1A2E;
+}
+.ghost:active:not(:disabled) {
+  background: #e5e7eb;
+  transform: scale(0.97);
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }

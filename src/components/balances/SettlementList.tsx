@@ -35,17 +35,17 @@ export function SettlementList({ debts, members, onSettle }: Props) {
 
   return (
     <Card className={styles.card}>
-      <h3 className={styles.title}>Pagos necesarios</h3>
+      <h2 className={styles.title}>Pagos necesarios</h2>
       <div className={styles.list}>
         {(() => {
           const memberById = new Map(members.map((m) => [m.id, m]));
-          return debts.map((d, i) => {
+          return debts.map((d) => {
           const key = `${d.from}-${d.to}`;
           const fromMember = memberById.get(d.from);
           const toMember = memberById.get(d.to);
 
           return (
-            <div key={i} className={styles.debtRow}>
+            <div key={`${d.from}-${d.to}`} className={styles.debtRow}>
               <div className={styles.debtMembers}>
                 <div className={styles.member}>
                   <Avatar name={fromMember?.name ?? d.fromName} size="sm" />

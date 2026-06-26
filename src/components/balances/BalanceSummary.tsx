@@ -21,7 +21,7 @@ export function BalanceSummary({ balances }: Props) {
 
   return (
     <Card className={styles.card}>
-      <h3 className={styles.title}>Resumen de balances</h3>
+      <h2 className={styles.title}>Resumen de balances</h2>
       <div className={styles.list}>
         {sorted.map((b) => {
           const isPositive = b.balance >= 0;
@@ -30,7 +30,7 @@ export function BalanceSummary({ balances }: Props) {
               <Avatar name={b.memberName} size="sm" />
               <span className={styles.name}>{b.memberName}</span>
               <span className={`${styles.amount} ${isPositive ? styles.positive : styles.negative}`}>
-                {formatCurrency(b.balance)}
+                {formatCurrency(b.balance, true)}
               </span>
             </div>
           );

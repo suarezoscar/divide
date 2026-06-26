@@ -67,7 +67,8 @@
 
 .claimBtn {
   flex: 1;
-  padding: 8px 12px;
+  padding: 10px 12px;
+  min-height: 44px;
   border: none;
   background: transparent;
   font-size: 13px;
@@ -77,6 +78,10 @@
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.15s;
+}
+
+.claimBtn:active {
+  transform: scale(0.96);
 }
 
 .claimActive {
@@ -107,7 +112,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 14px;
+  padding: 12px 14px;
+  min-height: 48px;
   border: 1.5px solid #E5E7EB;
   border-radius: 12px;
   background: #fff;
@@ -121,6 +127,10 @@
 
 .memberOption:hover {
   border-color: #07819C;
+}
+
+.memberOption:active {
+  transform: scale(0.98);
 }
 
 .memberOptionActive {

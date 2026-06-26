@@ -1,3 +1,4 @@
+import { useId } from "react";
 import styles from "./Input.module.css";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -5,12 +6,14 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
 }
 
-export function Input({ label, error, className = "", ...props }: InputProps) {
+export function Input({ label, error, className = "", id, ...props }: InputProps) {
+  const generatedId = useId();
+  const inputId = id ?? generatedId;
   return (
     <div className={`${styles.wrapper} ${className}`}>
-      {label && <label className={styles.label}>{label}</label>}
-      <input className={`${styles.input} ${error ? styles.inputError : ""}`} {...props} />
-      {error && <span className={styles.error}>{error}</span>}
+      {label && <label htmlFor={inputId} className={styles.label}>{label}</label>}
+      <input id={inputId} className={`${styles.input} ${error ? styles.inputError : ""}`} aria-invalid={!!error} aria-describedby={error ? `${inputId}-error` : undefined} {...props} />
+      {error && <span id={`${inputId}-error`} className={styles.error} role="alert">{error}</span>}
     </div>
   );
 }

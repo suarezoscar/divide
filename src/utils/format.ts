@@ -1,4 +1,4 @@
-export function formatCurrency(amount: number): string {
+export function formatCurrency(amount: number, signed = false): string {
   const abs = Math.abs(amount);
   const formatted = new Intl.NumberFormat("es-ES", {
     style: "currency",
@@ -6,7 +6,9 @@ export function formatCurrency(amount: number): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(abs);
-  return amount < 0 ? `-${formatted}` : formatted;
+  if (amount < 0) return `−${formatted}`;
+  if (signed && amount > 0) return `+${formatted}`;
+  return formatted;
 }
 
 export function formatDate(date: { toDate?: () => Date } | Date): string {

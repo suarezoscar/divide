@@ -51,6 +51,12 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .muted {
@@ -116,15 +122,24 @@
   background: none;
   border: none;
   font-size: 14px;
-  color: #9CA3AF;
+  color: #6B7280;
   cursor: pointer;
-  padding: 4px;
-  border-radius: 6px;
+  padding: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
   transition: all 0.15s;
 }
 .deleteBtn:hover {
   background: #FEF2F2;
   color: #EF4444;
+}
+.deleteBtn:active {
+  background: #FECACA;
+  transform: scale(0.95);
 }
 
 .splits {

@@ -166,10 +166,11 @@ export function AddExpensePage() {
         {/* Split mode */}
         <Card className={styles.card}>
           <div className={styles.splitHeader}>
-            <h3>División del gasto</h3>
+            <h2>División del gasto</h2>
             <div className={styles.splitToggle}>
               <button
                 type="button"
+                aria-pressed={splitMode === "even"}
                 className={`${styles.splitToggleBtn} ${splitMode === "even" ? styles.splitToggleActive : ""}`}
                 onClick={() => setSplitMode("even")}
               >
@@ -177,6 +178,7 @@ export function AddExpensePage() {
               </button>
               <button
                 type="button"
+                aria-pressed={splitMode === "custom"}
                 className={`${styles.splitToggleBtn} ${splitMode === "custom" ? styles.splitToggleActive : ""}`}
                 onClick={() => setSplitMode("custom")}
               >
@@ -211,6 +213,8 @@ export function AddExpensePage() {
                 >
                   <button
                     type="button"
+                    role="checkbox"
+                    aria-checked={isIncluded}
                     className={`${styles.checkbox} ${isIncluded ? styles.checkboxChecked : ""}`}
                     onClick={() => toggleMember(m.id)}
                   >
@@ -258,7 +262,7 @@ export function AddExpensePage() {
           )}
         </Card>
 
-        {error && <p className={styles.error}>{error}</p>}
+        {error && <p className={styles.error} role="alert">{error}</p>}
 
         <div className={styles.actions}>
           <Button type="button" variant="ghost" onClick={() => navigate(-1)}>
