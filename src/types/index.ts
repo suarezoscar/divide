@@ -12,6 +12,7 @@ export interface Group {
   name: string;
   description?: string;
   members: Member[];
+  userIds: string[];
   createdBy: string;
   createdAt: Timestamp;
 }

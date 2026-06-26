@@ -10,7 +10,8 @@ import { Modal } from "../components/ui/Modal";
 import { Input } from "../components/ui/Input";
 import { BalanceSummary } from "../components/balances/BalanceSummary";
 import { SettlementList } from "../components/balances/SettlementList";
-import { Plus, Receipt, Users, ArrowRightLeft } from "lucide-react";
+import { InviteSection } from "../components/groups/InviteSection";
+import { Plus, Receipt, Users, ArrowRightLeft, Share } from "lucide-react";
 import { formatCurrency, formatDate } from "../utils/format";
 import type { Member } from "../types";
 import styles from "./GroupDetailPage.module.css";
@@ -33,6 +34,9 @@ export function GroupDetailPage() {
   // Add member modal
   const [showAddMember, setShowAddMember] = useState(false);
   const [newMemberName, setNewMemberName] = useState("");
+
+  // Invite modal
+  const [showInvite, setShowInvite] = useState(false);
 
   const handleAddMember = async () => {
     if (!group || !newMemberName.trim()) return;
@@ -63,10 +67,16 @@ export function GroupDetailPage() {
     <div className={styles.page}>
       <div className={styles.header}>
         <h1>{group.name}</h1>
-        <Button size="sm" onClick={() => navigate(`/group/${groupId}/expense/new`)}>
-          <Plus size={16} />
-          Añadir gasto
-        </Button>
+        <div style={{ display: "flex", gap: 8 }}>
+          <Button size="sm" variant="ghost" onClick={() => setShowInvite(true)}>
+            <Share size={16} />
+            Invitar
+          </Button>
+          <Button size="sm" onClick={() => navigate(`/group/${groupId}/expense/new`)}>
+            <Plus size={16} />
+            Añadir gasto
+          </Button>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -185,6 +195,8 @@ export function GroupDetailPage() {
           </Modal>
         </div>
       )}
+
+      <InviteSection groupId={groupId!} open={showInvite} onClose={() => setShowInvite(false)} />
     </div>
   );
 }

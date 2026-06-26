@@ -5,6 +5,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { GroupDetailPage } from "./pages/GroupDetailPage";
 import { AddExpensePage } from "./pages/AddExpensePage";
+import { JoinGroupPage } from "./pages/JoinGroupPage";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -22,6 +23,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/join/:groupId" element={<JoinGroupPage />} />
       <Route
         element={
           <ProtectedRoute>

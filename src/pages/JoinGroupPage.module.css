@@ -1,0 +1,68 @@
+.shell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: 20px;
+  background: #F5F5F7;
+}
+
+.card {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  padding: 36px 28px;
+}
+
+.groupName {
+  font-size: 22px;
+  color: #1A1A2E;
+}
+
+.desc {
+  font-size: 14px;
+  color: #6B7280;
+  margin-top: -8px;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #6B7280;
+}
+
+.loginPrompt {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding-top: 8px;
+}
+
+.loginPrompt p {
+  font-size: 15px;
+  color: #6B7280;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+
+.error {
+  color: #EF4444;
+  font-size: 13px;
+  text-align: center;
+}
+
+.muted {
+  color: #6B7280;
+}
