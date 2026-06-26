@@ -21,6 +21,7 @@ function docToGroup(id: string, data: DocumentData): Group {
     description: data.description ?? "",
     members: data.members ?? [],
     userIds: data.userIds ?? [data.createdBy],
+    inviteCode: data.inviteCode,
     createdBy: data.createdBy,
     createdAt: data.createdAt,
   };
@@ -81,4 +82,33 @@ export async function addUserToGroup(
     userIds: arrayUnion(userId),
     members: arrayUnion(member),
   });
+}
+
+const CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no I, O, 0, 1
+
+function randomCode(): string {
+  let code = "";
+  for (let i = 0; i < 6; i++) {
+    code += CHARS[Math.floor(Math.random() * CHARS.length)];
+  }
+  return code;
+}
+
+export async function generateInviteCode(groupId: string): Promise<string> {
+  const snap = await getDoc(doc(db, "groups", groupId));
+  const data = snap.data();
+  if (data?.inviteCode) return data.inviteCode;
+  const code = randomCode();
+  await updateDoc(doc(db, "groups", groupId), { inviteCode: code });
+  return code;
+}
+
+export async function getGroupByInviteCode(code: string): Promise<Group | null> {
+  const q = query(
+    collection(db, "groups"),
+    where("inviteCode", "==", code.toUpperCase())
+  );
+  const snap = await getDocs(q);
+  if (snap.empty) return null;
+  return docToGroup(snap.docs[0].id, snap.docs[0].data());
 }

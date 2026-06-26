@@ -22,7 +22,14 @@ export function LoginPage() {
     );
   }
 
-  if (user) return <Navigate to="/dashboard" replace />;
+  if (user) {
+    const pending = sessionStorage.getItem("pendingGroupId");
+    if (pending) {
+      sessionStorage.removeItem("pendingGroupId");
+      return <Navigate to={`/join/${pending}`} replace />;
+    }
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

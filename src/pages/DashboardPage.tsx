@@ -6,7 +6,8 @@ import { Card } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
 import { Modal } from "../components/ui/Modal";
 import { Avatar } from "../components/ui/Avatar";
-import { Plus, Users } from "lucide-react";
+import { JoinByCode } from "../components/groups/JoinByCode";
+import { Plus, Users, LogIn } from "lucide-react";
 import type { Member } from "../types";
 import styles from "./DashboardPage.module.css";
 
@@ -15,6 +16,7 @@ export function DashboardPage() {
   const navigate = useNavigate();
 
   const [showCreate, setShowCreate] = useState(false);
+  const [showJoin, setShowJoin] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [memberNames, setMemberNames] = useState<string[]>([""]);
@@ -71,10 +73,16 @@ export function DashboardPage() {
     <div className={styles.page}>
       <div className={styles.header}>
         <h1>Tus grupos</h1>
-        <Button onClick={() => setShowCreate(true)} size="sm">
-          <Plus size={16} />
-          Nuevo
-        </Button>
+        <div style={{ display: "flex", gap: 8 }}>
+          <Button onClick={() => setShowJoin(true)} size="sm" variant="ghost">
+            <LogIn size={16} />
+            Unirse
+          </Button>
+          <Button onClick={() => setShowCreate(true)} size="sm">
+            <Plus size={16} />
+            Nuevo
+          </Button>
+        </div>
       </div>
 
       {groups.length === 0 ? (
@@ -150,6 +158,8 @@ export function DashboardPage() {
           </Button>
         </div>
       </Modal>
+
+      <JoinByCode open={showJoin} onClose={() => setShowJoin(false)} />
     </div>
   );
 }

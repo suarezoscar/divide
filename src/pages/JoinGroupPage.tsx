@@ -1,23 +1,38 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { useGroup } from "../hooks/useGroups";
 import * as groupsService from "../services/groups";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
 import { Users, LogIn } from "lucide-react";
+import type { Group } from "../types";
 import styles from "./JoinGroupPage.module.css";
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function JoinGroupPage() {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { group, loading } = useGroup(groupId!);
 
+  const [group, setGroup] = useState<Group | null>(null);
+  const [loading, setLoading] = useState(true);
   const [memberName, setMemberName] = useState("");
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!groupId) return;
+    const isUuid = UUID_RE.test(groupId);
+    const promise = isUuid
+      ? groupsService.getGroup(groupId)
+      : groupsService.getGroupByInviteCode(groupId);
+    promise
+      .then(setGroup)
+      .catch(() => setGroup(null))
+      .finally(() => setLoading(false));
+  }, [groupId]);
 
   // Show login prompt immediately for unauthenticated users
   if (authLoading) {
@@ -29,17 +44,28 @@ export function JoinGroupPage() {
   }
 
   if (!user) {
+    const saveAndGo = () => {
+      sessionStorage.setItem("pendingGroupId", groupId!);
+    };
+
     return (
       <div className={styles.shell}>
         <Card className={styles.card}>
           <h1 className={styles.groupName}>Unirse al grupo</h1>
-          <p className={styles.desc}>Inicia sesión para ver los detalles y unirte</p>
-          <Link to="/login">
-            <Button size="lg" style={{ width: "100%" }}>
-              <LogIn size={16} />
-              Iniciar sesión
-            </Button>
-          </Link>
+          <p className={styles.desc}>Inicia sesión o regístrate para unirte</p>
+          <div className={styles.authButtons}>
+            <Link to="/login" onClick={saveAndGo}>
+              <Button size="lg" style={{ width: "100%" }}>
+                <LogIn size={16} />
+                Iniciar sesión
+              </Button>
+            </Link>
+            <Link to="/login" onClick={saveAndGo}>
+              <Button size="lg" variant="secondary" style={{ width: "100%" }}>
+                Registrarse
+              </Button>
+            </Link>
+          </div>
         </Card>
       </div>
     );

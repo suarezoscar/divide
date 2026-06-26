@@ -1,9 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Modal } from "../ui/Modal";
 import { Button } from "../ui/Button";
 import { Copy, Check } from "lucide-react";
-import { useState } from "react";
 import QRCode from "qrcode";
+import { generateInviteCode } from "../../services/groups";
 import styles from "./InviteSection.module.css";
 
 const BASE_URL = "https://divide-app.netlify.app";
@@ -17,34 +17,48 @@ interface Props {
 export function InviteSection({ groupId, open, onClose }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [copied, setCopied] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
+  const [inviteCode, setInviteCode] = useState<string>("");
 
   const joinUrl = `${BASE_URL}/join/${groupId}`;
 
-  useEffect(() => {
-    if (open && canvasRef.current) {
-      QRCode.toCanvas(canvasRef.current, joinUrl, {
-        width: 180,
-        margin: 1,
-        color: { dark: "#1A1A2E", light: "#FFFFFF" },
-      });
-    }
-  }, [open, joinUrl]);
-
-  const handleCopy = async () => {
+  // Generate invite code when opened
+  const fetchCode = useCallback(async () => {
     try {
-      await navigator.clipboard.writeText(joinUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      const code = await generateInviteCode(groupId);
+      setInviteCode(code);
     } catch {
-      // Fallback for non-HTTPS or older browsers
+      // silently ignore — code is optional
+    }
+  }, [groupId]);
+
+  useEffect(() => {
+    if (open) {
+      fetchCode();
+      if (canvasRef.current) {
+        QRCode.toCanvas(canvasRef.current, joinUrl, {
+          width: 180,
+          margin: 1,
+          color: { dark: "#1A1A2E", light: "#FFFFFF" },
+        });
+      }
+    }
+  }, [open, joinUrl, fetchCode]);
+
+  const handleCopy = (text: string, setter: (v: boolean) => void) => async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setter(true);
+      setTimeout(() => setter(false), 2000);
+    } catch {
       const input = document.createElement("input");
-      input.value = joinUrl;
+      input.value = text;
       document.body.appendChild(input);
       input.select();
       document.execCommand("copy");
       document.body.removeChild(input);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setter(true);
+      setTimeout(() => setter(false), 2000);
     }
   };
 
@@ -55,7 +69,7 @@ export function InviteSection({ groupId, open, onClose }: Props) {
 
         <div className={styles.linkRow}>
           <code className={styles.link}>{joinUrl}</code>
-          <Button size="sm" variant="ghost" onClick={handleCopy} title="Copiar enlace">
+          <Button size="sm" variant="ghost" onClick={handleCopy(joinUrl, setCopied)} title="Copiar enlace">
             {copied ? <Check size={16} color="#10B981" /> : <Copy size={16} />}
           </Button>
         </div>
@@ -64,7 +78,21 @@ export function InviteSection({ groupId, open, onClose }: Props) {
           <canvas ref={canvasRef} className={styles.qr} />
         </div>
 
-        <p className={styles.qrHint}>Escanea el código QR o comparte el enlace</p>
+        {inviteCode && (
+          <>
+            <div className={styles.divider}>
+              <span>o introduce este código</span>
+            </div>
+            <div className={styles.codeRow}>
+              <code className={styles.code}>{inviteCode}</code>
+              <Button size="sm" variant="ghost" onClick={handleCopy(inviteCode, setCodeCopied)} title="Copiar código">
+                {codeCopied ? <Check size={16} color="#10B981" /> : <Copy size={16} />}
+              </Button>
+            </div>
+          </>
+        )}
+
+        <p className={styles.qrHint}>Escanea el QR, comparte el enlace, o dicta el código</p>
       </div>
     </Modal>
   );
