@@ -22,12 +22,14 @@ export function AddExpensePage() {
   const [paidBy, setPaidBy] = useState("");
   const [splitMode, setSplitMode] = useState<SplitMode>("even");
   const [customSplits, setCustomSplits] = useState<Record<string, string>>({});
+  const [includedMembers, setIncludedMembers] = useState<Set<string>>(new Set());
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (group && group.members.length > 0) {
       setPaidBy(group.members[0].id);
+      setIncludedMembers(new Set(group.members.map((m) => m.id)));
     }
   }, [group]);
 
@@ -44,29 +46,38 @@ export function AddExpensePage() {
       return;
     }
 
+    if (includedMembers.size < 1) {
+      setError("Al menos un miembro debe participar en el gasto");
+      return;
+    }
+    if (!includedMembers.has(paidBy)) {
+      setError("El pagador debe estar incluido en el gasto");
+      return;
+    }
+
     let splits: Split[];
 
     if (splitMode === "even") {
-      const memberCount = group.members.length;
-      const splitAmount = Math.round((numAmount / memberCount) * 100) / 100;
-      // Handle rounding: give the remainder to the first member
-      const remainder = Math.round((numAmount - splitAmount * (memberCount - 1)) * 100) / 100;
-      splits = group.members.map((m, i) => ({
-        memberId: m.id,
-        amount: i === 0 ? remainder : splitAmount,
+      const count = includedMembers.size;
+      const splitAmount = Math.round((numAmount / count) * 100) / 100;
+      const remaining = Math.round((numAmount - splitAmount * (count - 1)) * 100) / 100;
+      const memberIds = [...includedMembers];
+      splits = memberIds.map((memberId, i) => ({
+        memberId,
+        amount: i === 0 ? remaining : splitAmount,
       }));
     } else {
-      // Custom split
-      const customAmounts = group.members.map((m) => parseFloat(customSplits[m.id] || "0"));
-      const totalCustom = customAmounts.reduce((s, v) => s + v, 0);
+      const customAmounts: Split[] = [];
+      for (const id of includedMembers) {
+        const val = parseFloat(customSplits[id] || "0");
+        customAmounts.push({ memberId: id, amount: val });
+      }
+      const totalCustom = customAmounts.reduce((s, v) => s + v.amount, 0);
       if (Math.abs(totalCustom - numAmount) > 0.01) {
         setError(`La suma de los splits (${totalCustom.toFixed(2)}) debe ser igual al total (${numAmount.toFixed(2)})`);
         return;
       }
-      splits = group.members.map((m, i) => ({
-        memberId: m.id,
-        amount: customAmounts[i],
-      }));
+      splits = customAmounts;
     }
 
     setSubmitting(true);
@@ -83,8 +94,36 @@ export function AddExpensePage() {
     setCustomSplits((prev) => ({ ...prev, [memberId]: value }));
   };
 
-  const totalCustom = group.members.reduce(
-    (s, m) => s + parseFloat(customSplits[m.id] || "0"),
+  const toggleMember = (id: string) => {
+    setIncludedMembers((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        if (next.size <= 1) return prev;
+        next.delete(id);
+        if (paidBy === id) {
+          const remaining = [...next][0];
+          setPaidBy(remaining);
+        }
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const toggleAllMembers = () => {
+    if (!group) return;
+    const allIds = group.members.map((m) => m.id);
+    const allIncluded = allIds.every((id) => includedMembers.has(id));
+    if (allIncluded) {
+      setIncludedMembers(new Set([paidBy]));
+    } else {
+      setIncludedMembers(new Set(allIds));
+    }
+  };
+
+  const totalCustom = [...includedMembers].reduce(
+    (s, id) => s + parseFloat(customSplits[id] || "0"),
     0
   );
 
@@ -152,21 +191,51 @@ export function AddExpensePage() {
           </div>
 
           <div className={styles.splitList}>
+            <button type="button" className={styles.toggleAll} onClick={toggleAllMembers}>
+              {group.members.every((m) => includedMembers.has(m.id))
+                ? "Excluir todos"
+                : "Incluir todos"}
+            </button>
+
             {group.members.map((m) => {
+              const isIncluded = includedMembers.has(m.id);
               const evenAmount =
-                splitMode === "even"
+                splitMode === "even" && isIncluded
                   ? (() => {
-                      const memberCount = group.members.length;
-                      const splitAmount = Math.round((parseFloat(amount || "0") / memberCount) * 100) / 100;
-                      return isNaN(splitAmount) ? "—" : splitAmount.toFixed(2);
+                      const count = includedMembers.size;
+                      const val = parseFloat(amount || "0");
+                      const sa = Math.round((val / count) * 100) / 100;
+                      return isNaN(sa) ? "—" : sa.toFixed(2);
                     })()
                   : null;
 
               return (
-                <div key={m.id} className={styles.splitRow}>
+                <div
+                  key={m.id}
+                  className={`${styles.splitRow} ${!isIncluded ? styles.splitExcluded : ""}`}
+                >
+                  <button
+                    type="button"
+                    className={`${styles.checkbox} ${isIncluded ? styles.checkboxChecked : ""}`}
+                    onClick={() => toggleMember(m.id)}
+                  >
+                    {isIncluded && (
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                        <path
+                          d="M2.5 6L5 8.5L9.5 3.5"
+                          stroke="white"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+                  </button>
                   <Avatar name={m.name} size="sm" />
                   <span className={styles.splitMemberName}>{m.name}</span>
-                  {splitMode === "even" ? (
+                  {!isIncluded ? (
+                    <span className={styles.excludedLabel}>Excluido</span>
+                  ) : splitMode === "even" ? (
                     <span className={styles.splitValue}>{evenAmount}</span>
                   ) : (
                     <input
