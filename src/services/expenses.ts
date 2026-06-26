@@ -80,7 +80,7 @@ export async function getExpense(expenseId: string): Promise<Expense | null> {
 
 export async function updateExpense(
   expenseId: string,
-  data: Partial<Pick<Expense, "description" | "amount" | "paidBy" | "splits">>
+  data: Partial<Pick<Expense, "description" | "amount" | "paidBy" | "splits" | "category" | "payers" | "date">>
 ): Promise<void> {
   await updateDoc(doc(db, "expenses", expenseId), data as Record<string, unknown>);
 }

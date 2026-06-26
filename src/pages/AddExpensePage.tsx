@@ -158,7 +158,7 @@ export function AddExpensePage() {
       const cat = category || undefined;
       const firstPayer = payers[0]?.memberId ?? paidBy;
       if (isEditing) {
-        await update(expenseId!, description.trim(), numAmount, firstPayer, splits, date, cat);
+        await update(expenseId!, description.trim(), numAmount, firstPayer, splits, date, cat, payers);
         showToast("Gasto actualizado", "success");
       } else {
         await add(description.trim(), numAmount, firstPayer, splits, date, cat, payers);
