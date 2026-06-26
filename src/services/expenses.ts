@@ -14,7 +14,7 @@ import {
 import { db } from "./firebase";
 import type { Expense, Split, Payer } from "../types";
 
-function docToExpense(id: string, data: DocumentData): Expense {
+export function docToExpense(id: string, data: DocumentData): Expense {
   return {
     id,
     groupId: data.groupId,

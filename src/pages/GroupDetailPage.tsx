@@ -1,8 +1,9 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useGroup } from "../hooks/useGroups";
 import { useExpenses } from "../hooks/useExpenses";
 import { useBalances } from "../hooks/useBalances";
+import { useNotifications } from "../hooks/useNotifications";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Avatar } from "../components/ui/Avatar";
@@ -13,7 +14,7 @@ import { BalanceSummary } from "../components/balances/BalanceSummary";
 import { SettlementList } from "../components/balances/SettlementList";
 import { InviteSection } from "../components/groups/InviteSection";
 import { GroupDetailSkeleton } from "../components/ui/Skeleton";
-import { Plus, Receipt, Users, ArrowRightLeft, Share, Pencil, Trash2 } from "lucide-react";
+import { Plus, Receipt, Users, ArrowRightLeft, Share, Pencil, Trash2, Bell, BellOff } from "lucide-react";
 import { formatCurrency, formatDate } from "../utils/format";
 import { getCategory } from "../utils/categories";
 import type { Member } from "../types";
@@ -25,7 +26,54 @@ export function GroupDetailPage() {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
   const { group, loading, updateMembers, removeMember } = useGroup(groupId!);
-  const { expenses, loading: expLoading, remove } = useExpenses(groupId!);
+  const { expenses, loading: expLoading, remove, changes, clearChanges } = useExpenses(groupId!);
+  const { notify, permission, request } = useNotifications();
+  const [notifsOn, setNotifsOn] = useState(() => localStorage.getItem(`notif-${groupId}`) !== "off");
+  const localActionIds = useRef<Set<string>>(new Set());
+
+  // Toggle notifications
+  const toggleNotifs = async () => {
+    if (!notifsOn && permission !== "granted") {
+      const granted = await request();
+      if (!granted) return;
+    }
+    const next = !notifsOn;
+    setNotifsOn(next);
+    localStorage.setItem(`notif-${groupId}`, next ? "on" : "off");
+  };
+
+  // Watch for remote changes and notify
+  useEffect(() => {
+    if (!changes || !notifsOn || permission !== "granted") return;
+    const memberById = new Map(group?.members.map((m) => [m.id, m]) ?? []);
+
+    for (const exp of changes.added) {
+      if (localActionIds.current.has(exp.id)) {
+        localActionIds.current.delete(exp.id);
+        continue;
+      }
+      const payer = memberById.get(exp.paidBy);
+      notify(
+        `Nuevo gasto en ${group?.name}`,
+        `${payer?.name ?? exp.paidBy} añadió "${exp.description}" (${formatCurrency(exp.amount)})`
+      );
+    }
+
+    for (const exp of changes.modified) {
+      const payer = memberById.get(exp.paidBy);
+      notify(
+        `Gasto editado en ${group?.name}`,
+        `${payer?.name ?? exp.paidBy} editó "${exp.description}"`
+      );
+    }
+
+    for (const _id of changes.removed) {
+      notify(`Gasto eliminado en ${group?.name}`, "Se eliminó un gasto del grupo");
+    }
+
+    clearChanges();
+  }, [changes, notifsOn, permission, notify, group, clearChanges]);
+
   const [tab, setTab] = useState<Tab>("expenses");
 
   // Member name map for balance calculations
@@ -75,6 +123,9 @@ export function GroupDetailPage() {
       <div className={styles.header}>
         <h1>{group.name}</h1>
         <div style={{ display: "flex", gap: 8 }}>
+          <Button size="sm" variant="ghost" onClick={toggleNotifs} aria-label={notifsOn ? "Desactivar notificaciones" : "Activar notificaciones"}>
+            {notifsOn ? <Bell size={16} /> : <BellOff size={16} />}
+          </Button>
           <Button size="sm" variant="ghost" onClick={() => setShowInvite(true)}>
             <Share size={16} />
             Invitar
