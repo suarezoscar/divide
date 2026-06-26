@@ -434,7 +434,9 @@ export function AddExpensePage() {
                       <span className={styles.splitValue}>{evenAmount}</span>
                     ) : (
                       <input
-                        type="number"
+                        type="text"
+                        inputMode="decimal"
+                        pattern="[0-9]*[.,]?[0-9]*"
                         className={styles.splitInput}
                         value={customSplits[m.id] || ""}
                         onChange={(e) => updateCustomSplit(m.id, e.target.value)}
