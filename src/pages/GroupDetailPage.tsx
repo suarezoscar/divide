@@ -161,12 +161,6 @@ export function GroupDetailPage() {
             <Plus size={16} />
             Añadir gasto
           </Button>
-          {user?.uid === group.createdBy && (
-            <Button size="sm" variant="ghost" onClick={() => setShowDeleteGroup(true)} aria-label="Eliminar grupo"
-              style={{ color: "#DC2626" }}>
-              <Trash2 size={16} />
-            </Button>
-          )}
         </div>
       </div>
 
@@ -349,6 +343,21 @@ export function GroupDetailPage() {
       )}
 
       <InviteSection groupId={groupId!} open={showInvite} onClose={() => setShowInvite(false)} />
+
+      {user?.uid === group.createdBy && (
+        <div className={styles.dangerZone}>
+          <p className={styles.dangerZoneTitle}>Zona peligrosa</p>
+          <Button
+            size="md"
+            variant="ghost"
+            onClick={() => setShowDeleteGroup(true)}
+            style={{ width: "100%", color: "#DC2626", borderColor: "#FECACA", background: "#FEF2F2" }}
+          >
+            <Trash2 size={16} />
+            Eliminar grupo
+          </Button>
+        </div>
+      )}
 
       <ConfirmDialog
         open={!!deleteExpenseId}

@@ -263,3 +263,25 @@
   flex-direction: column;
   gap: 14px;
 }
+
+/* Danger zone */
+.dangerZone {
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px dashed #FECACA;
+  border-radius: 12px;
+  background: #FFFBEB;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.dangerZoneTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: #DC2626;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
