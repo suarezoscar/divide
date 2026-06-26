@@ -1,3 +1,4 @@
+import { memo } from "react";
 import styles from "./Card.module.css";
 
 interface CardProps {
@@ -6,7 +7,7 @@ interface CardProps {
   onClick?: () => void;
 }
 
-export function Card({ children, className = "", onClick }: CardProps) {
+export const Card = memo(function Card({ children, className = "", onClick }: CardProps) {
   return (
     <div
       className={`${styles.card} ${onClick ? styles.clickable : ""} ${className}`}
@@ -27,4 +28,4 @@ export function Card({ children, className = "", onClick }: CardProps) {
       {children}
     </div>
   );
-}
+});

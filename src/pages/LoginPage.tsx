@@ -5,6 +5,7 @@ import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Card } from "../components/ui/Card";
 import { friendlyError } from "../utils/errors";
+import { Skeleton } from "../components/ui/Skeleton";
 import { Divide } from "lucide-react";
 import styles from "./LoginPage.module.css";
 
@@ -18,7 +19,12 @@ export function LoginPage() {
   if (loading) {
     return (
       <div className={styles.shell}>
-        <p>Cargando…</p>
+        <div className={styles.skeletonCard}>
+          <Skeleton width="100px" height="32px" />
+          <Skeleton width="100%" height="44px" />
+          <Skeleton width="100%" height="44px" />
+          <Skeleton width="100%" height="44px" />
+        </div>
       </div>
     );
   }

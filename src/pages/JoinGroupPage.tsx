@@ -8,6 +8,7 @@ import { Input } from "../components/ui/Input";
 import { Users, LogIn } from "lucide-react";
 import { showToast } from "../components/ui/Toast";
 import { friendlyError } from "../utils/errors";
+import { Skeleton } from "../components/ui/Skeleton";
 import type { Group } from "../types";
 import styles from "./JoinGroupPage.module.css";
 
@@ -42,7 +43,10 @@ export function JoinGroupPage() {
   if (authLoading) {
     return (
       <div className={styles.shell}>
-        <p className={styles.muted}>Cargando…</p>
+        <div className={styles.skeletonCard}>
+          <Skeleton width="200px" height="24px" />
+          <Skeleton width="120px" height="14px" style={{ marginTop: 8 }} />
+        </div>
       </div>
     );
   }
@@ -79,7 +83,10 @@ export function JoinGroupPage() {
   if (loading) {
     return (
       <div className={styles.shell}>
-        <p className={styles.muted}>Cargando…</p>
+        <div className={styles.skeletonCard}>
+          <Skeleton width="200px" height="24px" />
+          <Skeleton width="120px" height="14px" style={{ marginTop: 8 }} />
+        </div>
       </div>
     );
   }

@@ -1,5 +1,6 @@
 import { Card } from "../ui/Card";
 import { Avatar } from "../ui/Avatar";
+import { memo, useMemo } from "react";
 import { formatCurrency } from "../../utils/format";
 import type { MemberBalance } from "../../types";
 import styles from "./BalanceSummary.module.css";
@@ -8,7 +9,9 @@ interface Props {
   balances: MemberBalance[];
 }
 
-export function BalanceSummary({ balances }: Props) {
+export const BalanceSummary = memo(function BalanceSummary({ balances }: Props) {
+  const sorted = useMemo(() => [...balances].sort((a, b) => a.balance - b.balance), [balances]);
+
   if (balances.length === 0) {
     return (
       <Card className={styles.empty}>
@@ -16,8 +19,6 @@ export function BalanceSummary({ balances }: Props) {
       </Card>
     );
   }
-
-  const sorted = [...balances].sort((a, b) => a.balance - b.balance);
 
   return (
     <Card className={styles.card}>
@@ -38,4 +39,4 @@ export function BalanceSummary({ balances }: Props) {
       </div>
     </Card>
   );
-}
+});

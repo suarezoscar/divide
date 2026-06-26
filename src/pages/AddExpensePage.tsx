@@ -10,6 +10,7 @@ import { Avatar } from "../components/ui/Avatar";
 import { CATEGORIES } from "../utils/categories";
 import { showToast } from "../components/ui/Toast";
 import { friendlyError } from "../utils/errors";
+import { Skeleton } from "../components/ui/Skeleton";
 import type { Split, Payer } from "../types";
 import styles from "./AddExpensePage.module.css";
 
@@ -78,7 +79,17 @@ export function AddExpensePage() {
     });
   }, [expenseId, group, groupId]);
 
-  if (loading) return <p style={{ textAlign: "center", padding: 40 }}>Cargando…</p>;
+  if (loading) return (
+    <div style={{ padding: 20, maxWidth: 640, margin: "0 auto", display: "flex", flexDirection: "column", gap: 16 }}>
+      <Skeleton width="200px" height="28px" />
+      <div style={{ background: "#fff", borderRadius: 16, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", gap: 16 }}>
+        <Skeleton width="100px" height="14px" />
+        <Skeleton width="100%" height="44px" />
+        <Skeleton width="80px" height="14px" />
+        <Skeleton width="100%" height="44px" />
+      </div>
+    </div>
+  );
   if (!group) return <p style={{ textAlign: "center", padding: 40, color: "#EF4444" }}>Grupo no encontrado</p>;
 
   const handleSubmit = async (e: React.FormEvent) => {

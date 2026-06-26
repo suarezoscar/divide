@@ -1,7 +1,23 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "./useAuth";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { db } from "../services/firebase";
 import * as groupsService from "../services/groups";
 import type { Group, Member } from "../types";
+
+function docToGroup(id: string, data: Record<string, unknown>): Group {
+  const d = data as Record<string, any>;
+  return {
+    id,
+    name: d.name,
+    description: d.description ?? "",
+    members: d.members ?? [],
+    userIds: d.userIds ?? [d.createdBy],
+    inviteCode: d.inviteCode,
+    createdBy: d.createdBy,
+    createdAt: d.createdAt,
+  };
+}
 
 export function useGroups() {
   const { user } = useAuth();
@@ -9,24 +25,24 @@ export function useGroups() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchGroups = useCallback(async () => {
+  useEffect(() => {
     if (!user) return;
     setLoading(true);
     setError(null);
-    try {
-      const result = await groupsService.getUserGroups(user.uid);
-      setGroups(result);
-    } catch (err) {
+
+    const q = query(collection(db, "groups"), where("userIds", "array-contains", user.uid));
+    const unsub = onSnapshot(q, (snap) => {
+      const result = snap.docs.map((d) => docToGroup(d.id, d.data()));
+      setGroups(result.toSorted((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis()));
+      setLoading(false);
+    }, (err) => {
       console.error("Error fetching groups:", err);
       setError("No se pudieron cargar los grupos. Revisa tu conexión o el adblocker.");
-    } finally {
       setLoading(false);
-    }
-  }, [user]);
+    });
 
-  useEffect(() => {
-    fetchGroups();
-  }, [fetchGroups]);
+    return () => unsub();
+  }, [user]);
 
   const create = async (name: string, description: string, members: Member[]) => {
     if (!user) throw new Error("No has iniciado sesión");
@@ -35,7 +51,7 @@ export function useGroups() {
     return g;
   };
 
-  return { groups, loading, error, create, refetch: fetchGroups };
+  return { groups, loading, error, create };
 }
 
 export function useGroup(groupId: string) {

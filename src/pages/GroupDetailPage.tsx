@@ -14,6 +14,7 @@ import { BalanceSummary } from "../components/balances/BalanceSummary";
 import { SettlementList } from "../components/balances/SettlementList";
 import { InviteSection } from "../components/groups/InviteSection";
 import { GroupDetailSkeleton } from "../components/ui/Skeleton";
+import { Skeleton } from "../components/ui/Skeleton";
 import { showToast } from "../components/ui/Toast";
 import { Plus, Receipt, Users, ArrowRightLeft, Share, Pencil, Trash2, Bell, BellOff } from "lucide-react";
 import { formatCurrency, formatDate } from "../utils/format";
@@ -159,7 +160,14 @@ export function GroupDetailPage() {
       {tab === "expenses" && (
         <div className={styles.tabContent}>
           {expLoading ? (
-            <p className={styles.muted}>Cargando gastos…</p>
+            <div className={styles.expenseList}>
+              {[1, 2, 3].map((i) => (
+                <div key={i} className={styles.skeletonCard}>
+                  <Skeleton width="60%" height="18px" />
+                  <Skeleton width="120px" height="14px" style={{ marginTop: 8 }} />
+                </div>
+              ))}
+            </div>
           ) : expenses.length === 0 ? (
             <Card className={styles.empty}>
               <p>Aún no hay gastos. ¡Añade el primero!</p>

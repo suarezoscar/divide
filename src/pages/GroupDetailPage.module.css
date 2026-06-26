@@ -232,6 +232,13 @@
   flex-shrink: 0;
 }
 
+.skeletonCard {
+  background: #fff;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
 /* Members */
 .memberList {
   display: flex;

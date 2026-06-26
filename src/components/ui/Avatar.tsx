@@ -1,3 +1,4 @@
+import { memo } from "react";
 import styles from "./Avatar.module.css";
 
 interface AvatarProps {
@@ -26,7 +27,7 @@ function initials(name: string): string {
     .toUpperCase();
 }
 
-export function Avatar({ name, size = "md" }: AvatarProps) {
+export const Avatar = memo(function Avatar({ name, size = "md" }: AvatarProps) {
   return (
     <div
       className={`${styles.avatar} ${styles[size]}`}
@@ -37,4 +38,4 @@ export function Avatar({ name, size = "md" }: AvatarProps) {
       {initials(name)}
     </div>
   );
-}
+});

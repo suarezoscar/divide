@@ -1,10 +1,10 @@
 import { Card } from "../ui/Card";
 import { Button } from "../ui/Button";
 import { Avatar } from "../ui/Avatar";
+import { memo, useState, useMemo } from "react";
 import { formatCurrency } from "../../utils/format";
 import type { DebtEdge, Member } from "../../types";
 import { ArrowRight, Check } from "lucide-react";
-import { useState } from "react";
 import styles from "./SettlementList.module.css";
 
 interface Props {
@@ -13,8 +13,9 @@ interface Props {
   onSettle: (from: string, to: string, amount: number) => Promise<void>;
 }
 
-export function SettlementList({ debts, members, onSettle }: Props) {
+export const SettlementList = memo(function SettlementList({ debts, members, onSettle }: Props) {
   const [settling, setSettling] = useState<string | null>(null);
+  const memberById = useMemo(() => new Map(members.map((m) => [m.id, m])), [members]);
 
   if (debts.length === 0) {
     return (
@@ -37,9 +38,7 @@ export function SettlementList({ debts, members, onSettle }: Props) {
     <Card className={styles.card}>
       <h2 className={styles.title}>Pagos necesarios</h2>
       <div className={styles.list}>
-        {(() => {
-          const memberById = new Map(members.map((m) => [m.id, m]));
-          return debts.map((d) => {
+        {debts.map((d) => {
           const key = `${d.from}-${d.to}`;
           const fromMember = memberById.get(d.from);
           const toMember = memberById.get(d.to);
@@ -71,8 +70,8 @@ export function SettlementList({ debts, members, onSettle }: Props) {
               </div>
             </div>
           );
-        })})()}
+        })}
       </div>
     </Card>
   );
-}
+});
