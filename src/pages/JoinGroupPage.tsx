@@ -19,7 +19,34 @@ export function JoinGroupPage() {
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState("");
 
-  if (loading || authLoading) {
+  // Show login prompt immediately for unauthenticated users
+  if (authLoading) {
+    return (
+      <div className={styles.shell}>
+        <p className={styles.muted}>Cargando…</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className={styles.shell}>
+        <Card className={styles.card}>
+          <h1 className={styles.groupName}>Unirse al grupo</h1>
+          <p className={styles.desc}>Inicia sesión para ver los detalles y unirte</p>
+          <Link to="/login">
+            <Button size="lg" style={{ width: "100%" }}>
+              <LogIn size={16} />
+              Iniciar sesión
+            </Button>
+          </Link>
+        </Card>
+      </div>
+    );
+  }
+
+  // User is authenticated — wait for group and show join form
+  if (loading) {
     return (
       <div className={styles.shell}>
         <p className={styles.muted}>Cargando…</p>
@@ -37,7 +64,7 @@ export function JoinGroupPage() {
     );
   }
 
-  const alreadyInGroup = user && group.userIds.includes(user.uid);
+  const alreadyInGroup = group.userIds.includes(user.uid);
 
   if (alreadyInGroup) {
     navigate(`/group/${groupId}`, { replace: true });
@@ -70,21 +97,10 @@ export function JoinGroupPage() {
           <span>{group.members.length} miembro{group.members.length !== 1 ? "s" : ""}</span>
         </div>
 
-        {!user ? (
-          <div className={styles.loginPrompt}>
-            <p>Inicia sesión para unirte al grupo</p>
-            <Link to={`/login`}>
-              <Button size="lg" style={{ width: "100%" }}>
-                <LogIn size={16} />
-                Iniciar sesión
-              </Button>
-            </Link>
-          </div>
-        ) : (
-          <form onSubmit={handleJoin} className={styles.form}>
-            <Input
-              label="Tu nombre en el grupo"
-              value={memberName}
+        <form onSubmit={handleJoin} className={styles.form}>
+          <Input
+            label="Tu nombre en el grupo"
+            value={memberName}
               onChange={(e) => setMemberName(e.target.value)}
               placeholder="¿Cómo te llamas?"
               required
@@ -94,7 +110,6 @@ export function JoinGroupPage() {
               {joining ? "Uniéndose…" : "Unirse al grupo"}
             </Button>
           </form>
-        )}
       </Card>
     </div>
   );

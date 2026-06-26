@@ -45,6 +45,9 @@ export function useGroup(groupId: string) {
   useEffect(() => {
     groupsService.getGroup(groupId).then((g) => {
       setGroup(g);
+    }).catch(() => {
+      // Silently fail — caller handles null group
+    }).finally(() => {
       setLoading(false);
     });
   }, [groupId]);
