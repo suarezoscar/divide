@@ -18,5 +18,7 @@ export function formatDate(date: { toDate?: () => Date } | Date): string {
     day: "numeric",
     month: "short",
     year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   }).format(d);
 }

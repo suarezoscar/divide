@@ -195,23 +195,13 @@
   padding-top: 10px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-
-.splitLabel {
-  font-size: 12px;
-  font-weight: 600;
-  color: #9CA3AF;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  gap: 8px;
 }
 
 .splitRow {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  grid-template-rows: auto auto;
+  display: flex;
   align-items: center;
-  gap: 4px 8px;
+  gap: 8px;
 }
 
 .splitName {
@@ -221,7 +211,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  min-width: 0;
+  flex: 1;
 }
 
 .payerChip {
@@ -239,37 +229,7 @@
   font-weight: 600;
   font-size: 14px;
   color: #1A1A2E;
-  grid-row: 1;
-  text-align: right;
-}
-
-.splitBar {
-  grid-column: 2;
-  height: 6px;
-  background: #F3F4F6;
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.splitBarFill {
-  height: 100%;
-  background: #07819C;
-  border-radius: 3px;
-  transition: width 0.3s ease;
-}
-
-.splitPct {
-  grid-column: 3;
-  font-size: 11px;
-  color: #9CA3AF;
-  text-align: right;
-  line-height: 1;
-}
-
-@media (max-width: 380px) {
-  .splitAmount {
-    font-size: 13px;
-  }
+  flex-shrink: 0;
 }
 
 /* Members */
