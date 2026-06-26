@@ -1,7 +1,8 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useGroup } from "../hooks/useGroups";
 import { useExpenses } from "../hooks/useExpenses";
+import * as expensesService from "../services/expenses";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
@@ -12,10 +13,11 @@ import styles from "./AddExpensePage.module.css";
 type SplitMode = "even" | "custom";
 
 export function AddExpensePage() {
-  const { groupId } = useParams<{ groupId: string }>();
+  const { groupId, expenseId } = useParams<{ groupId: string; expenseId?: string }>();
   const navigate = useNavigate();
   const { group, loading } = useGroup(groupId!);
-  const { add } = useExpenses(groupId!);
+  const { add, update } = useExpenses(groupId!);
+  const isEditing = !!expenseId;
 
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
@@ -27,6 +29,34 @@ export function AddExpensePage() {
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  // Load existing expense for edit mode
+  useEffect(() => {
+    if (!expenseId || !group) return;
+    expensesService.getExpense(expenseId).then((exp) => {
+      if (!exp || exp.groupId !== groupId) return;
+      setDescription(exp.description);
+      setAmount(String(exp.amount).replace(".", ","));
+      setPaidBy(exp.paidBy);
+      if (exp.splits.length > 0) {
+        // Detect split mode: even if all splits are equal
+        const firstAmount = exp.splits[0].amount;
+        const allEven = exp.splits.every((s) => Math.abs(s.amount - firstAmount) < 0.01)
+          || exp.splits.length === 1;
+        if (allEven && exp.splits.length === group.members.length) {
+          setSplitMode("even");
+        } else {
+          setSplitMode("custom");
+          const custom: Record<string, string> = {};
+          for (const s of exp.splits) {
+            custom[s.memberId] = String(s.amount).replace(".", ",");
+          }
+          setCustomSplits(custom);
+        }
+        setIncludedMembers(new Set(exp.splits.map((s) => s.memberId)));
+      }
+    });
+  }, [expenseId, group, groupId]);
 
   if (loading) return <p style={{ textAlign: "center", padding: 40 }}>Cargando…</p>;
   if (!group) return <p style={{ textAlign: "center", padding: 40, color: "#EF4444" }}>Grupo no encontrado</p>;
@@ -77,7 +107,11 @@ export function AddExpensePage() {
 
     setSubmitting(true);
     try {
-      await add(description.trim(), numAmount, paidBy, splits);
+      if (isEditing) {
+        await update(expenseId!, description.trim(), numAmount, paidBy, splits);
+      } else {
+        await add(description.trim(), numAmount, paidBy, splits);
+      }
       navigate(`/group/${groupId}`);
     } catch {
       setError("Error al guardar el gasto");
@@ -124,7 +158,7 @@ export function AddExpensePage() {
 
   return (
     <div className={styles.page}>
-      <h1 className={styles.pageTitle}>Nuevo gasto</h1>
+      <h1 className={styles.pageTitle}>{isEditing ? "Editar gasto" : "Nuevo gasto"}</h1>
 
       <form onSubmit={handleSubmit} className={styles.form}>
         <Card className={styles.card}>
@@ -269,7 +303,7 @@ export function AddExpensePage() {
             Cancelar
           </Button>
           <Button type="submit" disabled={submitting} size="lg">
-            {submitting ? "Guardando…" : "Guardar gasto"}
+            {submitting ? "Guardando…" : isEditing ? "Actualizar gasto" : "Guardar gasto"}
           </Button>
         </div>
       </form>

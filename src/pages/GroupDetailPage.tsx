@@ -12,7 +12,7 @@ import { BalanceSummary } from "../components/balances/BalanceSummary";
 import { SettlementList } from "../components/balances/SettlementList";
 import { InviteSection } from "../components/groups/InviteSection";
 import { GroupDetailSkeleton } from "../components/ui/Skeleton";
-import { Plus, Receipt, Users, ArrowRightLeft, Share } from "lucide-react";
+import { Plus, Receipt, Users, ArrowRightLeft, Share, Pencil, Trash2 } from "lucide-react";
 import { formatCurrency, formatDate } from "../utils/format";
 import type { Member } from "../types";
 import styles from "./GroupDetailPage.module.css";
@@ -106,51 +106,80 @@ export function GroupDetailPage() {
               <p>Aún no hay gastos. ¡Añade el primero!</p>
             </Card>
           ) : (
-            <div className={styles.expenseList}>
-              {(() => {
-                const memberById = new Map(group.members.map((m) => [m.id, m]));
-                return expenses.map((exp) => {
-                const payer = memberById.get(exp.paidBy);
-                return (
-                  <Card key={exp.id} className={styles.expenseCard}>
-                    <div className={styles.expenseRow}>
-                      <div className={styles.expenseInfo}>
-                        <p className={styles.expenseDesc}>{exp.description}</p>
-                        <p className={styles.expenseMeta}>
-                          Pagado por {payer?.name ?? exp.paidBy} · {formatDate(exp.date)}
-                        </p>
-                      </div>
-                      <div className={styles.expenseRight}>
+            <>
+              {/* Summary bar */}
+              <div className={styles.summaryBar}>
+                <span className={styles.summaryCount}>{expenses.length} gasto{expenses.length !== 1 ? "s" : ""}</span>
+                <span className={styles.summaryTotal}>
+                  Total acumulado: <strong>{formatCurrency(expenses.reduce((s, e) => s + e.amount, 0))}</strong>
+                </span>
+              </div>
+
+              <div className={styles.expenseList}>
+                {(() => {
+                  const memberById = new Map(group.members.map((m) => [m.id, m]));
+                  return expenses.map((exp) => {
+                  const payer = memberById.get(exp.paidBy);
+                  const participantCount = exp.splits.length;
+                  const totalMembers = group.members.length;
+                  return (
+                    <Card key={exp.id} className={styles.expenseCard}>
+                      {/* Top row: description + amount */}
+                      <div className={styles.expenseTopRow}>
+                        <span className={styles.expenseDesc}>{exp.description}</span>
                         <span className={styles.expenseAmount}>{formatCurrency(exp.amount)}</span>
-                        <button
-                          className={styles.deleteBtn}
-                          aria-label="Eliminar gasto"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (confirm("¿Eliminar este gasto?")) remove(exp.id);
-                          }}
-                          title="Eliminar"
-                        >
-                          ✕
-                        </button>
                       </div>
-                    </div>
-                    <div className={styles.splits}>
-                      {exp.splits.map((s) => {
-                        const member = memberById.get(s.memberId);
-                        return (
-                          <div key={s.memberId} className={styles.splitRow}>
-                            <Avatar name={member?.name ?? s.memberId} size="sm" />
-                            <span>{member?.name ?? s.memberId}</span>
-                            <span className={styles.splitAmount}>{formatCurrency(s.amount)}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </Card>
-                );
-              })})()}
-            </div>
+
+                      {/* Payer row: avatar + name + date + actions */}
+                      <div className={styles.expensePayerRow}>
+                        <Avatar name={payer?.name ?? exp.paidBy} size="sm" />
+                        <span className={styles.expenseMeta}>
+                          {payer?.name ?? exp.paidBy} · {formatDate(exp.date)}
+                        </span>
+                        <div className={styles.expenseActions}>
+                          <button
+                            className={styles.actionBtn}
+                            aria-label="Editar gasto"
+                            onClick={() => navigate(`/group/${groupId}/expense/${exp.id}`)}
+                          >
+                            <Pencil size={15} />
+                          </button>
+                          <button
+                            className={styles.actionBtn}
+                            aria-label="Eliminar gasto"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (confirm("¿Eliminar este gasto?")) remove(exp.id);
+                            }}
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Participant badge + splits */}
+                      {participantCount < totalMembers && (
+                        <span className={styles.participantBadge}>
+                          {participantCount}/{totalMembers} participantes
+                        </span>
+                      )}
+                      <div className={styles.splitGrid}>
+                        {exp.splits.map((s) => {
+                          const member = memberById.get(s.memberId);
+                          return (
+                            <div key={s.memberId} className={styles.splitItem}>
+                              <Avatar name={member?.name ?? s.memberId} size="sm" />
+                              <span className={styles.splitName}>{member?.name ?? s.memberId}</span>
+                              <span className={styles.splitAmount}>{formatCurrency(s.amount)}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </Card>
+                  );
+                })})()}
+              </div>
+            </>
           )}
         </div>
       )}

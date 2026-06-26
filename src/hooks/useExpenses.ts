@@ -33,5 +33,20 @@ export function useExpenses(groupId: string) {
     setExpenses((prev) => prev.filter((e) => e.id !== expenseId));
   };
 
-  return { expenses, loading, add, remove, refetch: fetch };
+  const update = async (
+    expenseId: string,
+    description: string,
+    amount: number,
+    paidBy: string,
+    splits: Split[]
+  ) => {
+    await expensesService.updateExpense(expenseId, { description, amount, paidBy, splits });
+    setExpenses((prev) =>
+      prev.map((e) =>
+        e.id === expenseId ? { ...e, description, amount, paidBy, splits } : e
+      )
+    );
+  };
+
+  return { expenses, loading, add, update, remove, refetch: fetch };
 }

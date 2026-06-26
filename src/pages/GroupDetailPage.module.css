@@ -71,6 +71,31 @@
   color: #6B7280;
 }
 
+/* Summary bar */
+.summaryBar {
+  background: #ECFEFF;
+  border: 1px solid #A5F3FC;
+  border-radius: 12px;
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.summaryCount {
+  color: #0891B2;
+  font-weight: 600;
+}
+
+.summaryTotal {
+  color: #155E75;
+}
+
+.summaryTotal strong {
+  font-weight: 700;
+}
+
 /* Expenses */
 .expenseList {
   display: flex;
@@ -79,50 +104,56 @@
 }
 
 .expenseCard {
-  padding: 16px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.expenseRow {
+.expenseTopRow {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.expenseInfo {
-  min-width: 0;
+  align-items: center;
 }
 
 .expenseDesc {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: #1A1A2E;
+  flex: 1;
+  min-width: 0;
+}
+
+.expenseAmount {
+  font-size: 22px;
+  font-weight: 700;
+  color: #07819C;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.expensePayerRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .expenseMeta {
   font-size: 13px;
-  color: #6B7280;
-  margin-top: 2px;
+  color: #4B5563;
+  flex: 1;
 }
 
-.expenseRight {
+.expenseActions {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  gap: 2px;
   flex-shrink: 0;
 }
 
-.expenseAmount {
-  font-size: 16px;
-  font-weight: 700;
-  color: #1A1A2E;
-}
-
-.deleteBtn {
+.actionBtn {
   background: none;
   border: none;
-  font-size: 14px;
-  color: #6B7280;
+  color: #9CA3AF;
   cursor: pointer;
   padding: 8px;
   min-width: 44px;
@@ -133,36 +164,71 @@
   border-radius: 8px;
   transition: all 0.15s;
 }
-.deleteBtn:hover {
-  background: #FEF2F2;
-  color: #EF4444;
+
+.actionBtn:hover {
+  color: #07819C;
+  background: #F0F9FB;
 }
-.deleteBtn:active {
-  background: #FECACA;
+
+.actionBtn:active {
   transform: scale(0.95);
 }
 
-.splits {
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid #F3F4F6;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.actionBtn:last-child:hover {
+  color: #EF4444;
+  background: #FEF2F2;
 }
 
-.splitRow {
+.participantBadge {
+  display: inline-flex;
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6B7280;
+  background: #F3F4F6;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.splitGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #F3F4F6;
+}
+
+.splitItem {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-size: 13px;
-  color: #6B7280;
+  color: #4B5563;
+}
+
+.splitName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .splitAmount {
-  margin-left: auto;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 13px;
   color: #1A1A2E;
+  flex-shrink: 0;
+}
+
+@media (max-width: 380px) {
+  .splitGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .expenseAmount {
+    font-size: 18px;
+  }
 }
 
 /* Members */
