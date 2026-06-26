@@ -4,7 +4,7 @@ import { Button } from "../ui/Button";
 import { Divide, LogOut } from "lucide-react";
 import styles from "./Shell.module.css";
 
-const APP_VERSION = import.meta.env.VITE_APP_VERSION ?? "1.0.0";
+const APP_VERSION = __APP_VERSION__;
 
 export function Shell() {
   const { logout } = useAuth();
