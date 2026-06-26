@@ -191,6 +191,17 @@ export function AddExpensePage() {
   );
   const payerCount = payerIds.length;
 
+  // computed: the real total when in multi-payer mode
+  const payerSum = payerIds.reduce((s, id) => s + parseFloat(payerAmounts[id].replace(",", ".")), 0);
+  const effectiveAmount = payerCount >= 2 ? payerSum : parseFloat((amount || "0").replace(",", "."));
+
+  // Sync amount state with payer sum in multi-payer mode
+  useEffect(() => {
+    if (payerCount >= 2 && !isNaN(payerSum) && payerSum > 0) {
+      setAmount(String(payerSum).replace(".", ","));
+    }
+  }, [payerCount, payerSum]);
+
   const toggleMember = (id: string) => {
     setIncludedMembers((prev) => {
       const next = new Set(prev);
@@ -289,7 +300,14 @@ export function AddExpensePage() {
                             return next;
                           });
                         } else {
-                          setPayerAmounts((prev) => ({ ...prev, [m.id]: amount }));
+                          setPayerAmounts((prev) => {
+                            // When going from 1→2, split amount equally
+                            if (payerCount === 1 && prev[payerIds[0]]) {
+                              const half = (parseFloat(prev[payerIds[0]].replace(",", ".")) / 2).toFixed(2).replace(".", ",");
+                              return { [payerIds[0]]: half, [m.id]: half };
+                            }
+                            return { ...prev, [m.id]: amount };
+                          });
                         }
                       }}
                     >
@@ -311,19 +329,11 @@ export function AddExpensePage() {
                 );
               })}
             </div>
-            {(() => {
-              const tp = group.members.reduce((s, m) => s + parseFloat((payerAmounts[m.id] || "0").replace(",", ".") || "0"), 0);
-              if (tp > 0) {
-                const mismatch = Math.abs(tp - parseFloat((amount || "0").replace(",", "."))) > 0.01;
-                return (
-                  <div className={styles.payerTotal}>
-                    Total pagado: <strong>{tp.toFixed(2)}</strong>
-                    {mismatch && <span className={styles.splitMismatch}> (no coincide)</span>}
-                  </div>
-                );
-              }
-              return null;
-            })()}
+            {payerCount >= 2 && (
+              <div className={styles.payerTotal}>
+                Total pagado: <strong>{payerSum.toFixed(2)}</strong>
+              </div>
+            )}
           </div>
 
           <div className={styles.field}>
@@ -389,7 +399,7 @@ export function AddExpensePage() {
                 splitMode === "even" && isIncluded
                   ? (() => {
                       const count = includedMembers.size;
-                      const val = parseFloat((amount || "0").replace(",", "."));
+                      const val = effectiveAmount;
                       const sa = Math.round((val / count) * 100) / 100;
                       return isNaN(sa) ? "—" : sa.toFixed(2);
                     })()
@@ -450,7 +460,7 @@ export function AddExpensePage() {
           {splitMode === "custom" && (
             <div className={styles.customTotal}>
               Total splits: <strong>{totalCustom.toFixed(2)}</strong>
-              {Math.abs(totalCustom - parseFloat((amount || "0").replace(",", "."))) > 0.01 && (
+              {Math.abs(totalCustom - effectiveAmount) > 0.01 && (
                 <span className={styles.splitMismatch}> (no coincide)</span>
               )}
             </div>
