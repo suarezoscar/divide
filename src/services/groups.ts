@@ -75,13 +75,20 @@ export async function updateGroupMembers(groupId: string, members: Member[]): Pr
 export async function addUserToGroup(
   groupId: string,
   userId: string,
-  memberName: string
+  memberNameOrId: string,
+  claimExisting = false
 ): Promise<void> {
-  const member: Member = { id: crypto.randomUUID(), name: memberName };
-  await updateDoc(doc(db, "groups", groupId), {
-    userIds: arrayUnion(userId),
-    members: arrayUnion(member),
-  });
+  if (claimExisting) {
+    await updateDoc(doc(db, "groups", groupId), {
+      userIds: arrayUnion(userId),
+    });
+  } else {
+    const member: Member = { id: crypto.randomUUID(), name: memberNameOrId };
+    await updateDoc(doc(db, "groups", groupId), {
+      userIds: arrayUnion(userId),
+      members: arrayUnion(member),
+    });
+  }
 }
 
 const CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no I, O, 0, 1
