@@ -7,17 +7,24 @@ import { GroupDetailPage } from "./pages/GroupDetailPage";
 import { AddExpensePage } from "./pages/AddExpensePage";
 import { JoinGroupPage } from "./pages/JoinGroupPage";
 import { ToastContainer } from "./components/ui/Toast";
+import { Divide } from "lucide-react";
+import styles from "./App.module.css";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
-  if (loading) return <div style={{ padding: 40, textAlign: "center" }}>Cargando…</div>;
+  if (loading) return (
+    <div className={styles.splash}>
+      <Divide size={48} color="#07819C" />
+      <span className={styles.splashText}>Divide</span>
+    </div>
+  );
   if (!user) return <Navigate to="/login" replace />;
   return <>{children}</>;
 }
 
 function AddExpensePageWithKey() {
-  const { groupId } = useParams();
-  return <AddExpensePage key={groupId} />;
+  const { groupId, expenseId } = useParams();
+  return <AddExpensePage key={`${groupId}-${expenseId ?? "new"}`} />;
 }
 
 function AppRoutes() {

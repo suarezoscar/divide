@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import * as groupsService from "../../services/groups";
+import { showToast } from "../ui/Toast";
+import { friendlyError } from "../../utils/errors";
 import { Modal } from "../ui/Modal";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
@@ -70,12 +72,13 @@ export function JoinByCode({ open, onClose }: Props) {
         claimExisting ? selectedMemberId : newName.trim(),
         claimExisting
       );
+      showToast("¡Te has unido al grupo!", "success");
       onClose();
       setCode("");
       setGroup(null);
       navigate(`/group/${group.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al unirse al grupo");
+      setError(friendlyError(err));
       setJoining(false);
     }
   };
@@ -115,8 +118,8 @@ export function JoinByCode({ open, onClose }: Props) {
         />
 
         {!group && (
-          <Button onClick={handleCheckCode} disabled={checking || !code.trim()} size="lg" style={{ width: "100%" }}>
-            {checking ? "Buscando…" : "Buscar grupo"}
+          <Button onClick={handleCheckCode} isLoading={checking} disabled={!code.trim()} size="lg" style={{ width: "100%" }}>
+            Buscar grupo
           </Button>
         )}
 
@@ -177,8 +180,8 @@ export function JoinByCode({ open, onClose }: Props) {
         {error && <p className={styles.error} role="alert">{error}</p>}
 
         {group && (
-          <Button onClick={handleJoin} disabled={joining || !canSubmit} size="lg" style={{ width: "100%" }}>
-            {joining ? "Uniéndose…" : "Unirse al grupo"}
+          <Button onClick={handleJoin} isLoading={joining} disabled={!canSubmit} size="lg" style={{ width: "100%" }}>
+            Unirse al grupo
           </Button>
         )}
       </div>

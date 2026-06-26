@@ -6,6 +6,8 @@ import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
 import { Users, LogIn } from "lucide-react";
+import { showToast } from "../components/ui/Toast";
+import { friendlyError } from "../utils/errors";
 import type { Group } from "../types";
 import styles from "./JoinGroupPage.module.css";
 
@@ -118,9 +120,10 @@ export function JoinGroupPage() {
         claimExisting ? selectedMemberId : memberName.trim(),
         claimExisting
       );
+      showToast("¡Te has unido al grupo!", "success");
       navigate(`/group/${group.id}`, { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al unirse al grupo");
+      setError(friendlyError(err));
       setJoining(false);
     }
   };
@@ -186,8 +189,8 @@ export function JoinGroupPage() {
             />
           )}
           {error && <p className={styles.error} role="alert">{error}</p>}
-          <Button type="submit" size="lg" disabled={joining || !canSubmit} style={{ width: "100%" }}>
-            {joining ? "Uniéndose…" : "Unirse al grupo"}
+          <Button type="submit" size="lg" isLoading={joining} disabled={!canSubmit} style={{ width: "100%" }}>
+            Unirse al grupo
           </Button>
         </form>
       </Card>

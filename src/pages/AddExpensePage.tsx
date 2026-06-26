@@ -8,6 +8,8 @@ import { Card } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
 import { Avatar } from "../components/ui/Avatar";
 import { CATEGORIES } from "../utils/categories";
+import { showToast } from "../components/ui/Toast";
+import { friendlyError } from "../utils/errors";
 import type { Split, Payer } from "../types";
 import styles from "./AddExpensePage.module.css";
 
@@ -150,12 +152,14 @@ export function AddExpensePage() {
       const firstPayer = payers[0]?.memberId ?? paidBy;
       if (isEditing) {
         await update(expenseId!, description.trim(), numAmount, firstPayer, splits, date, cat);
+        showToast("Gasto actualizado", "success");
       } else {
         await add(description.trim(), numAmount, firstPayer, splits, date, cat, payers);
+        showToast("Gasto añadido", "success");
       }
       navigate(`/group/${groupId}`);
     } catch {
-      setError("Error al guardar el gasto");
+      setError(friendlyError("Error al guardar"));
       setSubmitting(false);
     }
   };
@@ -429,8 +433,8 @@ export function AddExpensePage() {
           <Button type="button" variant="ghost" onClick={() => navigate(-1)}>
             Cancelar
           </Button>
-          <Button type="submit" disabled={submitting} size="lg">
-            {submitting ? "Guardando…" : isEditing ? "Actualizar gasto" : "Guardar gasto"}
+          <Button type="submit" isLoading={submitting} size="lg">
+            {isEditing ? "Actualizar gasto" : "Guardar gasto"}
           </Button>
         </div>
       </form>

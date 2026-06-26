@@ -14,6 +14,7 @@ import { BalanceSummary } from "../components/balances/BalanceSummary";
 import { SettlementList } from "../components/balances/SettlementList";
 import { InviteSection } from "../components/groups/InviteSection";
 import { GroupDetailSkeleton } from "../components/ui/Skeleton";
+import { showToast } from "../components/ui/Toast";
 import { Plus, Receipt, Users, ArrowRightLeft, Share, Pencil, Trash2, Bell, BellOff } from "lucide-react";
 import { formatCurrency, formatDate } from "../utils/format";
 import { getCategory } from "../utils/categories";
@@ -45,7 +46,6 @@ export function GroupDetailPage() {
   // Watch for remote changes and notify
   useEffect(() => {
     if (!changes || !notifsOn || permission !== "granted") return;
-    const memberById = new Map(group?.members.map((m) => [m.id, m]) ?? []);
 
     for (const exp of changes.added) {
       if (localActionIds.current.has(exp.id)) {
@@ -76,8 +76,9 @@ export function GroupDetailPage() {
 
   const [tab, setTab] = useState<Tab>("expenses");
 
-  // Member name map for balance calculations
+  // Member maps — built once
   const memberNames = new Map<string, string>();
+  const memberById = new Map(group?.members.map((m) => [m.id, m]) ?? []);
   group?.members.forEach((m) => memberNames.set(m.id, m.name));
 
   const { balances, debts, addSettlement } = useBalances(groupId!, expenses, memberNames);
@@ -102,6 +103,7 @@ export function GroupDetailPage() {
     await updateMembers(updated);
     setNewMemberName("");
     setShowAddMember(false);
+    showToast("Miembro añadido", "success");
   };
 
   if (loading) {
@@ -173,10 +175,8 @@ export function GroupDetailPage() {
               </div>
 
               <div className={styles.expenseList}>
-                {(() => {
-                  const memberById = new Map(group.members.map((m) => [m.id, m]));
-                  return expenses.map((exp) => {
-                  const payer = memberById.get(exp.paidBy);
+                {expenses.map((exp) => {
+                const payer = memberById.get(exp.paidBy);
                   const participantCount = exp.splits.length;
                   const totalMembers = group.members.length;
                   return (
@@ -250,7 +250,7 @@ export function GroupDetailPage() {
                       </div>
                     </Card>
                   );
-                })})()}
+                })}
               </div>
             </>
           )}
@@ -266,6 +266,7 @@ export function GroupDetailPage() {
             members={group.members}
             onSettle={async (from, to, amount) => {
               await addSettlement(from, to, amount);
+              showToast("Deuda saldada", "success");
             }}
           />
         </div>
@@ -314,7 +315,7 @@ export function GroupDetailPage() {
       <ConfirmDialog
         open={!!deleteExpenseId}
         onClose={() => setDeleteExpenseId(null)}
-        onConfirm={() => { if (deleteExpenseId) remove(deleteExpenseId); }}
+        onConfirm={() => { if (deleteExpenseId) { remove(deleteExpenseId); showToast("Gasto eliminado", "success"); } }}
         title="¿Eliminar este gasto?"
         message="Se eliminará el gasto y se recalcularán los balances. Esta acción no se puede deshacer."
         confirmLabel="Eliminar gasto"
@@ -324,7 +325,7 @@ export function GroupDetailPage() {
       <ConfirmDialog
         open={!!deleteMemberId}
         onClose={() => setDeleteMemberId(null)}
-        onConfirm={() => { if (deleteMemberId) removeMember(deleteMemberId); }}
+        onConfirm={() => { if (deleteMemberId) { removeMember(deleteMemberId); showToast("Miembro eliminado", "success"); } }}
         title="¿Quitar a este miembro?"
         message="El miembro se eliminará del grupo actual. Los gastos anteriores se conservan en el historial."
         confirmLabel="Quitar miembro"

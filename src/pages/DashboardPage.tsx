@@ -8,6 +8,8 @@ import { Modal } from "../components/ui/Modal";
 import { Avatar } from "../components/ui/Avatar";
 import { JoinByCode } from "../components/groups/JoinByCode";
 import { DashboardSkeleton } from "../components/ui/Skeleton";
+import { showToast } from "../components/ui/Toast";
+import { friendlyError } from "../utils/errors";
 import { Plus, Users, LogIn } from "lucide-react";
 import type { Member } from "../types";
 import styles from "./DashboardPage.module.css";
@@ -33,15 +35,14 @@ export function DashboardPage() {
         .filter((n) => n.trim())
         .map((n) => ({ id: crypto.randomUUID(), name: n.trim() }));
       const g = await create(name.trim(), description.trim(), members);
+      showToast("Grupo creado", "success");
       setShowCreate(false);
       setName("");
       setDescription("");
       setMemberNames([""]);
       if (g) navigate(`/group/${g.id}`);
     } catch (err) {
-      setCreateError(
-        err instanceof Error ? err.message : "Error al crear el grupo. ¿Está Firestore configurado?"
-      );
+      setCreateError(friendlyError(err));
     } finally {
       setCreating(false);
     }
@@ -154,8 +155,8 @@ export function DashboardPage() {
 
           {createError && <p style={{ color: "#EF4444", fontSize: 13, textAlign: "center" }}>{createError}</p>}
 
-          <Button onClick={handleCreate} disabled={creating || !name.trim()} size="lg" style={{ width: "100%" }}>
-            {creating ? "Creando…" : "Crear grupo"}
+          <Button onClick={handleCreate} isLoading={creating} disabled={!name.trim()} size="lg" style={{ width: "100%" }}>
+            Crear grupo
           </Button>
         </div>
       </Modal>

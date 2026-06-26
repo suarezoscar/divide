@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Card } from "../components/ui/Card";
+import { friendlyError } from "../utils/errors";
 import { Divide } from "lucide-react";
 import styles from "./LoginPage.module.css";
 
@@ -41,11 +42,7 @@ export function LoginPage() {
         await login(email, password);
       }
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Algo salió mal");
-      }
+      setError(friendlyError(err));
     }
   };
 
