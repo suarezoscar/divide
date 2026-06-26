@@ -163,14 +163,24 @@ export function GroupDetailPage() {
                           {participantCount}/{totalMembers} participantes
                         </span>
                       )}
-                      <div className={styles.splitGrid}>
+                      <div className={styles.splitList}>
+                        <span className={styles.splitLabel}>Reparto</span>
                         {exp.splits.map((s) => {
                           const member = memberById.get(s.memberId);
+                          const pct = Math.round((s.amount / exp.amount) * 100);
+                          const isPayer = s.memberId === exp.paidBy;
                           return (
-                            <div key={s.memberId} className={styles.splitItem}>
+                            <div key={s.memberId} className={styles.splitRow}>
                               <Avatar name={member?.name ?? s.memberId} size="sm" />
-                              <span className={styles.splitName}>{member?.name ?? s.memberId}</span>
+                              <span className={styles.splitName}>
+                                {member?.name ?? s.memberId}
+                                {isPayer && <span className={styles.payerChip}>pagó</span>}
+                              </span>
                               <span className={styles.splitAmount}>{formatCurrency(s.amount)}</span>
+                              <div className={styles.splitBar}>
+                                <div className={styles.splitBarFill} style={{ width: `${pct}%` }} />
+                              </div>
+                              <span className={styles.splitPct}>{pct}%</span>
                             </div>
                           );
                         })}
