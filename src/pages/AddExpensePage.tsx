@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useGroup } from "../hooks/useGroups";
 import { useExpenses } from "../hooks/useExpenses";
 import * as expensesService from "../services/expenses";
@@ -194,12 +194,14 @@ export function AddExpensePage() {
   // computed: the real total when in multi-payer mode
   const payerSum = payerIds.reduce((s, id) => s + parseFloat(payerAmounts[id].replace(",", ".")), 0);
   const effectiveAmount = payerCount >= 2 ? payerSum : parseFloat((amount || "0").replace(",", "."));
+  const lastPayerSum = useRef(0);
 
   // Sync amount state with payer sum in multi-payer mode
   useEffect(() => {
-    if (payerCount >= 2 && !isNaN(payerSum) && payerSum > 0) {
-      setAmount(String(payerSum).replace(".", ","));
-    }
+    if (payerCount < 2 || isNaN(payerSum) || payerSum <= 0) return;
+    if (lastPayerSum.current === payerSum) return;
+    lastPayerSum.current = payerSum;
+    setAmount(String(payerSum).replace(".", ","));
   }, [payerCount, payerSum]);
 
   const toggleMember = (id: string) => {
