@@ -70,6 +70,25 @@
   color: #07819C;
 }
 
+.amountFixed {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.amountFixed .label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1A1A2E;
+}
+
+.amountFixedValue {
+  font-size: 28px;
+  font-weight: 700;
+  color: #07819C;
+  padding: 8px 0;
+}
+
 .label {
   font-size: 14px;
   font-weight: 500;

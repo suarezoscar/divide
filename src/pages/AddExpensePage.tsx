@@ -11,6 +11,7 @@ import { CATEGORIES } from "../utils/categories";
 import { showToast } from "../components/ui/Toast";
 import { friendlyError } from "../utils/errors";
 import { Skeleton } from "../components/ui/Skeleton";
+import { formatCurrency } from "../utils/format";
 import type { Split, Payer } from "../types";
 import styles from "./AddExpensePage.module.css";
 
@@ -96,7 +97,7 @@ export function AddExpensePage() {
     e.preventDefault();
     setError("");
 
-    const numAmount = parseFloat(amount.replace(",", "."));
+    let numAmount = parseFloat(amount.replace(",", "."));
     if (!description.trim() || isNaN(numAmount) || numAmount <= 0) {
       setError("Completa todos los campos");
       return;
@@ -109,19 +110,28 @@ export function AddExpensePage() {
 
     // Build payers from amounts
     const payers: Payer[] = [];
-    for (const m of group.members) {
-      const val = parseFloat((payerAmounts[m.id] || "").replace(",", "."));
-      if (!isNaN(val) && val > 0) {
-        payers.push({ memberId: m.id, amount: val });
+    if (payerCount <= 1) {
+      // Single payer — use the main amount input
+      const payerId = payerCount === 1 ? payerIds[0] : group.members[0]?.id;
+      if (!payerId) {
+        setError("Selecciona quién pagó");
+        return;
       }
+      payers.push({ memberId: payerId, amount: numAmount });
+    } else {
+      // Multiple payers — use individual amounts
+      for (const id of payerIds) {
+        const val = parseFloat((payerAmounts[id] || "").replace(",", "."));
+        if (!isNaN(val) && val > 0) {
+          payers.push({ memberId: id, amount: val });
+        }
+      }
+      // numAmount comes from payer sum
+      const totalPaid = payers.reduce((s, p) => s + p.amount, 0);
+      numAmount = totalPaid;
     }
     if (payers.length === 0) {
       setError("Al menos una persona debe haber pagado");
-      return;
-    }
-    const totalPaid = payers.reduce((s, p) => s + p.amount, 0);
-    if (Math.abs(totalPaid - numAmount) > 0.01) {
-      setError(`La suma pagada (${totalPaid.toFixed(2)}) debe ser igual al total (${numAmount.toFixed(2)})`);
       return;
     }
 
@@ -175,6 +185,11 @@ export function AddExpensePage() {
     setCustomSplits((prev) => ({ ...prev, [memberId]: value }));
   };
 
+  const payerIds = Object.keys(payerAmounts).filter(
+    (id) => payerAmounts[id] !== "" && parseFloat(payerAmounts[id].replace(",", ".")) > 0
+  );
+  const payerCount = payerIds.length;
+
   const toggleMember = (id: string) => {
     setIncludedMembers((prev) => {
       const next = new Set(prev);
@@ -221,15 +236,22 @@ export function AddExpensePage() {
             placeholder="Cena en el italiano"
           />
 
-          <Input
-            label="Importe total"
-            type="text"
-            inputMode="decimal"
-            pattern="[0-9]*[.,]?[0-9]*"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="0.00"
-          />
+          {payerCount >= 2 ? (
+            <div className={styles.amountFixed}>
+              <span className={styles.label}>Importe total</span>
+              <span className={styles.amountFixedValue}>{parseFloat(amount.replace(",", ".")) ? formatCurrency(parseFloat(amount.replace(",", "."))) : "—"}</span>
+            </div>
+          ) : (
+            <Input
+              label="Importe total"
+              type="text"
+              inputMode="decimal"
+              pattern="[0-9]*[.,]?[0-9]*"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0.00"
+            />
+          )}
 
           <div className={styles.field}>
             <label className={styles.label}>Fecha (opcional)</label>
@@ -273,7 +295,7 @@ export function AddExpensePage() {
                       <Avatar name={m.name} size="sm" />
                       <span>{m.name}</span>
                     </button>
-                    {isActive && (
+                    {isActive && payerCount >= 2 && (
                       <input
                         type="text"
                         inputMode="decimal"
