@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useGroup } from "../hooks/useGroups";
 import { useExpenses } from "../hooks/useExpenses";
 import * as expensesService from "../services/expenses";
@@ -38,6 +38,14 @@ export function AddExpensePage() {
   const [expenseTime, setExpenseTime] = useState("");     // HH:MM
   const [category, setCategory] = useState("");
   const [payerAmounts, setPayerAmounts] = useState<Record<string, string>>({});
+
+  // Derived: payer stats — must be before any early return
+  const payerIds = Object.keys(payerAmounts).filter(
+    (id) => payerAmounts[id] !== "" && parseFloat(payerAmounts[id].replace(",", ".")) > 0
+  );
+  const payerCount = payerIds.length;
+  const payerSum = Math.round(payerIds.reduce((s, id) => s + parseFloat(payerAmounts[id].replace(",", ".")), 0) * 100) / 100;
+  const effectiveAmount = payerCount >= 2 ? payerSum : parseFloat((amount || "0").replace(",", "."));
 
   // Load existing expense for edit mode
   useEffect(() => {
@@ -186,24 +194,6 @@ export function AddExpensePage() {
     setCustomSplits((prev) => ({ ...prev, [memberId]: value }));
   };
 
-  const payerIds = Object.keys(payerAmounts).filter(
-    (id) => payerAmounts[id] !== "" && parseFloat(payerAmounts[id].replace(",", ".")) > 0
-  );
-  const payerCount = payerIds.length;
-
-  // computed: the real total when in multi-payer mode
-  const payerSum = Math.round(payerIds.reduce((s, id) => s + parseFloat(payerAmounts[id].replace(",", ".")), 0) * 100) / 100;
-  const effectiveAmount = payerCount >= 2 ? payerSum : parseFloat((amount || "0").replace(",", "."));
-  const lastPayerSum = useRef(0);
-
-  // Sync amount state with payer sum in multi-payer mode
-  useEffect(() => {
-    if (payerCount < 2 || isNaN(payerSum) || payerSum <= 0) return;
-    if (lastPayerSum.current === payerSum) return;
-    lastPayerSum.current = payerSum;
-    setAmount(String(payerSum).replace(".", ","));
-  }, [payerCount, payerSum]);
-
   const toggleMember = (id: string) => {
     setIncludedMembers((prev) => {
       const next = new Set(prev);
@@ -253,7 +243,7 @@ export function AddExpensePage() {
           {payerCount >= 2 ? (
             <div className={styles.amountFixed}>
               <span className={styles.label}>Importe total</span>
-              <span className={styles.amountFixedValue}>{parseFloat(amount.replace(",", ".")) ? formatCurrency(parseFloat(amount.replace(",", "."))) : "—"}</span>
+              <span className={styles.amountFixedValue}>{!isNaN(effectiveAmount) && effectiveAmount > 0 ? formatCurrency(effectiveAmount) : "—"}</span>
             </div>
           ) : (
             <Input
