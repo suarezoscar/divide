@@ -8,12 +8,14 @@ import { Card } from "../components/ui/Card";
 import { Avatar } from "../components/ui/Avatar";
 import { Modal } from "../components/ui/Modal";
 import { Input } from "../components/ui/Input";
+import { ConfirmDialog } from "../components/ui/ConfirmDialog";
 import { BalanceSummary } from "../components/balances/BalanceSummary";
 import { SettlementList } from "../components/balances/SettlementList";
 import { InviteSection } from "../components/groups/InviteSection";
 import { GroupDetailSkeleton } from "../components/ui/Skeleton";
 import { Plus, Receipt, Users, ArrowRightLeft, Share, Pencil, Trash2 } from "lucide-react";
 import { formatCurrency, formatDate } from "../utils/format";
+import { getCategory } from "../utils/categories";
 import type { Member } from "../types";
 import styles from "./GroupDetailPage.module.css";
 
@@ -22,7 +24,7 @@ type Tab = "expenses" | "balances" | "members";
 export function GroupDetailPage() {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
-  const { group, loading, updateMembers } = useGroup(groupId!);
+  const { group, loading, updateMembers, removeMember } = useGroup(groupId!);
   const { expenses, loading: expLoading, remove } = useExpenses(groupId!);
   const [tab, setTab] = useState<Tab>("expenses");
 
@@ -35,6 +37,10 @@ export function GroupDetailPage() {
   // Add member modal
   const [showAddMember, setShowAddMember] = useState(false);
   const [newMemberName, setNewMemberName] = useState("");
+
+  // Delete dialogs
+  const [deleteExpenseId, setDeleteExpenseId] = useState<string | null>(null);
+  const [deleteMemberId, setDeleteMemberId] = useState<string | null>(null);
 
   // Invite modal
   const [showInvite, setShowInvite] = useState(false);
@@ -126,7 +132,10 @@ export function GroupDetailPage() {
                     <Card key={exp.id} className={styles.expenseCard}>
                       {/* Top row: description + amount */}
                       <div className={styles.expenseTopRow}>
-                        <span className={styles.expenseDesc}>{exp.description}</span>
+                        <span className={styles.expenseDesc}>
+                          {(() => { const cat = getCategory(exp.category); return cat ? `${cat.emoji} ` : null; })()}
+                          {exp.description}
+                        </span>
                         <span className={styles.expenseAmount}>{formatCurrency(exp.amount)}</span>
                       </div>
 
@@ -134,7 +143,16 @@ export function GroupDetailPage() {
                       <div className={styles.expensePayerRow}>
                         <Avatar name={payer?.name ?? exp.paidBy} size="sm" />
                         <span className={styles.expenseMeta}>
-                          {payer?.name ?? exp.paidBy} · {formatDate(exp.date)}
+                          {(() => {
+                            if (exp.payers && exp.payers.length > 1) {
+                              const names = exp.payers.map(p => {
+                                const m = memberById.get(p.memberId);
+                                return `${m?.name ?? p.memberId} (${formatCurrency(p.amount)})`;
+                              }).join(", ");
+                              return `${names} · ${formatDate(exp.date)}`;
+                            }
+                            return `${payer?.name ?? exp.paidBy} · ${formatDate(exp.date)}`;
+                          })()}
                         </span>
                         <div className={styles.expenseActions}>
                           <button
@@ -149,7 +167,7 @@ export function GroupDetailPage() {
                             aria-label="Eliminar gasto"
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (confirm("¿Eliminar este gasto?")) remove(exp.id);
+                              setDeleteExpenseId(exp.id);
                             }}
                           >
                             <Trash2 size={15} />
@@ -210,6 +228,13 @@ export function GroupDetailPage() {
               <Card key={m.id} className={styles.memberCard}>
                 <Avatar name={m.name} size="md" />
                 <span className={styles.memberName}>{m.name}</span>
+                <button
+                  className={styles.actionBtn}
+                  aria-label={`Quitar a ${m.name}`}
+                  onClick={() => setDeleteMemberId(m.id)}
+                >
+                  <Trash2 size={15} />
+                </button>
               </Card>
             ))}
           </div>
@@ -234,6 +259,26 @@ export function GroupDetailPage() {
       )}
 
       <InviteSection groupId={groupId!} open={showInvite} onClose={() => setShowInvite(false)} />
+
+      <ConfirmDialog
+        open={!!deleteExpenseId}
+        onClose={() => setDeleteExpenseId(null)}
+        onConfirm={() => { if (deleteExpenseId) remove(deleteExpenseId); }}
+        title="¿Eliminar este gasto?"
+        message="Se eliminará el gasto y se recalcularán los balances. Esta acción no se puede deshacer."
+        confirmLabel="Eliminar gasto"
+        variant="danger"
+      />
+
+      <ConfirmDialog
+        open={!!deleteMemberId}
+        onClose={() => setDeleteMemberId(null)}
+        onConfirm={() => { if (deleteMemberId) removeMember(deleteMemberId); }}
+        title="¿Quitar a este miembro?"
+        message="El miembro se eliminará del grupo actual. Los gastos anteriores se conservan en el historial."
+        confirmLabel="Quitar miembro"
+        variant="danger"
+      />
     </div>
   );
 }

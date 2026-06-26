@@ -23,14 +23,21 @@ export interface Split {
   amount: number;
 }
 
+export interface Payer {
+  memberId: string;
+  amount: number;
+}
+
 export interface Expense {
   id: string;
   groupId: string;
   description: string;
   amount: number;
-  paidBy: string; // member id
+  paidBy: string;
+  payers?: Payer[];
   date: Timestamp;
   splits: Split[];
+  category?: string;
 }
 
 export interface Settlement {

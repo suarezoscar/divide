@@ -26,6 +26,50 @@
   gap: 8px;
 }
 
+.dateRow {
+  display: flex;
+  gap: 10px;
+}
+
+.dateRow > * {
+  flex: 1;
+}
+
+.categoryList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.categoryChip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 12px;
+  background: #fff;
+  font-size: 13px;
+  font-family: inherit;
+  color: #4B5563;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.categoryChip:hover {
+  border-color: #07819C;
+}
+
+.categoryChip:active {
+  transform: scale(0.97);
+}
+
+.categoryActive {
+  border-color: #07819C;
+  background: rgba(7, 129, 156, 0.06);
+  color: #07819C;
+}
+
 .label {
   font-size: 14px;
   font-weight: 500;
@@ -36,6 +80,12 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.payerItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .payerBtn {
@@ -66,6 +116,29 @@
   border-color: #07819C;
   background: rgba(7, 129, 156, 0.06);
   color: #07819C;
+}
+
+.payerInput {
+  width: 75px;
+  padding: 6px 8px;
+  font-size: 14px;
+  font-family: inherit;
+  text-align: right;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 10px;
+  outline: none;
+  background: #fff;
+}
+
+.payerInput:focus {
+  border-color: #07819C;
+}
+
+.payerTotal {
+  font-size: 13px;
+  color: #4B5563;
+  text-align: right;
+  padding-top: 4px;
 }
 
 /* Split section */

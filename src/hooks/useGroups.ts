@@ -57,5 +57,14 @@ export function useGroup(groupId: string) {
     setGroup((prev) => (prev ? { ...prev, members } : null));
   };
 
-  return { group, loading, updateMembers };
+  const removeMember = async (memberId: string) => {
+    await groupsService.removeMemberFromGroup(groupId, memberId);
+    setGroup((prev) =>
+      prev
+        ? { ...prev, members: prev.members.filter((m) => m.id !== memberId) }
+        : null
+    );
+  };
+
+  return { group, loading, updateMembers, removeMember };
 }

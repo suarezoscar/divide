@@ -72,6 +72,14 @@ export async function updateGroupMembers(groupId: string, members: Member[]): Pr
   await updateDoc(doc(db, "groups", groupId), { members });
 }
 
+export async function removeMemberFromGroup(groupId: string, memberId: string): Promise<void> {
+  const snap = await getDoc(doc(db, "groups", groupId));
+  const data = snap.data();
+  if (!data) return;
+  const members: Member[] = (data.members ?? []).filter((m: Member) => m.id !== memberId);
+  await updateDoc(doc(db, "groups", groupId), { members });
+}
+
 export async function addUserToGroup(
   groupId: string,
   userId: string,

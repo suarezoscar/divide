@@ -27,8 +27,14 @@ export function computeBalances(
 
   // Process expenses
   for (const exp of expenses) {
-    // The payer paid the full amount
-    init(exp.paidBy).paid += exp.amount;
+    // Use payers if available, fallback to old paidBy
+    if (exp.payers && exp.payers.length > 0) {
+      for (const p of exp.payers) {
+        init(p.memberId).paid += p.amount;
+      }
+    } else {
+      init(exp.paidBy).paid += exp.amount;
+    }
 
     // Each split adds to what members owe
     for (const split of exp.splits) {

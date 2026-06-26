@@ -7,7 +7,8 @@ import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
 import { Avatar } from "../components/ui/Avatar";
-import type { Split } from "../types";
+import { CATEGORIES } from "../utils/categories";
+import type { Split, Payer } from "../types";
 import styles from "./AddExpensePage.module.css";
 
 type SplitMode = "even" | "custom";
@@ -29,6 +30,10 @@ export function AddExpensePage() {
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [expenseDate, setExpenseDate] = useState("");     // YYYY-MM-DD
+  const [expenseTime, setExpenseTime] = useState("");     // HH:MM
+  const [category, setCategory] = useState("");
+  const [payerAmounts, setPayerAmounts] = useState<Record<string, string>>({});
 
   // Load existing expense for edit mode
   useEffect(() => {
@@ -38,6 +43,19 @@ export function AddExpensePage() {
       setDescription(exp.description);
       setAmount(String(exp.amount).replace(".", ","));
       setPaidBy(exp.paidBy);
+      // Pre-fill date and time
+      const d = exp.date.toDate();
+      setExpenseDate(d.toISOString().slice(0, 10));
+      setExpenseTime(d.toTimeString().slice(0, 5));
+      setCategory(exp.category ?? "");
+      // Pre-fill payer amounts
+      if (exp.payers && exp.payers.length > 0) {
+        const pa: Record<string, string> = {};
+        for (const p of exp.payers) {
+          pa[p.memberId] = String(p.amount).replace(".", ",");
+        }
+        setPayerAmounts(pa);
+      }
       if (exp.splits.length > 0) {
         // Detect split mode: even if all splits are equal
         const firstAmount = exp.splits[0].amount;
@@ -76,7 +94,25 @@ export function AddExpensePage() {
       return;
     }
     if (!includedMembers.has(paidBy)) {
-      setError("El pagador debe estar incluido en el gasto");
+      setError("El pagador principal debe estar incluido en el gasto");
+      return;
+    }
+
+    // Build payers from amounts
+    const payers: Payer[] = [];
+    for (const m of group.members) {
+      const val = parseFloat((payerAmounts[m.id] || "").replace(",", "."));
+      if (!isNaN(val) && val > 0) {
+        payers.push({ memberId: m.id, amount: val });
+      }
+    }
+    if (payers.length === 0) {
+      setError("Al menos una persona debe haber pagado");
+      return;
+    }
+    const totalPaid = payers.reduce((s, p) => s + p.amount, 0);
+    if (Math.abs(totalPaid - numAmount) > 0.01) {
+      setError(`La suma pagada (${totalPaid.toFixed(2)}) debe ser igual al total (${numAmount.toFixed(2)})`);
       return;
     }
 
@@ -107,10 +143,15 @@ export function AddExpensePage() {
 
     setSubmitting(true);
     try {
+      const date = expenseDate
+        ? new Date(`${expenseDate}T${expenseTime || "12:00"}`)
+        : undefined;
+      const cat = category || undefined;
+      const firstPayer = payers[0]?.memberId ?? paidBy;
       if (isEditing) {
-        await update(expenseId!, description.trim(), numAmount, paidBy, splits);
+        await update(expenseId!, description.trim(), numAmount, firstPayer, splits, date, cat);
       } else {
-        await add(description.trim(), numAmount, paidBy, splits);
+        await add(description.trim(), numAmount, firstPayer, splits, date, cat, payers);
       }
       navigate(`/group/${groupId}`);
     } catch {
@@ -180,17 +221,95 @@ export function AddExpensePage() {
           />
 
           <div className={styles.field}>
-            <label className={styles.label}>Pagado por</label>
+            <label className={styles.label}>Fecha (opcional)</label>
+            <div className={styles.dateRow}>
+              <Input
+                type="date"
+                value={expenseDate}
+                onChange={(e) => setExpenseDate(e.target.value)}
+              />
+              <Input
+                type="time"
+                value={expenseTime}
+                onChange={(e) => setExpenseTime(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label}>¿Quién pagó?</label>
             <div className={styles.payerList}>
-              {group.members.map((m) => (
+              {group.members.map((m) => {
+                const val = payerAmounts[m.id] || "";
+                const isActive = val !== "" && parseFloat(val.replace(",", ".")) > 0;
+                return (
+                  <div key={m.id} className={styles.payerItem}>
+                    <button
+                      type="button"
+                      className={`${styles.payerBtn} ${isActive ? styles.payerActive : ""}`}
+                      onClick={() => {
+                        if (isActive) {
+                          setPayerAmounts((prev) => {
+                            const next = { ...prev };
+                            delete next[m.id];
+                            return next;
+                          });
+                        } else {
+                          setPayerAmounts((prev) => ({ ...prev, [m.id]: amount }));
+                        }
+                      }}
+                    >
+                      <Avatar name={m.name} size="sm" />
+                      <span>{m.name}</span>
+                    </button>
+                    {isActive && (
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        pattern="[0-9]*[.,]?[0-9]*"
+                        className={styles.payerInput}
+                        value={val}
+                        onChange={(e) => setPayerAmounts((prev) => ({ ...prev, [m.id]: e.target.value }))}
+                        placeholder="0.00"
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            {(() => {
+              const tp = group.members.reduce((s, m) => s + parseFloat((payerAmounts[m.id] || "0").replace(",", ".") || "0"), 0);
+              if (tp > 0) {
+                const mismatch = Math.abs(tp - parseFloat((amount || "0").replace(",", "."))) > 0.01;
+                return (
+                  <div className={styles.payerTotal}>
+                    Total pagado: <strong>{tp.toFixed(2)}</strong>
+                    {mismatch && <span className={styles.splitMismatch}> (no coincide)</span>}
+                  </div>
+                );
+              }
+              return null;
+            })()}
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label}>Categoría</label>
+            <div className={styles.categoryList}>
+              <button
+                type="button"
+                className={`${styles.categoryChip} ${!category ? styles.categoryActive : ""}`}
+                onClick={() => setCategory("")}
+              >
+                Sin
+              </button>
+              {CATEGORIES.map((c) => (
                 <button
-                  key={m.id}
+                  key={c.id}
                   type="button"
-                  className={`${styles.payerBtn} ${paidBy === m.id ? styles.payerActive : ""}`}
-                  onClick={() => setPaidBy(m.id)}
+                  className={`${styles.categoryChip} ${category === c.id ? styles.categoryActive : ""}`}
+                  onClick={() => setCategory(c.id)}
                 >
-                  <Avatar name={m.name} size="sm" />
-                  <span>{m.name}</span>
+                  {c.emoji} {c.label}
                 </button>
               ))}
             </div>

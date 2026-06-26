@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
+import { Timestamp } from "firebase/firestore";
 import * as expensesService from "../services/expenses";
-import type { Expense, Split } from "../types";
+import type { Expense, Split, Payer } from "../types";
 
 export function useExpenses(groupId: string) {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -21,9 +22,12 @@ export function useExpenses(groupId: string) {
     description: string,
     amount: number,
     paidBy: string,
-    splits: Split[]
+    splits: Split[],
+    date?: Date,
+    category?: string,
+    payers?: Payer[]
   ) => {
-    const e = await expensesService.createExpense(groupId, description, amount, paidBy, splits);
+    const e = await expensesService.createExpense(groupId, description, amount, paidBy, splits, date, category, payers);
     setExpenses((prev) => [e, ...prev]);
     return e;
   };
@@ -38,12 +42,14 @@ export function useExpenses(groupId: string) {
     description: string,
     amount: number,
     paidBy: string,
-    splits: Split[]
+    splits: Split[],
+    date?: Date,
+    category?: string
   ) => {
-    await expensesService.updateExpense(expenseId, { description, amount, paidBy, splits });
+    await expensesService.updateExpense(expenseId, { description, amount, paidBy, splits, category, date: date ? Timestamp.fromDate(date) : undefined } as any);
     setExpenses((prev) =>
       prev.map((e) =>
-        e.id === expenseId ? { ...e, description, amount, paidBy, splits } : e
+        e.id === expenseId ? { ...e, description, amount, paidBy, splits, category } : e
       )
     );
   };

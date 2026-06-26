@@ -12,7 +12,7 @@ import {
   type DocumentData,
 } from "firebase/firestore";
 import { db } from "./firebase";
-import type { Expense, Split } from "../types";
+import type { Expense, Split, Payer } from "../types";
 
 function docToExpense(id: string, data: DocumentData): Expense {
   return {
@@ -20,9 +20,11 @@ function docToExpense(id: string, data: DocumentData): Expense {
     groupId: data.groupId,
     description: data.description,
     amount: data.amount,
-    paidBy: data.paidBy,
+    paidBy: data.paidBy ?? data.payers?.[0]?.memberId ?? "",
+    payers: data.payers ?? (data.paidBy ? [{ memberId: data.paidBy, amount: data.amount }] : undefined),
     date: data.date,
     splits: data.splits ?? [],
+    category: data.category,
   };
 }
 
@@ -31,7 +33,10 @@ export async function createExpense(
   description: string,
   amount: number,
   paidBy: string,
-  splits: Split[]
+  splits: Split[],
+  date?: Date,
+  category?: string,
+  payers?: Payer[]
 ): Promise<Expense> {
   const ref = await addDoc(collection(db, "expenses"), {
     groupId,
@@ -39,7 +44,9 @@ export async function createExpense(
     amount,
     paidBy,
     splits,
-    date: Timestamp.now(),
+    payers: payers ?? undefined,
+    category: category ?? null,
+    date: date ? Timestamp.fromDate(date) : Timestamp.now(),
   });
   return {
     id: ref.id,
@@ -48,7 +55,9 @@ export async function createExpense(
     amount,
     paidBy,
     splits,
-    date: Timestamp.now(),
+    payers,
+    category,
+    date: date ? Timestamp.fromDate(date) : Timestamp.now(),
   };
 }
 
