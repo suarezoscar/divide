@@ -12,7 +12,8 @@ export function formatCurrency(amount: number, signed = false): string {
 }
 
 export function formatDate(date: { toDate?: () => Date } | Date): string {
-  const d = "toDate" in date && typeof date.toDate === "function" ? date.toDate() : date;
+  if (!date) return "";
+  const d = "toDate" in date && typeof (date as any).toDate === "function" ? (date as any).toDate() : date;
   if (!(d instanceof Date) || isNaN(d.getTime())) return "";
   return new Intl.DateTimeFormat("es-ES", {
     day: "numeric",

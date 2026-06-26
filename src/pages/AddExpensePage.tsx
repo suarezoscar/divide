@@ -106,10 +106,7 @@ export function AddExpensePage() {
       setError("Al menos un miembro debe participar en el gasto");
       return;
     }
-    if (!includedMembers.has(paidBy)) {
-      setError("El pagador principal debe estar incluido en el gasto");
-      return;
-    }
+    if (!includedMembers.has(paidBy)) return;
 
     // Build payers from amounts
     const payers: Payer[] = [];
