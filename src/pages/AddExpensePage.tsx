@@ -222,11 +222,13 @@ export function AddExpensePage() {
           </div>
 
           <div className={styles.splitList}>
-            <button type="button" className={styles.toggleAll} onClick={toggleAllMembers}>
-              {group.members.every((m) => includedMembers.has(m.id))
-                ? "Excluir todos"
-                : "Incluir todos"}
-            </button>
+            <div className={styles.toggleAllPill}>
+              <button type="button" onClick={toggleAllMembers}>
+                {group.members.every((m) => includedMembers.has(m.id))
+                  ? "Excluir todos"
+                  : "Incluir todos"}
+              </button>
+            </div>
 
             {group.members.map((m) => {
               const isIncluded = includedMembers.has(m.id);
@@ -243,7 +245,7 @@ export function AddExpensePage() {
               return (
                 <div
                   key={m.id}
-                  className={`${styles.splitRow} ${!isIncluded ? styles.splitExcluded : ""}`}
+                  className={`${styles.splitRowCard} ${!isIncluded ? styles.splitRowExcluded : ""}`}
                 >
                   <button
                     type="button"
@@ -264,23 +266,29 @@ export function AddExpensePage() {
                       </svg>
                     )}
                   </button>
-                  <Avatar name={m.name} size="sm" />
-                  <span className={styles.splitMemberName}>{m.name}</span>
-                  {!isIncluded ? (
-                    <span className={styles.excludedLabel}>Excluido</span>
-                  ) : splitMode === "even" ? (
-                    <span className={styles.splitValue}>{evenAmount}</span>
-                  ) : (
-                    <input
-                      type="number"
-                      className={styles.splitInput}
-                      value={customSplits[m.id] || ""}
-                      onChange={(e) => updateCustomSplit(m.id, e.target.value)}
-                      placeholder="0.00"
-                      step="0.01"
-                      min="0"
-                    />
-                  )}
+                  <div className={styles.splitRowContent}>
+                    <div className={styles.splitMemberInfo}>
+                      <Avatar name={m.name} size="sm" />
+                      <span className={`${styles.splitMemberName} ${!isIncluded ? styles.splitMemberExcluded : ""}`}>
+                        {m.name}
+                      </span>
+                    </div>
+                    {!isIncluded ? (
+                      <span className={styles.excludedLabel}>Excluido</span>
+                    ) : splitMode === "even" ? (
+                      <span className={styles.splitValue}>{evenAmount}</span>
+                    ) : (
+                      <input
+                        type="number"
+                        className={styles.splitInput}
+                        value={customSplits[m.id] || ""}
+                        onChange={(e) => updateCustomSplit(m.id, e.target.value)}
+                        placeholder="0.00"
+                        step="0.01"
+                        min="0"
+                      />
+                    )}
+                  </div>
                 </div>
               );
             })}
