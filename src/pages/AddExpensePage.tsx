@@ -171,7 +171,8 @@ export function AddExpensePage() {
         await update(expenseId!, description.trim(), numAmount, firstPayer, splits, date, cat, payers);
         showToast("Gasto actualizado", "success");
       } else {
-        await add(description.trim(), numAmount, firstPayer, splits, date, cat, payers);
+        const created = await add(description.trim(), numAmount, firstPayer, splits, date, cat, payers);
+        sessionStorage.setItem(`lastAdded-${groupId}`, created.id);
         showToast("Gasto añadido", "success");
       }
       navigate(`/group/${groupId}`);

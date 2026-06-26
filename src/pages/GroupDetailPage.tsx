@@ -31,7 +31,13 @@ export function GroupDetailPage() {
   const { expenses, loading: expLoading, remove, changes, clearChanges } = useExpenses(groupId!);
   const { notify, permission, request } = useNotifications();
   const [notifsOn, setNotifsOn] = useState(() => localStorage.getItem(`notif-${groupId}`) !== "off");
-  const localActionIds = useRef<Set<string>>(new Set());
+  const pendingNotifs = useRef<any[]>([]);
+  const notifTimer = useRef<ReturnType<typeof setTimeout>>(null);
+
+  // Member maps — built once (declared early for notification effect)
+  const memberNames = new Map<string, string>();
+  const memberById = new Map(group?.members.map((m) => [m.id, m]) ?? []);
+  group?.members.forEach((m) => memberNames.set(m.id, m.name));
 
   // Toggle notifications
   const toggleNotifs = async () => {
@@ -44,43 +50,52 @@ export function GroupDetailPage() {
     localStorage.setItem(`notif-${groupId}`, next ? "on" : "off");
   };
 
-  // Watch for remote changes and notify
+  // Watch for remote changes and notify — debounced, only 'added'
   useEffect(() => {
     if (!changes || !notifsOn || permission !== "granted") return;
 
-    for (const exp of changes.added) {
-      if (localActionIds.current.has(exp.id)) {
-        localActionIds.current.delete(exp.id);
-        continue;
-      }
-      const payer = memberById.get(exp.paidBy);
-      notify(
-        `Nuevo gasto en ${group?.name}`,
-        `${payer?.name ?? exp.paidBy} añadió "${exp.description}" (${formatCurrency(exp.amount)})`
-      );
+    const filterSelf = sessionStorage.getItem(`lastAdded-${groupId}`);
+    const remoteAdded = filterSelf
+      ? changes.added.filter((e) => e.id !== filterSelf)
+      : changes.added;
+
+    if (remoteAdded.length === 0) {
+      clearChanges();
+      return;
     }
 
-    for (const exp of changes.modified) {
-      const payer = memberById.get(exp.paidBy);
-      notify(
-        `Gasto editado en ${group?.name}`,
-        `${payer?.name ?? exp.paidBy} editó "${exp.description}"`
-      );
-    }
-
-    for (const _id of changes.removed) {
-      notify(`Gasto eliminado en ${group?.name}`, "Se eliminó un gasto del grupo");
-    }
-
+    // Accumulate pending notifications
+    pendingNotifs.current.push(...remoteAdded);
     clearChanges();
-  }, [changes, notifsOn, permission, notify, group, clearChanges]);
+
+    // Debounce: wait 3s to batch notifications
+    if (notifTimer.current) clearTimeout(notifTimer.current);
+    notifTimer.current = setTimeout(() => {
+      const batch = pendingNotifs.current;
+      pendingNotifs.current = [];
+      if (batch.length === 0) return;
+
+      if (batch.length === 1) {
+        const exp = batch[0];
+        const payer = memberById.get(exp.paidBy);
+        notify(
+          `Nuevo gasto en ${group?.name}`,
+          `${payer?.name ?? exp.paidBy} añadió "${exp.description}" (${formatCurrency(exp.amount)})`
+        );
+      } else {
+        notify(
+          `${batch.length} gastos nuevos en ${group?.name}`,
+          batch.map((e) => `• ${e.description}`).join("\n")
+        );
+      }
+    }, 3000);
+
+    return () => {
+      if (notifTimer.current) clearTimeout(notifTimer.current);
+    };
+  }, [changes, notifsOn, permission, notify, group, groupId, clearChanges, memberById]);
 
   const [tab, setTab] = useState<Tab>("expenses");
-
-  // Member maps — built once
-  const memberNames = new Map<string, string>();
-  const memberById = new Map(group?.members.map((m) => [m.id, m]) ?? []);
-  group?.members.forEach((m) => memberNames.set(m.id, m.name));
 
   const { balances, debts, addSettlement } = useBalances(groupId!, expenses, memberNames);
 
