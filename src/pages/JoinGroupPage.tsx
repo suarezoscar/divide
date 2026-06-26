@@ -95,7 +95,7 @@ export function JoinGroupPage() {
   const alreadyInGroup = group.userIds.includes(user.uid);
 
   if (alreadyInGroup) {
-    navigate(`/group/${groupId}`, { replace: true });
+    navigate(`/group/${group.id}`, { replace: true });
     return null;
   }
 
@@ -113,12 +113,12 @@ export function JoinGroupPage() {
     setError("");
     try {
       await groupsService.addUserToGroup(
-        groupId!,
+        group.id,
         user.uid,
         claimExisting ? selectedMemberId : memberName.trim(),
         claimExisting
       );
-      navigate(`/group/${groupId}`, { replace: true });
+      navigate(`/group/${group.id}`, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al unirse al grupo");
       setJoining(false);

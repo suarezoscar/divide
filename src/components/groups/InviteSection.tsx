@@ -18,9 +18,11 @@ export function InviteSection({ groupId, open, onClose }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [copied, setCopied] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
-  const [inviteCode, setInviteCode] = useState<string>("");
+  const [inviteCode, setInviteCode] = useState<string | null>(null);  // null = still loading
 
-  const joinUrl = `${BASE_URL}/join/${groupId}`;
+  const joinUrl = inviteCode
+    ? `${BASE_URL}/join/${inviteCode}`
+    : `${BASE_URL}/join/${groupId}`;
 
   // Generate invite code when opened
   const fetchCode = useCallback(async () => {
