@@ -192,7 +192,7 @@ export function AddExpensePage() {
   const payerCount = payerIds.length;
 
   // computed: the real total when in multi-payer mode
-  const payerSum = payerIds.reduce((s, id) => s + parseFloat(payerAmounts[id].replace(",", ".")), 0);
+  const payerSum = Math.round(payerIds.reduce((s, id) => s + parseFloat(payerAmounts[id].replace(",", ".")), 0) * 100) / 100;
   const effectiveAmount = payerCount >= 2 ? payerSum : parseFloat((amount || "0").replace(",", "."));
   const lastPayerSum = useRef(0);
 
