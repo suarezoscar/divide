@@ -35,7 +35,7 @@ export function AddExpensePage() {
     e.preventDefault();
     setError("");
 
-    const numAmount = parseFloat(amount);
+    const numAmount = parseFloat(amount.replace(",", "."));
     if (!description.trim() || isNaN(numAmount) || numAmount <= 0) {
       setError("Completa todos los campos");
       return;
@@ -137,12 +137,12 @@ export function AddExpensePage() {
 
           <Input
             label="Importe total"
-            type="number"
+            type="text"
+            inputMode="decimal"
+            pattern="[0-9]*[.,]?[0-9]*"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             placeholder="0.00"
-            min="0"
-            step="0.01"
           />
 
           <div className={styles.field}>
@@ -200,7 +200,7 @@ export function AddExpensePage() {
                 splitMode === "even" && isIncluded
                   ? (() => {
                       const count = includedMembers.size;
-                      const val = parseFloat(amount || "0");
+                      const val = parseFloat((amount || "0").replace(",", "."));
                       const sa = Math.round((val / count) * 100) / 100;
                       return isNaN(sa) ? "—" : sa.toFixed(2);
                     })()
@@ -255,7 +255,7 @@ export function AddExpensePage() {
           {splitMode === "custom" && (
             <div className={styles.customTotal}>
               Total splits: <strong>{totalCustom.toFixed(2)}</strong>
-              {Math.abs(totalCustom - parseFloat(amount || "0")) > 0.01 && (
+              {Math.abs(totalCustom - parseFloat((amount || "0").replace(",", "."))) > 0.01 && (
                 <span className={styles.splitMismatch}> (no coincide)</span>
               )}
             </div>
