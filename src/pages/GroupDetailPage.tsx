@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useGroup } from "../hooks/useGroups";
 import { useAuth } from "../hooks/useAuth";
 import { useExpenses } from "../hooks/useExpenses";
@@ -40,6 +40,18 @@ export function GroupDetailPage() {
   const memberNames = new Map<string, string>();
   const memberById = new Map(group?.members.map((m) => [m.id, m]) ?? []);
   group?.members.forEach((m) => memberNames.set(m.id, m.name));
+
+  // Members involved in at least one expense (cannot be removed)
+  const expenseMemberIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const exp of expenses) {
+      ids.add(exp.paidBy);
+      for (const split of exp.splits) {
+        ids.add(split.memberId);
+      }
+    }
+    return ids;
+  }, [expenses]);
 
   // Toggle notifications
   const toggleNotifs = async () => {
@@ -308,19 +320,24 @@ export function GroupDetailPage() {
       {tab === "members" && (
         <div className={styles.tabContent}>
           <div className={styles.memberList}>
-            {group.members.map((m) => (
-              <Card key={m.id} className={styles.memberCard}>
-                <Avatar name={m.name} size="md" />
-                <span className={styles.memberName}>{m.name}</span>
-                <button
-                  className={styles.actionBtn}
-                  aria-label={`Quitar a ${m.name}`}
-                  onClick={() => setDeleteMemberId(m.id)}
-                >
-                  <Trash2 size={15} />
-                </button>
-              </Card>
-            ))}
+            {group.members.map((m) => {
+              const isInExpense = expenseMemberIds.has(m.id);
+              return (
+                <Card key={m.id} className={styles.memberCard}>
+                  <Avatar name={m.name} size="md" />
+                  <span className={styles.memberName}>{m.name}</span>
+                  <button
+                    className={`${styles.actionBtn} ${isInExpense ? styles.actionBtnDisabled : ""}`}
+                    aria-label={isInExpense ? `${m.name} no se puede quitar porque está en gastos` : `Quitar a ${m.name}`}
+                    title={isInExpense ? "No se puede eliminar: está involucrado en uno o más gastos" : undefined}
+                    disabled={isInExpense}
+                    onClick={() => !isInExpense && setDeleteMemberId(m.id)}
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </Card>
+              );
+            })}
           </div>
           <Button variant="secondary" size="sm" onClick={() => setShowAddMember(true)}>
             <Plus size={14} /> Añadir miembro

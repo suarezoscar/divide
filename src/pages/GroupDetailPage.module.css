@@ -179,6 +179,16 @@
   background: #FEF2F2;
 }
 
+.actionBtnDisabled {
+  opacity: 0.35;
+  cursor: not-allowed !important;
+}
+
+.actionBtnDisabled:hover {
+  color: #9CA3AF !important;
+  background: transparent !important;
+}
+
 .participantBadge {
   display: inline-flex;
   align-self: flex-start;
