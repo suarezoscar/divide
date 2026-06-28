@@ -9,6 +9,7 @@ import { Card } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
 import { Avatar } from "../components/ui/Avatar";
 import { CATEGORIES } from "../utils/categories";
+import { detectCategory } from "../utils/categoryDetection";
 import { showToast } from "../components/ui/Toast";
 import { friendlyError } from "../utils/errors";
 import { Skeleton } from "../components/ui/Skeleton";
@@ -36,6 +37,7 @@ export function AddExpensePage() {
   const [expenseDate, setExpenseDate] = useState("");
   const [expenseTime, setExpenseTime] = useState("");
   const [category, setCategory] = useState("other");
+  const [categoryManuallySet, setCategoryManuallySet] = useState(false);
 
   // Load existing expense for edit mode
   useEffect(() => {
@@ -49,6 +51,7 @@ export function AddExpensePage() {
       setExpenseDate(d.toISOString().slice(0, 10));
       setExpenseTime(d.toTimeString().slice(0, 5));
       setCategory(exp.category ?? "other");
+      setCategoryManuallySet(true);
       if (exp.splits.length > 0) {
         const firstAmount = exp.splits[0].amount;
         const allEven = exp.splits.every((s) => equal(eur(s.amount), eur(firstAmount)))
@@ -153,7 +156,17 @@ export function AddExpensePage() {
           <Input
             label="Descripción"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => {
+              setDescription(e.target.value);
+              if (!categoryManuallySet) {
+                const detected = detectCategory(e.target.value);
+                setCategory(detected ?? "other");
+              }
+              if (!e.target.value.trim()) {
+                setCategory("other");
+                setCategoryManuallySet(false);
+              }
+            }}
             placeholder="Cena en el italiano"
           />
 
@@ -200,7 +213,7 @@ export function AddExpensePage() {
                   key={c.id}
                   type="button"
                   className={`${styles.categoryChip} ${category === c.id ? styles.categoryActive : ""}`}
-                  onClick={() => setCategory(c.id)}
+                  onClick={() => { setCategory(c.id); setCategoryManuallySet(true); }}
                 >
                   {c.emoji} {c.label}
                 </button>
