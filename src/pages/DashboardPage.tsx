@@ -11,6 +11,7 @@ import { DashboardSkeleton } from "../components/ui/Skeleton";
 import { showToast } from "../components/ui/Toast";
 import { friendlyError } from "../utils/errors";
 import { Plus, Users, LogIn } from "lucide-react";
+import { getGroupColor } from "../utils/groupColors";
 import type { Member } from "../types";
 import styles from "./DashboardPage.module.css";
 
@@ -102,6 +103,7 @@ export function DashboardPage() {
               key={g.id}
               className={styles.groupCard}
               onClick={() => navigate(`/group/${g.id}`)}
+              style={{ borderLeft: `3px solid ${getGroupColor(g.name)}` }}
             >
               <div className={styles.groupInfo}>
                 <h3>{g.name}</h3>

@@ -100,6 +100,24 @@
   gap: 10px;
 }
 
+.expenseList > *:nth-child(1) { animation-delay: 0ms; }
+.expenseList > *:nth-child(2) { animation-delay: 40ms; }
+.expenseList > *:nth-child(3) { animation-delay: 80ms; }
+.expenseList > *:nth-child(4) { animation-delay: 120ms; }
+.expenseList > *:nth-child(5) { animation-delay: 160ms; }
+.expenseList > *:nth-child(n+6) { animation-delay: 200ms; }
+
+@keyframes cardEnter {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .expenseList > * {
+    animation: cardEnter 0.25s cubic-bezier(0.25, 1, 0.5, 1) both;
+  }
+}
+
 .expenseCard:hover {
   transform: scale(1.005);
   box-shadow: 0 2px 8px rgba(7,129,156,0.06);

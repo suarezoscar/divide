@@ -1,0 +1,73 @@
+.donutWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.donut {
+  width: 180px;
+  height: 180px;
+}
+
+.donutTotal {
+  font-size: 16px;
+  font-weight: 700;
+  fill: #1A1A2E;
+}
+
+.donutLabel {
+  font-size: 11px;
+  fill: #6B7280;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legendName {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+  color: #1A1A2E;
+}
+
+.legendAmount {
+  font-weight: 600;
+  color: #4B5563;
+}
+
+.legendPct {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9CA3AF;
+  width: 32px;
+  text-align: right;
+}
+
+@media (max-width: 380px) {
+  .donut {
+    width: 140px;
+    height: 140px;
+  }
+}

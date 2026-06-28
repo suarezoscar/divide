@@ -13,6 +13,7 @@ import { Input } from "../components/ui/Input";
 import { ConfirmDialog } from "../components/ui/ConfirmDialog";
 import { BalanceSummary } from "../components/balances/BalanceSummary";
 import { SettlementList } from "../components/balances/SettlementList";
+import { ExpenseDonut } from "../components/balances/ExpenseDonut";
 import { InviteSection } from "../components/groups/InviteSection";
 import { GroupDetailSkeleton } from "../components/ui/Skeleton";
 import { Skeleton } from "../components/ui/Skeleton";
@@ -20,6 +21,7 @@ import { showToast } from "../components/ui/Toast";
 import { Plus, Receipt, Users, ArrowRightLeft, Share, Pencil, Trash2, Bell, BellOff } from "lucide-react";
 import { formatCurrency, formatDate } from "../utils/format";
 import { getCategory } from "../utils/categories";
+import { getGroupColor, getGroupColorRgba } from "../utils/groupColors";
 import type { Member } from "../types";
 import styles from "./GroupDetailPage.module.css";
 
@@ -157,10 +159,13 @@ export function GroupDetailPage() {
     { key: "members", label: "Miembros", icon: <Users size={16} /> },
   ];
 
+  const groupColor = getGroupColor(group.name);
+  const groupColorLight = getGroupColorRgba(group.name, 0.08);
+
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <h1>{group.name}</h1>
+        <h1 style={{ borderBottom: `2px solid ${groupColor}`, paddingBottom: 4 }}>{group.name}</h1>
         <div style={{ display: "flex", gap: 8 }}>
           <Button size="sm" variant="ghost" onClick={toggleNotifs} aria-label={notifsOn ? "Desactivar notificaciones" : "Activar notificaciones"}>
             {notifsOn ? <Bell size={16} /> : <BellOff size={16} />}
@@ -212,7 +217,7 @@ export function GroupDetailPage() {
           ) : (
             <>
               {/* Summary bar */}
-              <div className={styles.summaryBar}>
+              <div className={styles.summaryBar} style={{ background: groupColorLight, borderColor: getGroupColorRgba(group.name, 0.15) }}>
                 <span className={styles.summaryCount}>{expenses.length} gasto{expenses.length !== 1 ? "s" : ""}</span>
                 <span className={styles.summaryTotal}>
                   Total acumulado: <strong>{formatCurrency(expenses.reduce((s, e) => s + e.amount, 0))}</strong>
@@ -305,6 +310,10 @@ export function GroupDetailPage() {
       {/* Balances tab */}
       {tab === "balances" && (
         <div className={styles.tabContent}>
+          <ExpenseDonut
+            balances={balances.map((b) => ({ memberId: b.memberId, memberName: b.memberName, amount: b.owed }))}
+            total={expenses.reduce((s, e) => s + e.amount, 0)}
+          />
           <BalanceSummary balances={balances} />
           <SettlementList
             debts={debts}
