@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { Modal } from "./Modal";
 
 describe("Modal", () => {
@@ -18,11 +18,11 @@ describe("Modal", () => {
     expect(screen.getByText("My Modal")).toBeInTheDocument();
   });
 
-  it("calls onClose when pressing Escape", () => {
+  it("calls onClose when pressing Escape", async () => {
     const fn = vi.fn();
     render(<Modal open={true} onClose={fn}>Content</Modal>);
     fireEvent.keyDown(document, { key: "Escape" });
-    expect(fn).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(fn).toHaveBeenCalledTimes(1));
   });
 
   it("has role=dialog and aria-modal", () => {

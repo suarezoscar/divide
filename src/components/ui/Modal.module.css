@@ -11,6 +11,10 @@
   animation: fadeIn 0.15s ease;
 }
 
+.overlayExiting {
+  animation: fadeOut 0.15s ease forwards;
+}
+
 .modal {
   background: #fff;
   border-radius: 20px;
@@ -20,6 +24,10 @@
   overflow-y: auto;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   animation: slideUp 0.2s ease;
+}
+
+.modalExiting {
+  animation: slideDown 0.15s ease forwards;
 }
 
 .header {
@@ -73,6 +81,16 @@
 @keyframes slideUp {
   from { transform: translateY(12px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(12px); opacity: 0; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
 /* Mobile: full-width modal */
