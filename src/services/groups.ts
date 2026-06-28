@@ -34,6 +34,7 @@ export async function createGroup(
   description: string,
   members: Member[]
 ): Promise<Group> {
+  if (!members.length) throw new Error("El grupo debe tener al menos un miembro");
   const ref = await addDoc(collection(db, "groups"), {
     name,
     description,
@@ -78,7 +79,12 @@ export async function removeMemberFromGroup(groupId: string, memberId: string): 
   const data = snap.data();
   if (!data) return;
   const members: Member[] = (data.members ?? []).filter((m: Member) => m.id !== memberId);
-  await updateDoc(doc(db, "groups", groupId), { members });
+  // If no members left, clean userIds to prevent zombie group access
+  if (members.length === 0) {
+    await updateDoc(doc(db, "groups", groupId), { members: [], userIds: [] });
+  } else {
+    await updateDoc(doc(db, "groups", groupId), { members });
+  }
 }
 
 export async function addUserToGroup(

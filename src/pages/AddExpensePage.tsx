@@ -319,7 +319,7 @@ export function AddExpensePage() {
                     )}
                   </div>
                 );
-              })}
+            })}
             </div>
             {payerCount >= 2 && (
               <div className={styles.payerTotal}>
@@ -385,16 +385,22 @@ export function AddExpensePage() {
               </button>
             </div>
 
-            {group.members.map((m) => {
+            {/* Pre-compute even split amounts for preview */}
+            {(() => {
+              const splitMap = new Map<string, number>();
+              if (splitMode === "even" && includedMembers.size > 0) {
+                const memberIds = [...includedMembers];
+                const parts = allocateEven(eur(effectiveAmount), memberIds.length);
+                memberIds.forEach((id, i) => splitMap.set(id, toFloat(parts[i])));
+              }
+
+              return group.members.map((m) => {
               const isIncluded = includedMembers.has(m.id);
               const evenAmount =
                 splitMode === "even" && isIncluded
                   ? (() => {
-                      const count = includedMembers.size;
-                      const val = effectiveAmount;
-                      const parts = allocateEven(eur(val), count);
-                      const sa = toFloat(parts[0]);
-                      return isNaN(sa) ? "—" : sa.toFixed(2);
+                      const sa = splitMap.get(m.id);
+                      return sa !== undefined && !isNaN(sa) ? sa.toFixed(2) : "—";
                     })()
                   : null;
 
@@ -449,7 +455,7 @@ export function AddExpensePage() {
                   </div>
                 </div>
               );
-            })}
+            })})()}
           </div>
 
           {splitMode === "custom" && (

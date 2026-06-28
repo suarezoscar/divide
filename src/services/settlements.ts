@@ -27,6 +27,9 @@ export async function createSettlement(
   to: string,
   amount: number
 ): Promise<Settlement> {
+  if (from === to) throw new Error("No puedes saldar una deuda contigo mismo");
+  if (amount <= 0) throw new Error("El importe debe ser positivo");
+
   const ref = await addDoc(collection(db, "settlements"), {
     groupId,
     from,
