@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { AddExpensePage } from "./AddExpensePage";
@@ -71,6 +72,19 @@ describe("AddExpensePage", () => {
     expect(screen.getAllByText("Alice").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Bob").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Carol").length).toBeGreaterThan(0);
+  });
+
+  it("allows excluding a member from the split", async () => {
+    render(
+      <MemoryRouter>
+        <AddExpensePage />
+      </MemoryRouter>
+    );
+    const checkboxes = screen.getAllByRole("checkbox");
+    expect(checkboxes).toHaveLength(3);
+    expect(checkboxes[0]).toHaveAttribute("aria-checked", "true");
+    await userEvent.click(checkboxes[1]);
+    expect(checkboxes[1]).toHaveAttribute("aria-checked", "false");
   });
 
   it("shows date inputs", () => {

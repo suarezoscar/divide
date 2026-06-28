@@ -291,14 +291,10 @@ export function GroupDetailPage() {
                         {exp.splits.map((s) => {
                           const member = memberById.get(s.memberId);
                           const memberName = member?.name ?? "(ex-miembro)";
-                          const isPayer = s.memberId === exp.paidBy;
                           return (
                             <div key={s.memberId} className={styles.splitRow}>
                               <Avatar name={memberName} size="sm" />
-                              <span className={styles.splitName}>
-                                {memberName}
-                                {isPayer && <span className={styles.payerChip}>pagó</span>}
-                              </span>
+                              <span className={styles.splitName}>{memberName}</span>
                               <span className={styles.splitAmount}>{formatCurrency(s.amount)}</span>
                             </div>
                           );

@@ -171,6 +171,46 @@
   transition: opacity 0.2s;
 }
 
+.splitRowExcluded {
+  opacity: 0.4;
+}
+
+.checkbox {
+  width: 44px;
+  height: 44px;
+  border: 2px solid #9CA3AF;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  padding: 0;
+}
+
+.checkbox:hover {
+  border-color: #07819C;
+}
+
+.checkboxChecked {
+  background: #07819C;
+  border-color: #07819C;
+}
+
+.splitMemberExcluded {
+  text-decoration: line-through;
+  color: #9CA3AF;
+}
+
+.excludedLabel {
+  font-size: 13px;
+  color: #9CA3AF;
+  font-style: italic;
+  flex-shrink: 0;
+}
+
 .splitRowContent {
   flex: 1;
   display: flex;
