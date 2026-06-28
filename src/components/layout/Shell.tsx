@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
@@ -18,6 +18,19 @@ export function Shell() {
   const isGroupDetail = pathname.includes("/group/");
   const isAddExpense = pathname.includes("/expense/new");
   const isDashboard = pathname === "/dashboard";
+
+  // Auto-request notification permission on first visit
+  useEffect(() => {
+    if (typeof Notification === "undefined") return;
+    if (localStorage.getItem("notif-prompt-asked")) return;
+    if (Notification.permission !== "default") return;
+    const timer = setTimeout(() => {
+      Notification.requestPermission().then(() => {
+        localStorage.setItem("notif-prompt-asked", "1");
+      });
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Change password
   const [showChangePwd, setShowChangePwd] = useState(false);

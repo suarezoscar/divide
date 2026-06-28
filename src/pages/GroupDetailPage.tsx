@@ -96,7 +96,7 @@ export function GroupDetailPage() {
         const payer = memberById.get(exp.paidBy);
         notify(
           `Nuevo gasto en ${group?.name}`,
-          `${payer?.name ?? exp.paidBy} añadió "${exp.description}" (${formatCurrency(exp.amount)})`
+          `${payer?.name ?? "(ex-miembro)"} añadió "${exp.description}" (${formatCurrency(exp.amount)})`
         );
       } else {
         notify(
@@ -227,6 +227,7 @@ export function GroupDetailPage() {
               <div className={styles.expenseList}>
                 {expenses.map((exp) => {
                 const payer = memberById.get(exp.paidBy);
+                const payerName = payer?.name ?? "(ex-miembro)";
                   const participantCount = exp.splits.length;
                   const totalMembers = group.members.length;
                   return (
@@ -242,7 +243,7 @@ export function GroupDetailPage() {
 
                       {/* Payer row: avatar + name + date + actions */}
                       <div className={styles.expensePayerRow}>
-                        <Avatar name={payer?.name ?? exp.paidBy} size="sm" />
+                        <Avatar name={payerName} size="sm" />
                         <span className={styles.expenseMeta}>
                           {(() => {
                             if (exp.payers && exp.payers.length > 1) {
@@ -252,7 +253,7 @@ export function GroupDetailPage() {
                               }).join(", ");
                               return `${names} · ${formatDate(exp.date)}`;
                             }
-                            return `${payer?.name ?? exp.paidBy} · ${formatDate(exp.date)}`;
+                            return `${payerName} · ${formatDate(exp.date)}`;
                           })()}
                         </span>
                         <div className={styles.expenseActions}>
@@ -285,12 +286,13 @@ export function GroupDetailPage() {
                       <div className={styles.splitList}>
                         {exp.splits.map((s) => {
                           const member = memberById.get(s.memberId);
+                          const memberName = member?.name ?? "(ex-miembro)";
                           const isPayer = s.memberId === exp.paidBy;
                           return (
                             <div key={s.memberId} className={styles.splitRow}>
-                              <Avatar name={member?.name ?? s.memberId} size="sm" />
+                              <Avatar name={memberName} size="sm" />
                               <span className={styles.splitName}>
-                                {member?.name ?? s.memberId}
+                                {memberName}
                                 {isPayer && <span className={styles.payerChip}>pagó</span>}
                               </span>
                               <span className={styles.splitAmount}>{formatCurrency(s.amount)}</span>
