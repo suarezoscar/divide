@@ -49,7 +49,7 @@ export function AddExpensePage() {
     if (group && group.members.length > 0) {
       setIncludedMembers(new Set(group.members.map((m) => m.id)));
     }
-  }, [group, isEditing]);
+  }, [group?.id, isEditing]);
 
   // Load existing expense for edit mode
   useEffect(() => {

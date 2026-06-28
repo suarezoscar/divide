@@ -23,6 +23,7 @@ vi.mock("../hooks/useGroups", () => ({
       ],
     },
     loading: false,
+    linkedMemberId: null,
   }),
   useGroups: () => ({ groups: [], loading: false, error: null, create: vi.fn() }),
 }));

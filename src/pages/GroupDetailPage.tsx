@@ -62,7 +62,7 @@ export function GroupDetailPage() {
       const unclaimed = group.members.filter((m) => !m.userId);
       if (unclaimed.length > 0) setShowClaimModal(true);
     }
-  }, [loading, group, user, linkedMemberId]);
+  }, [loading, group?.id, user?.uid, linkedMemberId]);
 
   const handleClaim = async (memberId: string) => {
     await claimMember(memberId);
