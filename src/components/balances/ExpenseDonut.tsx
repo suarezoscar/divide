@@ -1,12 +1,11 @@
 import { formatCurrency } from "../../utils/format";
+import { getMemberColor } from "../../utils/memberColor";
 import styles from "./ExpenseDonut.module.css";
 
 interface Props {
   balances: { memberId: string; memberName: string; amount: number }[];
   total: number;
 }
-
-const COLORS = ["#07819C", "#E57373", "#5C6BC0", "#FF8A65", "#66BB6A", "#AB47BC", "#26C6DA", "#EC407A"];
 
 export function ExpenseDonut({ balances, total }: Props) {
   if (balances.length === 0 || total === 0) return null;
@@ -17,10 +16,10 @@ export function ExpenseDonut({ balances, total }: Props) {
   const circumference = 2 * Math.PI * radius;
 
   let offset = 0;
-  const segments = sorted.map((b, i) => {
+  const segments = sorted.map((b) => {
     const pct = b.amount / total;
     const dash = pct * circumference;
-    const segment = { ...b, pct, dash, offset, color: COLORS[i % COLORS.length] };
+    const segment = { ...b, pct, dash, offset, color: getMemberColor(b.memberName) };
     offset += dash;
     return segment;
   });
