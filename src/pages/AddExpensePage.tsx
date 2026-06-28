@@ -38,9 +38,15 @@ export function AddExpensePage() {
   const [expenseTime, setExpenseTime] = useState("");
   const [category, setCategory] = useState("other");
   const [categoryManuallySet, setCategoryManuallySet] = useState(false);
-  const [includedMembers, setIncludedMembers] = useState<Set<string>>(
-    () => new Set(group?.members.map((m) => m.id) ?? [])
-  );
+  const [includedMembers, setIncludedMembers] = useState<Set<string>>(new Set());
+
+  // Auto-init: all members included by default (only for new expenses)
+  useEffect(() => {
+    if (isEditing) return;
+    if (group && group.members.length > 0) {
+      setIncludedMembers(new Set(group.members.map((m) => m.id)));
+    }
+  }, [group, isEditing]);
 
   // Load existing expense for edit mode
   useEffect(() => {
