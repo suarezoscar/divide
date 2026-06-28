@@ -12,8 +12,7 @@ import { CATEGORIES } from "../utils/categories";
 import { showToast } from "../components/ui/Toast";
 import { friendlyError } from "../utils/errors";
 import { Skeleton } from "../components/ui/Skeleton";
-import { formatCurrency } from "../utils/format";
-import type { Split, Payer } from "../types";
+import type { Split } from "../types";
 import { eur, toFloat, allocateEven, equal } from "../utils/money";
 import styles from "./AddExpensePage.module.css";
 
@@ -32,23 +31,11 @@ export function AddExpensePage() {
   const [paidBy, setPaidBy] = useState(() => group?.members[0]?.id ?? "");
   const [splitMode, setSplitMode] = useState<SplitMode>("even");
   const [customSplits, setCustomSplits] = useState<Record<string, string>>({});
-  const [includedMembers, setIncludedMembers] = useState<Set<string>>(
-    () => new Set(group?.members.map((m) => m.id) ?? [])
-  );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [expenseDate, setExpenseDate] = useState("");     // YYYY-MM-DD
-  const [expenseTime, setExpenseTime] = useState("");     // HH:MM
-  const [category, setCategory] = useState("");
-  const [payerAmounts, setPayerAmounts] = useState<Record<string, string>>({});
-
-  // Derived: payer stats — must be before any early return
-  const payerIds = Object.keys(payerAmounts).filter(
-    (id) => payerAmounts[id] !== "" && parseFloat(payerAmounts[id].replace(",", ".")) > 0
-  );
-  const payerCount = payerIds.length;
-  const payerSum = Math.round(payerIds.reduce((s, id) => s + toFloat(eur(parseFloat(payerAmounts[id].replace(",", ".")))), 0) * 100) / 100;
-  const effectiveAmount = payerCount >= 2 ? payerSum : parseFloat((amount || "0").replace(",", "."));
+  const [expenseDate, setExpenseDate] = useState("");
+  const [expenseTime, setExpenseTime] = useState("");
+  const [category, setCategory] = useState("other");
 
   // Load existing expense for edit mode
   useEffect(() => {
@@ -58,21 +45,11 @@ export function AddExpensePage() {
       setDescription(exp.description);
       setAmount(String(exp.amount).replace(".", ","));
       setPaidBy(exp.paidBy);
-      // Pre-fill date and time
       const d = exp.date.toDate();
       setExpenseDate(d.toISOString().slice(0, 10));
       setExpenseTime(d.toTimeString().slice(0, 5));
-      setCategory(exp.category ?? "");
-      // Pre-fill payer amounts
-      if (exp.payers && exp.payers.length > 0) {
-        const pa: Record<string, string> = {};
-        for (const p of exp.payers) {
-          pa[p.memberId] = String(p.amount).replace(".", ",");
-        }
-        setPayerAmounts(pa);
-      }
+      setCategory(exp.category ?? "other");
       if (exp.splits.length > 0) {
-        // Detect split mode: even if all splits are equal
         const firstAmount = exp.splits[0].amount;
         const allEven = exp.splits.every((s) => equal(eur(s.amount), eur(firstAmount)))
           || exp.splits.length === 1;
@@ -86,7 +63,6 @@ export function AddExpensePage() {
           }
           setCustomSplits(custom);
         }
-        setIncludedMembers(new Set(exp.splits.map((s) => s.memberId)));
       }
     });
   }, [expenseId, group, groupId]);
@@ -108,59 +84,26 @@ export function AddExpensePage() {
     e.preventDefault();
     setError("");
 
-    let numAmount = parseFloat(amount.replace(",", "."));
+    const numAmount = parseFloat(amount.replace(",", "."));
     if (!description.trim() || isNaN(numAmount) || numAmount <= 0) {
-      setError("Completa todos los campos");
-      return;
-    }
-
-    if (includedMembers.size < 1) {
-      setError("Al menos un miembro debe participar en el gasto");
-      return;
-    }
-
-    // Build payers from amounts
-    const payers: Payer[] = [];
-    if (payerCount <= 1) {
-      // Single payer — use the main amount input
-      const payerId = payerCount === 1 ? payerIds[0] : group.members[0]?.id;
-      if (!payerId) {
-        setError("Selecciona quién pagó");
-        return;
-      }
-      payers.push({ memberId: payerId, amount: numAmount });
-    } else {
-      // Multiple payers — use individual amounts
-      for (const id of payerIds) {
-        const val = parseFloat((payerAmounts[id] || "").replace(",", "."));
-        if (!isNaN(val) && val > 0) {
-          payers.push({ memberId: id, amount: val });
-        }
-      }
-      // numAmount comes from payer sum
-      const totalPaid = payers.reduce((s, p) => s + p.amount, 0);
-      numAmount = totalPaid;
-    }
-    if (payers.length === 0) {
-      setError("Al menos una persona debe haber pagado");
+      setError("Falta la descripción o el importe no es válido");
       return;
     }
 
     let splits: Split[];
 
     if (splitMode === "even") {
-      const count = includedMembers.size;
+      const count = group.members.length;
       const parts = allocateEven(eur(numAmount), count);
-      const memberIds = [...includedMembers];
-      splits = memberIds.map((memberId, i) => ({
-        memberId,
+      splits = group.members.map((m, i) => ({
+        memberId: m.id,
         amount: toFloat(parts[i]),
       }));
     } else {
       const customAmounts: Split[] = [];
-      for (const id of includedMembers) {
-        const val = parseFloat(customSplits[id] || "0");
-        customAmounts.push({ memberId: id, amount: val });
+      for (const m of group.members) {
+        const val = parseFloat(customSplits[m.id] || "0");
+        customAmounts.push({ memberId: m.id, amount: val });
       }
       const totalCustom = customAmounts.reduce((s, v) => s + v.amount, 0);
       if (Math.abs(totalCustom - numAmount) > 0.01) {
@@ -176,12 +119,11 @@ export function AddExpensePage() {
         ? new Date(`${expenseDate}T${expenseTime || "12:00"}`)
         : undefined;
       const cat = category || undefined;
-      const firstPayer = payers[0]?.memberId ?? paidBy;
       if (isEditing) {
-        await update(expenseId!, description.trim(), numAmount, firstPayer, splits, date, cat, payers);
+        await update(expenseId!, description.trim(), numAmount, paidBy, splits, date, cat);
         showToast("Gasto actualizado", "success");
       } else {
-        const created = await add(description.trim(), numAmount, firstPayer, splits, date, cat, payers, user?.uid);
+        const created = await add(description.trim(), numAmount, paidBy, splits, date, cat, user?.uid);
         sessionStorage.setItem(`lastAdded-${groupId}`, created.id);
         showToast("Gasto añadido", "success");
       }
@@ -196,38 +138,11 @@ export function AddExpensePage() {
     setCustomSplits((prev) => ({ ...prev, [memberId]: value }));
   };
 
-  const toggleMember = (id: string) => {
-    setIncludedMembers((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        if (next.size <= 1) return prev;
-        next.delete(id);
-        if (paidBy === id) {
-          const remaining = [...next][0];
-          setPaidBy(remaining);
-        }
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
-
-  const toggleAllMembers = () => {
-    if (!group) return;
-    const allIds = group.members.map((m) => m.id);
-    const allIncluded = allIds.every((id) => includedMembers.has(id));
-    if (allIncluded) {
-      setIncludedMembers(new Set([paidBy]));
-    } else {
-      setIncludedMembers(new Set(allIds));
-    }
-  };
-
-  const totalCustom = [...includedMembers].reduce(
-    (s, id) => s + parseFloat(customSplits[id] || "0"),
+  const totalCustom = group.members.reduce(
+    (s, m) => s + parseFloat(customSplits[m.id] || "0"),
     0
   );
+  const effectiveAmount = parseFloat((amount || "0").replace(",", "."));
 
   return (
     <div className={styles.page}>
@@ -242,104 +157,44 @@ export function AddExpensePage() {
             placeholder="Cena en el italiano"
           />
 
-          {payerCount >= 2 ? (
-            <div className={styles.amountFixed}>
-              <span className={styles.label}>Importe total</span>
-              <span className={styles.amountFixedValue}>{!isNaN(effectiveAmount) && effectiveAmount > 0 ? formatCurrency(effectiveAmount) : "—"}</span>
-            </div>
-          ) : (
-            <Input
-              label="Importe total"
-              type="text"
-              inputMode="decimal"
-              pattern="[0-9]*[.,]?[0-9]*"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="0.00"
-            />
-          )}
+          <Input
+            label="Importe total"
+            type="text"
+            inputMode="decimal"
+            pattern="[0-9]*[.,]?[0-9]*"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="0.00"
+          />
 
           <div className={styles.field}>
             <label className={styles.label}>Fecha (opcional)</label>
             <div className={styles.dateRow}>
-              <Input
-                type="date"
-                value={expenseDate}
-                onChange={(e) => setExpenseDate(e.target.value)}
-              />
-              <Input
-                type="time"
-                value={expenseTime}
-                onChange={(e) => setExpenseTime(e.target.value)}
-              />
+              <Input type="date" value={expenseDate} onChange={(e) => setExpenseDate(e.target.value)} />
+              <Input type="time" value={expenseTime} onChange={(e) => setExpenseTime(e.target.value)} />
             </div>
           </div>
 
           <div className={styles.field}>
             <label className={styles.label}>¿Quién pagó?</label>
             <div className={styles.payerList}>
-              {group.members.map((m) => {
-                const val = payerAmounts[m.id] || "";
-                const isActive = val !== "" && parseFloat(val.replace(",", ".")) > 0;
-                return (
-                  <div key={m.id} className={styles.payerItem}>
-                    <button
-                      type="button"
-                      className={`${styles.payerBtn} ${isActive ? styles.payerActive : ""}`}
-                      onClick={() => {
-                        if (isActive) {
-                          setPayerAmounts((prev) => {
-                            const next = { ...prev };
-                            delete next[m.id];
-                            return next;
-                          });
-                        } else {
-                          setPayerAmounts((prev) => {
-                            // When going from 1→2, split amount equally
-                            if (payerCount === 1 && prev[payerIds[0]]) {
-                              const half = (parseFloat(prev[payerIds[0]].replace(",", ".")) / 2).toFixed(2).replace(".", ",");
-                              return { [payerIds[0]]: half, [m.id]: half };
-                            }
-                            return { ...prev, [m.id]: amount };
-                          });
-                        }
-                      }}
-                    >
-                      <Avatar name={m.name} size="sm" />
-                      <span>{m.name}</span>
-                    </button>
-                    {isActive && payerCount >= 2 && (
-                      <input
-                        type="text"
-                        inputMode="decimal"
-                        pattern="[0-9]*[.,]?[0-9]*"
-                        className={styles.payerInput}
-                        value={val}
-                        onChange={(e) => setPayerAmounts((prev) => ({ ...prev, [m.id]: e.target.value }))}
-                        placeholder="0.00"
-                      />
-                    )}
-                  </div>
-                );
-            })}
+              {group.members.map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  className={`${styles.payerBtn} ${paidBy === m.id ? styles.payerActive : ""}`}
+                  onClick={() => setPaidBy(m.id)}
+                >
+                  <Avatar name={m.name} size="sm" />
+                  <span>{m.name}</span>
+                </button>
+              ))}
             </div>
-            {payerCount >= 2 && (
-              <div className={styles.payerTotal}>
-                Total pagado: <strong>{payerSum.toFixed(2)}</strong>
-              </div>
-            )}
           </div>
 
           <div className={styles.field}>
             <label className={styles.label}>Categoría</label>
             <div className={styles.categoryList}>
-              <button
-                type="button"
-                className={`${styles.categoryChip} ${!category ? styles.categoryActive : ""}`}
-                onClick={() => setCategory("")}
-              >
-                Sin
-              </button>
               {CATEGORIES.map((c) => (
                 <button
                   key={c.id}
@@ -379,85 +234,46 @@ export function AddExpensePage() {
           </div>
 
           <div className={styles.splitList}>
-            <div className={styles.toggleAllPill}>
-              <button type="button" onClick={toggleAllMembers}>
-                {group.members.every((m) => includedMembers.has(m.id))
-                  ? "Excluir todos"
-                  : "Incluir todos"}
-              </button>
-            </div>
-
-            {/* Pre-compute even split amounts for preview */}
             {(() => {
               const splitMap = new Map<string, number>();
-              if (splitMode === "even" && includedMembers.size > 0) {
-                const memberIds = [...includedMembers];
-                const parts = allocateEven(eur(effectiveAmount), memberIds.length);
-                memberIds.forEach((id, i) => splitMap.set(id, toFloat(parts[i])));
+              if (splitMode === "even" && group.members.length > 0 && !isNaN(effectiveAmount) && effectiveAmount > 0) {
+                const parts = allocateEven(eur(effectiveAmount), group.members.length);
+                group.members.forEach((m, i) => splitMap.set(m.id, toFloat(parts[i])));
               }
 
               return group.members.map((m) => {
-              const isIncluded = includedMembers.has(m.id);
-              const evenAmount =
-                splitMode === "even" && isIncluded
+                const evenAmount = splitMode === "even"
                   ? (() => {
                       const sa = splitMap.get(m.id);
                       return sa !== undefined && !isNaN(sa) ? sa.toFixed(2) : "—";
                     })()
                   : null;
 
-              return (
-                <div
-                  key={m.id}
-                  className={`${styles.splitRowCard} ${!isIncluded ? styles.splitRowExcluded : ""}`}
-                >
-                  <button
-                    type="button"
-                    role="checkbox"
-                    aria-checked={isIncluded}
-                    className={`${styles.checkbox} ${isIncluded ? styles.checkboxChecked : ""}`}
-                    onClick={() => toggleMember(m.id)}
-                  >
-                    {isIncluded && (
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                        <path
-                          d="M2.5 6L5 8.5L9.5 3.5"
-                          stroke="white"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
+                return (
+                  <div key={m.id} className={styles.splitRowCard}>
+                    <div className={styles.splitRowContent}>
+                      <div className={styles.splitMemberInfo}>
+                        <Avatar name={m.name} size="sm" />
+                        <span className={styles.splitMemberName}>{m.name}</span>
+                      </div>
+                      {splitMode === "even" ? (
+                        <span className={styles.splitValue}>{evenAmount}</span>
+                      ) : (
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          pattern="[0-9]*[.,]?[0-9]*"
+                          className={styles.splitInput}
+                          value={customSplits[m.id] || ""}
+                          onChange={(e) => updateCustomSplit(m.id, e.target.value)}
+                          placeholder="0.00"
                         />
-                      </svg>
-                    )}
-                  </button>
-                  <div className={styles.splitRowContent}>
-                    <div className={styles.splitMemberInfo}>
-                      <Avatar name={m.name} size="sm" />
-                      <span className={`${styles.splitMemberName} ${!isIncluded ? styles.splitMemberExcluded : ""}`}>
-                        {m.name}
-                      </span>
+                      )}
                     </div>
-                    {!isIncluded ? (
-                      <span className={styles.excludedLabel}>Excluido</span>
-                    ) : splitMode === "even" ? (
-                      <span className={styles.splitValue}>{evenAmount}</span>
-                    ) : (
-                      <input
-                        type="text"
-                        inputMode="decimal"
-                        pattern="[0-9]*[.,]?[0-9]*"
-                        className={styles.splitInput}
-                        value={customSplits[m.id] || ""}
-                        onChange={(e) => updateCustomSplit(m.id, e.target.value)}
-                        placeholder="0.00"
-                        step="0.01"
-                        min="0"
-                      />
-                    )}
                   </div>
-                </div>
-              );
-            })})()}
+                );
+              });
+            })()}
           </div>
 
           {splitMode === "custom" && (

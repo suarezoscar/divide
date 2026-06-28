@@ -74,21 +74,6 @@ describe("AddExpensePage", () => {
     expect(screen.getAllByText("Carol").length).toBeGreaterThan(0);
   });
 
-  it("allows excluding a member from the split", async () => {
-    render(
-      <MemoryRouter>
-        <AddExpensePage />
-      </MemoryRouter>
-    );
-    // All 3 checkboxes checked by default
-    const checkboxes = screen.getAllByRole("checkbox");
-    expect(checkboxes).toHaveLength(3);
-    expect(checkboxes[0]).toHaveAttribute("aria-checked", "true");
-    // Click second checkbox to exclude Bob
-    await userEvent.click(checkboxes[1]);
-    expect(checkboxes[1]).toHaveAttribute("aria-checked", "false");
-  });
-
   it("shows date inputs", () => {
     render(
       <MemoryRouter>

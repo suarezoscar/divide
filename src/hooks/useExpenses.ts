@@ -3,7 +3,7 @@ import { Timestamp, onSnapshot } from "firebase/firestore";
 import { collection, query, where } from "firebase/firestore";
 import { db } from "../services/firebase";
 import * as expensesService from "../services/expenses";
-import type { Expense, Split, Payer } from "../types";
+import type { Expense, Split } from "../types";
 
 // Deep compare two expenses for relevant fields
 function hasChanged(a: Expense, b: Expense): boolean {
@@ -79,10 +79,9 @@ export function useExpenses(groupId: string) {
     splits: Split[],
     date?: Date,
     category?: string,
-    payers?: Payer[],
     userId?: string
   ) => {
-    return await expensesService.createExpense(groupId, description, amount, paidBy, splits, date, category, payers, userId);
+    return await expensesService.createExpense(groupId, description, amount, paidBy, splits, date, category, userId);
   };
 
   const remove = async (expenseId: string) => {
@@ -96,11 +95,10 @@ export function useExpenses(groupId: string) {
     paidBy: string,
     splits: Split[],
     date?: Date,
-    category?: string,
-    payers?: Payer[]
+    category?: string
   ) => {
     await expensesService.updateExpense(expenseId, {
-      description, amount, paidBy, splits, category, payers,
+      description, amount, paidBy, splits, category,
       date: date ? Timestamp.fromDate(date) : undefined,
     } as any);
   };

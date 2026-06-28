@@ -12,7 +12,7 @@ import {
   type DocumentData,
 } from "firebase/firestore";
 import { db } from "./firebase";
-import type { Expense, Split, Payer } from "../types";
+import type { Expense, Split } from "../types";
 
 export function docToExpense(id: string, data: DocumentData): Expense {
   return {
@@ -37,30 +37,17 @@ export async function createExpense(
   splits: Split[],
   date?: Date,
   category?: string,
-  payers?: Payer[],
   userId?: string
 ): Promise<Expense> {
   const ref = await addDoc(collection(db, "expenses"), {
-    groupId,
-    description,
-    amount,
-    paidBy,
-    splits,
-    payers: payers ?? undefined,
+    groupId, description, amount, paidBy, splits,
     category: category ?? null,
     createdBy: userId ?? null,
     date: date ? Timestamp.fromDate(date) : Timestamp.now(),
   });
   return {
-    id: ref.id,
-    groupId,
-    description,
-    amount,
-    paidBy,
-    splits,
-    payers,
-    category,
-    createdBy: userId,
+    id: ref.id, groupId, description, amount, paidBy, splits,
+    category, createdBy: userId,
     date: date ? Timestamp.fromDate(date) : Timestamp.now(),
   };
 }
