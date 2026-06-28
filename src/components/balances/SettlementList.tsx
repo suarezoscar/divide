@@ -4,7 +4,7 @@ import { Avatar } from "../ui/Avatar";
 import { memo, useState, useMemo } from "react";
 import { formatCurrency } from "../../utils/format";
 import type { DebtEdge, Member } from "../../types";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, CircleCheckBig } from "lucide-react";
 import styles from "./SettlementList.module.css";
 
 interface Props {
@@ -20,7 +20,8 @@ export const SettlementList = memo(function SettlementList({ debts, members, onS
   if (debts.length === 0) {
     return (
       <Card className={styles.empty}>
-        <p>Todo está saldado ✓</p>
+        <CircleCheckBig size={28} color="#059669" />
+        <p>Sin deudas pendientes</p>
       </Card>
     );
   }

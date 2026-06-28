@@ -122,7 +122,7 @@ export function Shell() {
             placeholder="••••••"
             required
           />
-          {pwdError && <p style={{ color: "#EF4444", fontSize: 13, textAlign: "center" }} role="alert">{pwdError}</p>}
+          {pwdError && <p style={{ color: "#DC2626", fontSize: 13, textAlign: "center" }} role="alert">{pwdError}</p>}
           <Button type="submit" size="lg" isLoading={changingPwd} style={{ width: "100%" }}>
             Actualizar contraseña
           </Button>

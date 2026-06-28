@@ -65,7 +65,7 @@ export function DashboardPage() {
           <h1>Tus grupos</h1>
         </div>
         <Card className={styles.empty}>
-          <p style={{ color: "#EF4444" }}>{error}</p>
+          <p style={{ color: "#DC2626" }}>{error}</p>
         </Card>
       </div>
     );
@@ -89,7 +89,11 @@ export function DashboardPage() {
 
       {groups.length === 0 ? (
         <Card className={styles.empty}>
-          <p>Aún no tienes grupos. ¡Crea el primero!</p>
+          <p style={{ fontSize: 15, marginBottom: 8 }}>Aún no tienes grupos</p>
+          <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 12 }}>Divide gastos con amigos sin hojas de cálculo</p>
+          <Button onClick={() => setShowCreate(true)} size="sm">
+            <Plus size={16} /> Crear tu primer grupo
+          </Button>
         </Card>
       ) : (
         <div className={styles.list}>
@@ -153,7 +157,7 @@ export function DashboardPage() {
             </Button>
           </div>
 
-          {createError && <p style={{ color: "#EF4444", fontSize: 13, textAlign: "center" }}>{createError}</p>}
+          {createError && <p style={{ color: "#DC2626", fontSize: 13, textAlign: "center" }}>{createError}</p>}
 
           <Button onClick={handleCreate} isLoading={creating} disabled={!name.trim()} size="lg" style={{ width: "100%" }}>
             Crear grupo

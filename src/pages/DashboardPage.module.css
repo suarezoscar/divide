@@ -1,17 +1,14 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
 }
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.header h1 {
-  font-size: 24px;
+  margin-bottom: 4px;
 }
 
 .empty {

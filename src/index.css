@@ -63,11 +63,12 @@ body {
 h1, h2, h3, h4 {
   color: var(--color-text);
   line-height: 1.2;
+  margin-bottom: 0.35em;
 }
 
-h1 { font-size: 28px; font-weight: 700; }
-h2 { font-size: 22px; font-weight: 600; }
-h3 { font-size: 17px; font-weight: 600; }
+h1 { font-size: 24px; font-weight: 700; }
+h2 { font-size: 20px; font-weight: 600; }
+h3 { font-size: 16px; font-weight: 600; }
 
 a {
   color: var(--color-primary);
@@ -82,7 +83,7 @@ a {
 
 @media (prefers-reduced-motion: no-preference) {
   main > * {
-    animation: pageEnter 0.2s ease;
+    animation: pageEnter 0.3s cubic-bezier(0.25, 1, 0.5, 1);
   }
 }
 @media (prefers-reduced-motion: reduce) {

@@ -18,7 +18,7 @@ export const colors = {
 
   success: "#059669",
   warning: "#F59E0B",
-  danger: "#EF4444",
+  danger: "#DC2626",
 
   sent: "#DC2626",    // red — money owed (you owe)
   received: "#059669", // green — money owed to you

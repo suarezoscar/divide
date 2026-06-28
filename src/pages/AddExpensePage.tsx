@@ -99,7 +99,7 @@ export function AddExpensePage() {
       </div>
     </div>
   );
-  if (!group) return <p style={{ textAlign: "center", padding: 40, color: "#EF4444" }}>Grupo no encontrado</p>;
+  if (!group) return <p style={{ textAlign: "center", padding: 40, color: "#DC2626" }}>Grupo no encontrado</p>;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

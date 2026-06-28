@@ -284,11 +284,11 @@
 }
 
 .splitMismatch {
-  color: #EF4444;
+  color: #DC2626;
 }
 
 .error {
-  color: #EF4444;
+  color: #DC2626;
   font-size: 13px;
   text-align: center;
   background: #FEF2F2;

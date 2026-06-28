@@ -148,7 +148,7 @@ export function GroupDetailPage() {
   }
 
   if (!group) {
-    return <p style={{ textAlign: "center", padding: 40, color: "#EF4444" }}>Grupo no encontrado</p>;
+    return <p style={{ textAlign: "center", padding: 40, color: "#DC2626" }}>Grupo no encontrado</p>;
   }
 
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
@@ -206,7 +206,8 @@ export function GroupDetailPage() {
             </div>
           ) : expenses.length === 0 ? (
             <Card className={styles.empty}>
-              <p>Aún no hay gastos. ¡Añade el primero!</p>
+              <p style={{ marginBottom: 6 }}>Aún no hay gastos</p>
+              <p style={{ fontSize: 13, color: "#6B7280" }}>Los gastos se dividen automáticamente entre los miembros. ¡Añade el primero!</p>
             </Card>
           ) : (
             <>
@@ -363,7 +364,7 @@ export function GroupDetailPage() {
 
       {user?.uid === group.createdBy && (
         <div className={styles.dangerZone}>
-          <p className={styles.dangerZoneTitle}>Zona peligrosa</p>
+          <p className={styles.dangerZoneTitle}>Administración del grupo</p>
           <Button
             size="md"
             variant="ghost"
