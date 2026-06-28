@@ -19,7 +19,7 @@ export function ExpenseDonut({ balances, total }: Props) {
   const segments = sorted.map((b) => {
     const pct = b.amount / total;
     const dash = pct * circumference;
-    const segment = { ...b, pct, dash, offset, color: getMemberColor(b.memberName) };
+    const segment = { ...b, pct, dash, offset, color: getMemberColor(b.memberId) };
     offset += dash;
     return segment;
   });

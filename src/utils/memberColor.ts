@@ -1,10 +1,22 @@
-const AVATAR_COLORS = [
-  "#07819C", "#E57373", "#64B5F6", "#81C784",
-  "#FFB74D", "#BA68C8", "#4DB6AC", "#F06292",
+const MEMBER_COLORS = [
+  "#07819C", // teal
+  "#E57373", // coral
+  "#64B5F6", // blue
+  "#81C784", // green
+  "#FFB74D", // amber
+  "#BA68C8", // purple
+  "#4DB6AC", // mint
+  "#F06292", // pink
+  "#FF8A65", // deep orange
+  "#9575CD", // deep purple
+  "#4FC3F7", // light blue
+  "#AED581", // light green
 ];
 
-export function getMemberColor(name: string): string {
+export function getMemberColor(seed: string): string {
   let h = 0;
-  for (const c of name) h = (h * 31 + c.charCodeAt(0)) | 0;
-  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+  for (let i = 0; i < seed.length; i++) {
+    h = ((h << 5) - h + seed.charCodeAt(i)) | 0;
+  }
+  return MEMBER_COLORS[Math.abs(h) % MEMBER_COLORS.length];
 }

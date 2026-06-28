@@ -257,7 +257,7 @@ export function GroupDetailPage() {
 
                       {/* Payer row: avatar + name + date + actions */}
                       <div className={styles.expensePayerRow}>
-                        <Avatar name={payerName} size="sm" />
+                        <Avatar name={payerName} size="sm" id={exp.paidBy} />
                         <span className={styles.expenseMeta}>
                           {(() => {
                             if (exp.payers && exp.payers.length > 1) {
@@ -307,7 +307,7 @@ export function GroupDetailPage() {
                           const memberName = member?.name ?? "(ex-miembro)";
                           return (
                             <div key={s.memberId} className={styles.splitRow}>
-                              <Avatar name={memberName} size="sm" />
+                              <Avatar name={memberName} size="sm" id={s.memberId} />
                               <span className={styles.splitName}>{memberName}</span>
                               <span className={styles.splitAmount}>{formatCurrency(s.amount)}</span>
                             </div>
@@ -350,7 +350,7 @@ export function GroupDetailPage() {
               const isInExpense = expenseMemberIds.has(m.id);
               return (
                 <Card key={m.id} className={styles.memberCard}>
-                  <Avatar name={m.name} size="md" />
+                  <Avatar name={m.name} size="md" id={m.id} />
                   <span className={styles.memberName}>{m.name}</span>
                   <button
                     className={`${styles.actionBtn} ${isInExpense ? styles.actionBtnDisabled : ""}`}
@@ -450,7 +450,7 @@ export function GroupDetailPage() {
               onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#07819C")}
               onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#E5E7EB")}
             >
-              <Avatar name={m.name} size="sm" />
+              <Avatar name={m.name} size="sm" id={m.id} />
               <span>{m.name}</span>
             </button>
           ))}

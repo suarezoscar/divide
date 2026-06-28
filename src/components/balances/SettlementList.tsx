@@ -58,12 +58,12 @@ export const SettlementList = memo(function SettlementList({ debts, members, onS
               <div key={key} className={styles.debtRow}>
                 <div className={styles.debtMembers}>
                   <div className={styles.member}>
-                    <Avatar name={fromMember?.name ?? d.fromName ?? "(ex-miembro)"} size="sm" />
+                    <Avatar name={fromMember?.name ?? d.fromName ?? "(ex-miembro)"} size="sm" id={d.from} />
                     <span>{fromMember?.name ?? "(ex-miembro)"}</span>
                   </div>
                   <ArrowRight size={16} color="#9CA3AF" />
                   <div className={styles.member}>
-                    <Avatar name={toMember?.name ?? d.toName ?? "(ex-miembro)"} size="sm" />
+                    <Avatar name={toMember?.name ?? d.toName ?? "(ex-miembro)"} size="sm" id={d.to} />
                     <span>{toMember?.name ?? "(ex-miembro)"}</span>
                   </div>
                 </div>

@@ -5,6 +5,7 @@ import styles from "./Avatar.module.css";
 interface AvatarProps {
   name: string;
   size?: "sm" | "md" | "lg";
+  id?: string;
 }
 
 function initials(name: string): string {
@@ -17,11 +18,11 @@ function initials(name: string): string {
     .toUpperCase();
 }
 
-export const Avatar = memo(function Avatar({ name, size = "md" }: AvatarProps) {
+export const Avatar = memo(function Avatar({ name, size = "md", id }: AvatarProps) {
   return (
     <div
       className={`${styles.avatar} ${styles[size]}`}
-      style={{ background: getMemberColor(name) }}
+      style={{ background: getMemberColor(id ?? name) }}
       title={name}
       aria-hidden="true"
     >

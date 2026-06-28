@@ -28,7 +28,7 @@ export const BalanceSummary = memo(function BalanceSummary({ balances }: Props) 
           const isPositive = b.balance >= 0;
           return (
             <div key={b.memberId} className={styles.row}>
-              <Avatar name={b.memberName} size="sm" />
+              <Avatar name={b.memberName} size="sm" id={b.memberId} />
               <span className={styles.name}>{b.memberName}</span>
               <span className={`${styles.amount} ${isPositive ? styles.positive : styles.negative}`}>
                 {formatCurrency(b.balance, true)}

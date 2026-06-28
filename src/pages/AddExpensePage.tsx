@@ -241,7 +241,7 @@ export function AddExpensePage() {
                   className={`${styles.payerBtn} ${paidBy === m.id ? styles.payerActive : ""}`}
                   onClick={() => setPaidBy(m.id)}
                 >
-                  <Avatar name={m.name} size="sm" />
+                  <Avatar name={m.name} size="sm" id={m.id} />
                   <span>{m.name}</span>
                 </button>
               ))}
@@ -328,7 +328,7 @@ export function AddExpensePage() {
                   </button>
                   <div className={styles.splitRowContent}>
                     <div className={styles.splitMemberInfo}>
-                      <Avatar name={m.name} size="sm" />
+                      <Avatar name={m.name} size="sm" id={m.id} />
                       <span className={`${styles.splitMemberName} ${!isIncluded ? styles.splitMemberExcluded : ""}`}>{m.name}</span>
                     </div>
                     {!isIncluded ? (

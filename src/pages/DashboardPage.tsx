@@ -112,7 +112,7 @@ export function DashboardPage() {
               <div className={styles.groupMeta}>
                 <div className={styles.memberAvatars}>
                   {g.members.slice(0, 4).map((m) => (
-                    <Avatar key={m.id} name={m.name} size="sm" />
+                    <Avatar key={m.id} name={m.name} size="sm" id={m.id} />
                   ))}
                   {g.members.length > 4 && (
                     <span className={styles.moreMembers}>+{g.members.length - 4}</span>
