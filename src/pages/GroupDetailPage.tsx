@@ -31,7 +31,7 @@ export function GroupDetailPage() {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { group, loading, updateMembers, removeMember, removeGroup } = useGroup(groupId!);
+  const { group, loading, linkedMemberId, updateMembers, removeMember, removeGroup, claimMember } = useGroup(groupId!);
   const { expenses, loading: expLoading, remove, changes, clearChanges } = useExpenses(groupId!);
   const { notify, permission, request } = useNotifications();
   const [notifsOn, setNotifsOn] = useState(() => localStorage.getItem(`notif-${groupId}`) !== "off");
@@ -54,6 +54,20 @@ export function GroupDetailPage() {
     }
     return ids;
   }, [expenses]);
+
+  // Auto-claim modal: if no linked member, ask "Who are you?"
+  const [showClaimModal, setShowClaimModal] = useState(false);
+  useEffect(() => {
+    if (!loading && group && user && !linkedMemberId) {
+      const unclaimed = group.members.filter((m) => !m.userId);
+      if (unclaimed.length > 0) setShowClaimModal(true);
+    }
+  }, [loading, group, user, linkedMemberId]);
+
+  const handleClaim = async (memberId: string) => {
+    await claimMember(memberId);
+    setShowClaimModal(false);
+  };
 
   // Toggle notifications
   const toggleNotifs = async () => {
@@ -417,6 +431,31 @@ export function GroupDetailPage() {
         confirmLabel="Eliminar grupo"
         variant="danger"
       />
+
+      <Modal open={showClaimModal} onClose={() => setShowClaimModal(false)} title="¿Quién eres?">
+        <p style={{ fontSize: 14, color: "#4B5563", marginBottom: 14, textAlign: "center" }}>
+          Selecciona tu nombre en este grupo
+        </p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {group.members.filter((m) => !m.userId).map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              onClick={() => handleClaim(m.id)}
+              style={{
+                display: "flex", alignItems: "center", gap: 10, padding: 12, border: "1.5px solid #E5E7EB",
+                borderRadius: 12, background: "#fff", cursor: "pointer", fontFamily: "inherit", fontSize: 15, fontWeight: 500,
+                transition: "all 0.15s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#07819C")}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#E5E7EB")}
+            >
+              <Avatar name={m.name} size="sm" />
+              <span>{m.name}</span>
+            </button>
+          ))}
+        </div>
+      </Modal>
     </div>
   );
 }

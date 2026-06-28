@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "./useAuth";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "../services/firebase";
@@ -55,6 +55,7 @@ export function useGroups() {
 }
 
 export function useGroup(groupId: string) {
+  const { user } = useAuth();
   const [group, setGroup] = useState<Group | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -62,11 +63,14 @@ export function useGroup(groupId: string) {
     groupsService.getGroup(groupId).then((g) => {
       setGroup(g);
     }).catch(() => {
-      // Silently fail — caller handles null group
-    }).finally(() => {
       setLoading(false);
     });
   }, [groupId]);
+
+  const linkedMemberId = useMemo(() => {
+    if (!user || !group) return null;
+    return group.members.find((m) => m.userId === user.uid)?.id ?? null;
+  }, [group, user]);
 
   const updateMembers = async (members: Member[]) => {
     await groupsService.updateGroupMembers(groupId, members);
@@ -86,5 +90,20 @@ export function useGroup(groupId: string) {
     await groupsService.deleteGroup(groupId);
   };
 
-  return { group, loading, updateMembers, removeMember, removeGroup };
+  const claimMember = async (memberId: string) => {
+    if (!user) return;
+    await groupsService.claimMember(groupId, memberId, user.uid);
+    setGroup((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        members: prev.members.map((m) =>
+          m.id === memberId ? { ...m, userId: user.uid } : m
+        ),
+        userIds: prev.userIds.includes(user.uid) ? prev.userIds : [...prev.userIds, user.uid],
+      };
+    });
+  };
+
+  return { group, loading, linkedMemberId, updateMembers, removeMember, removeGroup, claimMember };
 }

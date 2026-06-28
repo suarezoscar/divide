@@ -94,16 +94,35 @@ export async function addUserToGroup(
   claimExisting = false
 ): Promise<void> {
   if (claimExisting) {
-    await updateDoc(doc(db, "groups", groupId), {
-      userIds: arrayUnion(userId),
-    });
+    // Update existing member to link userId
+    const snap = await getDoc(doc(db, "groups", groupId));
+    const data = snap.data();
+    if (!data) return;
+    const members: Member[] = (data.members ?? []).map((m: Member) =>
+      m.id === memberNameOrId ? { ...m, userId } : m
+    );
+    await updateDoc(doc(db, "groups", groupId), { members, userIds: arrayUnion(userId) });
   } else {
-    const member: Member = { id: crypto.randomUUID(), name: memberNameOrId };
+    const member: Member = { id: crypto.randomUUID(), name: memberNameOrId, userId };
     await updateDoc(doc(db, "groups", groupId), {
       userIds: arrayUnion(userId),
       members: arrayUnion(member),
     });
   }
+}
+
+export async function claimMember(
+  groupId: string,
+  memberId: string,
+  userId: string
+): Promise<void> {
+  const snap = await getDoc(doc(db, "groups", groupId));
+  const data = snap.data();
+  if (!data) return;
+  const members: Member[] = (data.members ?? []).map((m: Member) =>
+    m.id === memberId ? { ...m, userId } : m
+  );
+  await updateDoc(doc(db, "groups", groupId), { members, userIds: arrayUnion(userId) });
 }
 
 const CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no I, O, 0, 1

@@ -5,6 +5,7 @@ import type { Timestamp } from "firebase/firestore";
 export interface Member {
   id: string;
   name: string;
+  userId?: string;
 }
 
 export interface Group {

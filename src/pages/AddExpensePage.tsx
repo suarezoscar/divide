@@ -22,14 +22,17 @@ type SplitMode = "even" | "custom";
 export function AddExpensePage() {
   const { groupId, expenseId } = useParams<{ groupId: string; expenseId?: string }>();
   const navigate = useNavigate();
-  const { group, loading } = useGroup(groupId!);
+  const { group, loading, linkedMemberId } = useGroup(groupId!);
   const { add, update } = useExpenses(groupId!);
   const { user } = useAuth();
   const isEditing = !!expenseId;
 
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
-  const [paidBy, setPaidBy] = useState(() => group?.members[0]?.id ?? "");
+  const [paidBy, setPaidBy] = useState(() => {
+    if (!group) return "";
+    return linkedMemberId ?? group.members[0]?.id ?? "";
+  });
   const [splitMode, setSplitMode] = useState<SplitMode>("even");
   const [customSplits, setCustomSplits] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
