@@ -57,6 +57,33 @@
   cursor: pointer;
 }
 
+.forgotBtn {
+  background: none;
+  border: none;
+  color: #6B7280;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: center;
+  padding: 4px;
+  font-family: inherit;
+}
+
+.forgotBtn:hover {
+  color: #07819C;
+}
+
+.resetForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.resetHint {
+  font-size: 14px;
+  color: #4B5563;
+  text-align: center;
+}
+
 .skeletonCard {
   background: #fff;
   border-radius: 16px;
