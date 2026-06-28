@@ -1,4 +1,8 @@
 import type { Expense, Settlement, MemberBalance, DebtEdge } from "../types";
+import { eur, toFloat, add, subtract, greaterThan, lessThan, isZero } from "./money";
+import type { Dinero } from "./money";
+
+const zeroEur = eur(0);
 
 /**
  * Compute per-member balances from expenses and settlements.
@@ -10,51 +14,57 @@ export function computeBalances(
   settlements: Settlement[],
   memberNames: Map<string, string>
 ): MemberBalance[] {
-  const balances = new Map<string, MemberBalance>();
+  const paidMap = new Map<string, Dinero>();
+  const owedMap = new Map<string, Dinero>();
 
   const init = (id: string) => {
-    if (!balances.has(id)) {
-      balances.set(id, {
-        memberId: id,
-        memberName: memberNames.get(id) ?? id,
-        paid: 0,
-        owed: 0,
-        balance: 0,
-      });
+    if (!paidMap.has(id)) {
+      paidMap.set(id, zeroEur);
+      owedMap.set(id, zeroEur);
     }
-    return balances.get(id)!;
   };
 
   // Process expenses
   for (const exp of expenses) {
-    // Use payers if available, fallback to old paidBy
     if (exp.payers && exp.payers.length > 0) {
       for (const p of exp.payers) {
-        init(p.memberId).paid += p.amount;
+        init(p.memberId);
+        paidMap.set(p.memberId, add(paidMap.get(p.memberId)!, eur(p.amount)) as Dinero);
       }
     } else {
-      init(exp.paidBy).paid += exp.amount;
+      init(exp.paidBy);
+      paidMap.set(exp.paidBy, add(paidMap.get(exp.paidBy)!, eur(exp.amount)) as Dinero);
     }
 
-    // Each split adds to what members owe
     for (const split of exp.splits) {
-      init(split.memberId).owed += split.amount;
+      init(split.memberId);
+      owedMap.set(split.memberId, add(owedMap.get(split.memberId)!, eur(split.amount)) as Dinero);
     }
   }
 
-  // Process settlements (a settlement reduces what "from" owes to "to")
+  // Process settlements
   for (const s of settlements) {
-    // "from" paid "to" — this reduces from's debt and to's credit
-    init(s.from).paid += s.amount;
-    init(s.to).owed += s.amount;
+    init(s.from);
+    init(s.to);
+    paidMap.set(s.from, add(paidMap.get(s.from)!, eur(s.amount)) as Dinero);
+    owedMap.set(s.to, add(owedMap.get(s.to)!, eur(s.amount)) as Dinero);
   }
 
   // Calculate net balance
-  for (const b of balances.values()) {
-    b.balance = b.paid - b.owed;
+  const result: MemberBalance[] = [];
+  for (const [id] of paidMap) {
+    const paid = toFloat(paidMap.get(id)!);
+    const owed = toFloat(owedMap.get(id)!);
+    result.push({
+      memberId: id,
+      memberName: memberNames.get(id) ?? id,
+      paid,
+      owed,
+      balance: Math.round((paid - owed) * 100) / 100,
+    });
   }
 
-  return Array.from(balances.values());
+  return result;
 }
 
 /**
@@ -62,14 +72,13 @@ export function computeBalances(
  * Returns the minimum set of transactions to settle all debts.
  */
 export function minimizeDebts(balances: MemberBalance[]): DebtEdge[] {
-  const netBalances = new Map<string, number>();
+  const netBalances = new Map<string, Dinero>();
   const nameMap = new Map<string, string>();
 
   for (const b of balances) {
-    // Round to avoid floating point issues
-    const rounded = Math.round(b.balance * 100) / 100;
-    if (rounded !== 0) {
-      netBalances.set(b.memberId, rounded);
+    const d = eur(b.balance);
+    if (!isZero(d)) {
+      netBalances.set(b.memberId, d);
       nameMap.set(b.memberId, b.memberName);
     }
   }
@@ -77,45 +86,46 @@ export function minimizeDebts(balances: MemberBalance[]): DebtEdge[] {
   const debts: DebtEdge[] = [];
 
   while (netBalances.size > 0) {
-    // Find max creditor and max debtor
-    let maxCreditor: [string, number] | null = null;
-    let maxDebtor: [string, number] | null = null;
+    let maxCreditor: [string, Dinero] | null = null;
+    let maxDebtor: [string, Dinero] | null = null;
 
     for (const [id, bal] of netBalances) {
-      if (bal > 0 && (maxCreditor === null || bal > maxCreditor[1])) {
+      if (greaterThan(bal, eur(0)) && (maxCreditor === null || greaterThan(bal, maxCreditor[1]))) {
         maxCreditor = [id, bal];
       }
-      if (bal < 0 && (maxDebtor === null || bal < maxDebtor[1])) {
+      if (lessThan(bal, eur(0)) && (maxDebtor === null || lessThan(bal, maxDebtor[1]))) {
         maxDebtor = [id, bal];
       }
     }
 
     if (!maxCreditor || !maxDebtor) break;
 
-    const amount = Math.min(maxCreditor[1], Math.abs(maxDebtor[1]));
-    const rounded = Math.round(amount * 100) / 100;
+    // Amount to transfer: min(creditor amount, |debtor amount|)
+    const debtorAbs = eur(Math.abs(toFloat(maxDebtor[1])));
+    const transfer = lessThan(maxCreditor[1], debtorAbs) ? maxCreditor[1] : debtorAbs;
+    const amount = toFloat(transfer);
 
-    if (rounded <= 0) break;
+    if (amount <= 0) break;
 
     debts.push({
       from: maxDebtor[0],
       fromName: nameMap.get(maxDebtor[0]) ?? maxDebtor[0],
       to: maxCreditor[0],
       toName: nameMap.get(maxCreditor[0]) ?? maxCreditor[0],
-      amount: rounded,
+      amount,
     });
 
     // Update balances
-    const newCreditorBal = maxCreditor[1] - rounded;
-    const newDebtorBal = maxDebtor[1] + rounded;
+    const newCreditorBal = subtract(maxCreditor[1], transfer);
+    const newDebtorBal = add(maxDebtor[1], transfer);
 
-    if (Math.abs(newCreditorBal) < 0.01) {
+    if (isZero(newCreditorBal)) {
       netBalances.delete(maxCreditor[0]);
     } else {
       netBalances.set(maxCreditor[0], newCreditorBal);
     }
 
-    if (Math.abs(newDebtorBal) < 0.01) {
+    if (isZero(newDebtorBal)) {
       netBalances.delete(maxDebtor[0]);
     } else {
       netBalances.set(maxDebtor[0], newDebtorBal);

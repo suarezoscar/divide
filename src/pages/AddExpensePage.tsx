@@ -13,6 +13,7 @@ import { friendlyError } from "../utils/errors";
 import { Skeleton } from "../components/ui/Skeleton";
 import { formatCurrency } from "../utils/format";
 import type { Split, Payer } from "../types";
+import { eur, toFloat, allocateEven, equal } from "../utils/money";
 import styles from "./AddExpensePage.module.css";
 
 type SplitMode = "even" | "custom";
@@ -44,7 +45,7 @@ export function AddExpensePage() {
     (id) => payerAmounts[id] !== "" && parseFloat(payerAmounts[id].replace(",", ".")) > 0
   );
   const payerCount = payerIds.length;
-  const payerSum = Math.round(payerIds.reduce((s, id) => s + parseFloat(payerAmounts[id].replace(",", ".")), 0) * 100) / 100;
+  const payerSum = Math.round(payerIds.reduce((s, id) => s + toFloat(eur(parseFloat(payerAmounts[id].replace(",", ".")))), 0) * 100) / 100;
   const effectiveAmount = payerCount >= 2 ? payerSum : parseFloat((amount || "0").replace(",", "."));
 
   // Load existing expense for edit mode
@@ -71,7 +72,7 @@ export function AddExpensePage() {
       if (exp.splits.length > 0) {
         // Detect split mode: even if all splits are equal
         const firstAmount = exp.splits[0].amount;
-        const allEven = exp.splits.every((s) => Math.abs(s.amount - firstAmount) < 0.01)
+        const allEven = exp.splits.every((s) => equal(eur(s.amount), eur(firstAmount)))
           || exp.splits.length === 1;
         if (allEven && exp.splits.length === group.members.length) {
           setSplitMode("even");
@@ -147,12 +148,11 @@ export function AddExpensePage() {
 
     if (splitMode === "even") {
       const count = includedMembers.size;
-      const splitAmount = Math.round((numAmount / count) * 100) / 100;
-      const remaining = Math.round((numAmount - splitAmount * (count - 1)) * 100) / 100;
+      const parts = allocateEven(eur(numAmount), count);
       const memberIds = [...includedMembers];
       splits = memberIds.map((memberId, i) => ({
         memberId,
-        amount: i === 0 ? remaining : splitAmount,
+        amount: toFloat(parts[i]),
       }));
     } else {
       const customAmounts: Split[] = [];
@@ -392,7 +392,8 @@ export function AddExpensePage() {
                   ? (() => {
                       const count = includedMembers.size;
                       const val = effectiveAmount;
-                      const sa = Math.round((val / count) * 100) / 100;
+                      const parts = allocateEven(eur(val), count);
+                      const sa = toFloat(parts[0]);
                       return isNaN(sa) ? "—" : sa.toFixed(2);
                     })()
                   : null;
