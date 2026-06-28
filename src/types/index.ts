@@ -38,15 +38,17 @@ export interface Expense {
   date: Timestamp;
   splits: Split[];
   category?: string;
+  createdBy?: string;
 }
 
 export interface Settlement {
   id: string;
   groupId: string;
-  from: string; // member id (who pays)
-  to: string; // member id (who receives)
+  from: string;
+  to: string;
   amount: number;
   date: Timestamp;
+  expenseId?: string;
 }
 
 // ── Derived / UI types ──

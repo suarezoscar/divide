@@ -25,6 +25,7 @@ export function docToExpense(id: string, data: DocumentData): Expense {
     date: data.date,
     splits: data.splits ?? [],
     category: data.category,
+    createdBy: data.createdBy,
   };
 }
 
@@ -36,7 +37,8 @@ export async function createExpense(
   splits: Split[],
   date?: Date,
   category?: string,
-  payers?: Payer[]
+  payers?: Payer[],
+  userId?: string
 ): Promise<Expense> {
   const ref = await addDoc(collection(db, "expenses"), {
     groupId,
@@ -46,6 +48,7 @@ export async function createExpense(
     splits,
     payers: payers ?? undefined,
     category: category ?? null,
+    createdBy: userId ?? null,
     date: date ? Timestamp.fromDate(date) : Timestamp.now(),
   });
   return {
@@ -57,6 +60,7 @@ export async function createExpense(
     splits,
     payers,
     category,
+    createdBy: userId,
     date: date ? Timestamp.fromDate(date) : Timestamp.now(),
   };
 }
@@ -86,5 +90,10 @@ export async function updateExpense(
 }
 
 export async function deleteExpense(expenseId: string): Promise<void> {
+  // Also delete related settlements if they reference this expense
+  const settlementSnap = await getDocs(
+    query(collection(db, "settlements"), where("expenseId", "==", expenseId))
+  );
+  await Promise.all(settlementSnap.docs.map((d) => deleteDoc(doc(db, "settlements", d.id))));
   await deleteDoc(doc(db, "expenses", expenseId));
 }

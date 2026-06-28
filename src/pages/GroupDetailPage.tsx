@@ -257,23 +257,27 @@ export function GroupDetailPage() {
                           })()}
                         </span>
                         <div className={styles.expenseActions}>
-                          <button
-                            className={styles.actionBtn}
-                            aria-label="Editar gasto"
-                            onClick={() => navigate(`/group/${groupId}/expense/${exp.id}`)}
-                          >
-                            <Pencil size={15} />
-                          </button>
-                          <button
-                            className={styles.actionBtn}
-                            aria-label="Eliminar gasto"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDeleteExpenseId(exp.id);
-                            }}
-                          >
-                            <Trash2 size={15} />
-                          </button>
+                          {(exp.createdBy === user?.uid || !exp.createdBy) && (
+                            <button
+                              className={styles.actionBtn}
+                              aria-label="Editar gasto"
+                              onClick={() => navigate(`/group/${groupId}/expense/${exp.id}`)}
+                            >
+                              <Pencil size={15} />
+                            </button>
+                          )}
+                          {(exp.createdBy === user?.uid || !exp.createdBy) && (
+                            <button
+                              className={styles.actionBtn}
+                              aria-label="Eliminar gasto"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeleteExpenseId(exp.id);
+                              }}
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          )}
                         </div>
                       </div>
 

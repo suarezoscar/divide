@@ -18,6 +18,7 @@ function docToSettlement(id: string, data: DocumentData): Settlement {
     to: data.to,
     amount: data.amount,
     date: data.date,
+    expenseId: data.expenseId,
   };
 }
 

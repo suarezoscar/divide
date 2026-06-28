@@ -79,9 +79,10 @@ export function useExpenses(groupId: string) {
     splits: Split[],
     date?: Date,
     category?: string,
-    payers?: Payer[]
+    payers?: Payer[],
+    userId?: string
   ) => {
-    return await expensesService.createExpense(groupId, description, amount, paidBy, splits, date, category, payers);
+    return await expensesService.createExpense(groupId, description, amount, paidBy, splits, date, category, payers, userId);
   };
 
   const remove = async (expenseId: string) => {

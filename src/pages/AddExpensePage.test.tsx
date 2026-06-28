@@ -1,10 +1,16 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import React from "react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { AddExpensePage } from "./AddExpensePage";
 
 // Mock hooks
+vi.mock("../hooks/useAuth", () => ({
+  useAuth: () => ({ user: { uid: "test-user" }, loading: false }),
+  AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 vi.mock("../hooks/useGroups", () => ({
   useGroup: () => ({
     group: {

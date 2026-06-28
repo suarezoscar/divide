@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useGroup } from "../hooks/useGroups";
 import { useExpenses } from "../hooks/useExpenses";
+import { useAuth } from "../hooks/useAuth";
 import * as expensesService from "../services/expenses";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
@@ -23,6 +24,7 @@ export function AddExpensePage() {
   const navigate = useNavigate();
   const { group, loading } = useGroup(groupId!);
   const { add, update } = useExpenses(groupId!);
+  const { user } = useAuth();
   const isEditing = !!expenseId;
 
   const [description, setDescription] = useState("");
@@ -179,7 +181,7 @@ export function AddExpensePage() {
         await update(expenseId!, description.trim(), numAmount, firstPayer, splits, date, cat, payers);
         showToast("Gasto actualizado", "success");
       } else {
-        const created = await add(description.trim(), numAmount, firstPayer, splits, date, cat, payers);
+        const created = await add(description.trim(), numAmount, firstPayer, splits, date, cat, payers, user?.uid);
         sessionStorage.setItem(`lastAdded-${groupId}`, created.id);
         showToast("Gasto añadido", "success");
       }
