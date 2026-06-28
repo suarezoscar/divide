@@ -77,7 +77,7 @@ export function AddExpensePage() {
         const firstAmount = exp.splits[0].amount;
         const allEven = exp.splits.every((s) => equal(eur(s.amount), eur(firstAmount)))
           || exp.splits.length === 1;
-        if (allEven && exp.splits.length === group.members.length) {
+        if (allEven) {
           setSplitMode("even");
         } else {
           setSplitMode("custom");
