@@ -5,10 +5,8 @@
       <stop offset="100%" stop-color="#045F74"/>
     </linearGradient>
   </defs>
-  <!-- Background circle -->
   <circle cx="256" cy="256" r="256" fill="url(#bg)"/>
-  <!-- Divide symbol: two dots + line, centered -->
-  <circle cx="186" cy="186" r="36" fill="white"/>
-  <circle cx="326" cy="326" r="36" fill="white"/>
-  <rect x="130" y="244" width="252" height="24" rx="12" fill="white"/>
+  <circle cx="186" cy="186" r="32" fill="white"/>
+  <circle cx="326" cy="326" r="32" fill="white"/>
+  <rect x="146" y="246" width="220" height="20" rx="10" fill="white"/>
 </svg>
