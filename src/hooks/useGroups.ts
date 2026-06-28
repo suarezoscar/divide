@@ -62,9 +62,8 @@ export function useGroup(groupId: string) {
   useEffect(() => {
     groupsService.getGroup(groupId).then((g) => {
       setGroup(g);
-    }).catch(() => {
-      setLoading(false);
-    });
+    }).catch(() => {})
+    .finally(() => setLoading(false));
   }, [groupId]);
 
   const linkedMemberId = useMemo(() => {
