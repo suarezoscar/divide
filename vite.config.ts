@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 const commitCount = execSync('git rev-list --count HEAD').toString().trim();
-const APP_VERSION = `1.0.${commitCount}`;
+const APP_VERSION = `1.0.${Number(commitCount) + 1}`;
 
 // https://vite.dev/config/
 export default defineConfig({
