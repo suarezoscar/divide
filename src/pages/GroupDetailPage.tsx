@@ -164,9 +164,9 @@ export function GroupDetailPage() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.header}>
-        <h1 style={{ borderBottom: `2px solid ${groupColor}`, paddingBottom: 4 }}>{group.name}</h1>
-        <div style={{ display: "flex", gap: 8 }}>
+      <div className={styles.header} style={{ background: `linear-gradient(180deg, ${getGroupColorRgba(group.name, 0.08)}, transparent)` }}>
+        <h1 style={{ borderBottom: `2px solid ${groupColor}`, paddingBottom: 4, width: "100%" }}>{group.name}</h1>
+        <div className={styles.headerActions}>
           <Button size="sm" variant="ghost" onClick={toggleNotifs} aria-label={notifsOn ? "Desactivar notificaciones" : "Activar notificaciones"}>
             {notifsOn ? <Bell size={16} /> : <BellOff size={16} />}
           </Button>
