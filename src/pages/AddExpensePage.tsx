@@ -29,13 +29,21 @@ export function AddExpensePage() {
 
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
-  const [paidBy, setPaidBy] = useState(() => {
-    if (!group) return "";
-    return linkedMemberId ?? group.members[0]?.id ?? "";
-  });
+  const [paidBy, setPaidBy] = useState("");
   const [splitMode, setSplitMode] = useState<SplitMode>("even");
   const [customSplits, setCustomSplits] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+
+  // Auto-select linked member as payer (new expenses only)
+  useEffect(() => {
+    if (isEditing) return;
+    if (!group) return;
+    if (linkedMemberId) {
+      setPaidBy(linkedMemberId);
+    } else if (group.members.length > 0 && !paidBy) {
+      setPaidBy(group.members[0].id);
+    }
+  }, [linkedMemberId, group?.id, isEditing]);
   const [error, setError] = useState("");
   const [expenseDate, setExpenseDate] = useState("");
   const [expenseTime, setExpenseTime] = useState("");
