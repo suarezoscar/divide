@@ -14,7 +14,7 @@ import { showToast } from "../components/ui/Toast";
 import { friendlyError } from "../utils/errors";
 import { Skeleton } from "../components/ui/Skeleton";
 import type { Split } from "../types";
-import { eur, toFloat, allocateEven, equal } from "../utils/money";
+import { eur, splitEvenCents, equal } from "../utils/money";
 import styles from "./AddExpensePage.module.css";
 
 type SplitMode = "even" | "custom";
@@ -122,20 +122,12 @@ export function AddExpensePage() {
     let splits: Split[];
 
     if (splitMode === "even") {
-      const count = includedMembers.size;
-      const parts = allocateEven(eur(numAmount), count);
       const memberIds = [...includedMembers];
+      const amounts = splitEvenCents(numAmount, memberIds.length);
       splits = memberIds.map((memberId, i) => ({
         memberId,
-        amount: toFloat(parts[i]),
+        amount: amounts[i],
       }));
-      // Ajustar: diferencia de céntimos la asume el pagador
-      const payerIdx = memberIds.indexOf(paidBy);
-      if (payerIdx >= 0) {
-        const total = splits.reduce((s, sp) => s + sp.amount, 0);
-        const diff = Math.round((numAmount - total) * 100) / 100;
-        splits[payerIdx].amount = Math.round((toFloat(eur(splits[payerIdx].amount + diff))) * 100) / 100;
-      }
     } else {
       const customAmounts: Split[] = [];
       for (const id of includedMembers) {
@@ -302,8 +294,8 @@ export function AddExpensePage() {
               const splitMap = new Map<string, number>();
               if (splitMode === "even" && includedMembers.size > 0 && !isNaN(effectiveAmount) && effectiveAmount > 0) {
                 const memberIds = [...includedMembers];
-                const parts = allocateEven(eur(effectiveAmount), memberIds.length);
-                memberIds.forEach((id, i) => splitMap.set(id, toFloat(parts[i])));
+                const amounts = splitEvenCents(effectiveAmount, memberIds.length);
+                memberIds.forEach((id, i) => splitMap.set(id, amounts[i]));
               }
 
               return group.members.map((m) => {

@@ -133,6 +133,17 @@ export function GroupDetailPage() {
   const [showAddMember, setShowAddMember] = useState(false);
   const [newMemberName, setNewMemberName] = useState("");
 
+  // Collapsible expenses
+  const [expandedExpenses, setExpandedExpenses] = useState<Set<string>>(new Set());
+  const toggleExpense = (id: string) => {
+    setExpandedExpenses((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
   // Delete dialogs
   const [deleteExpenseId, setDeleteExpenseId] = useState<string | null>(null);
   const [deleteMemberId, setDeleteMemberId] = useState<string | null>(null);
@@ -241,11 +252,14 @@ export function GroupDetailPage() {
               <div className={styles.expenseList}>
                 {expenses.map((exp) => {
                 const payer = memberById.get(exp.paidBy);
-                const payerName = payer?.name ?? "(ex-miembro)";
-                  const participantCount = exp.splits.length;
-                  const totalMembers = group.members.length;
+                  const payerName = payer?.name ?? "(ex-miembro)";
                   return (
-                    <Card key={exp.id} className={styles.expenseCard}>
+                    <Card
+                      key={exp.id}
+                      className={`${styles.expenseCard} ${expandedExpenses.has(exp.id) ? styles.expenseCardExpanded : ""}`}
+                      onClick={() => toggleExpense(exp.id)}
+                      aria-expanded={expandedExpenses.has(exp.id)}
+                    >
                       {/* Top row: description + amount */}
                       <div className={styles.expenseTopRow}>
                         <span className={styles.expenseDesc}>
@@ -275,7 +289,7 @@ export function GroupDetailPage() {
                             <button
                               className={styles.actionBtn}
                               aria-label="Editar gasto"
-                              onClick={() => navigate(`/group/${groupId}/expense/${exp.id}`)}
+                              onClick={(e) => { e.stopPropagation(); navigate(`/group/${groupId}/expense/${exp.id}`); }}
                             >
                               <Pencil size={15} />
                             </button>
@@ -295,25 +309,32 @@ export function GroupDetailPage() {
                         </div>
                       </div>
 
-                      {/* Participant badge + splits */}
-                      {participantCount < totalMembers && (
-                        <span className={styles.participantBadge}>
-                          {participantCount}/{totalMembers} participantes
-                        </span>
+                      {/* Collapsed: participant avatars row */}
+                      {!expandedExpenses.has(exp.id) && (
+                        <div className={styles.avatarRow}>
+                          {exp.splits.map((s) => {
+                            const m = memberById.get(s.memberId);
+                            return <Avatar key={s.memberId} name={m?.name ?? ""} size="sm" id={s.memberId} />;
+                          })}
+                        </div>
                       )}
-                      <div className={styles.splitList}>
-                        {exp.splits.map((s) => {
-                          const member = memberById.get(s.memberId);
-                          const memberName = member?.name ?? "(ex-miembro)";
-                          return (
-                            <div key={s.memberId} className={styles.splitRow}>
-                              <Avatar name={memberName} size="sm" id={s.memberId} />
-                              <span className={styles.splitName}>{memberName}</span>
-                              <span className={styles.splitAmount}>{formatCurrency(s.amount)}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
+
+                      {/* Expanded: full split list */}
+                      {expandedExpenses.has(exp.id) && (
+                        <div className={styles.splitList}>
+                          {exp.splits.map((s) => {
+                            const member = memberById.get(s.memberId);
+                            const memberName = member?.name ?? "(ex-miembro)";
+                            return (
+                              <div key={s.memberId} className={styles.splitRow}>
+                                <Avatar name={memberName} size="sm" id={s.memberId} />
+                                <span className={styles.splitName}>{memberName}</span>
+                                <span className={styles.splitAmount}>{formatCurrency(s.amount)}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </Card>
                   );
                 })}

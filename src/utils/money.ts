@@ -49,6 +49,23 @@ export function allocateEven(d: D, parts: number): D[] {
   return allocate(d, Array(parts).fill(1)) as D[];
 }
 
+/**
+ * Split a float amount evenly across `count` parts using cents-based
+ * floor + remainder distribution (transparent, no dinero.js rounding).
+ * Returns float amounts that always sum back to the original.
+ */
+export function splitEvenCents(amount: number, count: number): number[] {
+  if (count === 0) return [];
+  const cents = Math.round(amount * 100);
+  const share = Math.floor(cents / count);
+  const remainder = cents - share * count;
+  const result: number[] = [];
+  for (let i = 0; i < count; i++) {
+    result.push((share + (i < remainder ? 1 : 0)) / 100);
+  }
+  return result;
+}
+
 /** Add multiple Dinero amounts together. */
 export function addEur(items: D[]): D {
   return items.reduce((acc, d) => add(acc, d) as D);
