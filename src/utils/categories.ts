@@ -2,8 +2,9 @@ export const CATEGORIES = [
   { id: "food", emoji: "🍕", label: "Comida" },
   { id: "transport", emoji: "🚌", label: "Transporte" },
   { id: "housing", emoji: "🏠", label: "Alojamiento" },
-  { id: "leisure", emoji: "🍻", label: "Ocio" },
+  { id: "leisure", emoji: "🏃", label: "Actividad" },
   { id: "shopping", emoji: "🛒", label: "Compras" },
+  { id: "nightlife", emoji: "🍻", label: "Copas" },
   { id: "other", emoji: "📦", label: "Otro" },
 ] as const;
 

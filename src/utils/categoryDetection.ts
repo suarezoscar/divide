@@ -4,9 +4,11 @@ import {
   HOUSING_KEYWORDS,
   LEISURE_KEYWORDS,
   SHOPPING_KEYWORDS,
+  NIGHTLIFE_KEYWORDS,
 } from "./categoryKeywords";
 
 const CATEGORY_KEYWORDS: Record<string, string[]> = {
+  nightlife: NIGHTLIFE_KEYWORDS,
   food: FOOD_KEYWORDS,
   transport: TRANSPORT_KEYWORDS,
   housing: HOUSING_KEYWORDS,

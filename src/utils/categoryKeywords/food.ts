@@ -50,15 +50,7 @@ export const FOOD_KEYWORDS: string[] = [
   "sope", "huarache", "carnitas", "cochinita", "pibil",
   "ajiaco", "bandeja paisa", "sancocho", "mofongo", "tostones", "maduros",
   "yuca", "platano", "plátano", "frijoles", "porotos", "habichuelas",
-  // Bebidas
-  "cerveza", "birra", "caña", "jarra", "pinta", "vino", "tinto", "blanco", "rosado",
-  "copa", "cocktail", "coctel", "mojito", "gin", "gintonic", "ron", "whisky", "vodka",
-  "vermuth", "vermut", "aperol", "spritz", "campari",
-  "martini", "negroni", "margarita", "daiquiri", "pina colada",
-  "sangria", "sangría", "tinto verano", "clara", "radler", "shandy",
-  "champan", "champán", "cava", "prosecco", "lambrusco", "txakoli",
-  "sidra", "orujo", "pacharan", "pacharán", "licor", "crema", "anís",
-  "sake", "soju",
+  // Bebidas (solo no alcohólicas)
   "refresco", "cocacola", "coca", "cola", "fanta", "sprite", "nestea", "agua", "zumo",
   // Panadería / postres
   "pan", "croissant", "cruasan", "napolitana", "bolleria", "bollería", "tostada",
