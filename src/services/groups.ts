@@ -208,6 +208,21 @@ export async function getGroupByInviteCode(code: string): Promise<Group | null> 
   return docToGroup(snap.docs[0].id, snap.docs[0].data());
 }
 
+export async function updateGroupInfo(
+  groupId: string,
+  name: string,
+  description: string,
+  actorUserId?: string,
+  actorName?: string
+): Promise<void> {
+  await updateDoc(doc(db, "groups", groupId), { name, description });
+  if (actorUserId) {
+    logEvent(groupId, "group_updated", actorUserId, actorName ?? actorUserId, {
+      memberName: name,
+    });
+  }
+}
+
 export async function deleteGroup(
   groupId: string,
   actorUserId?: string,

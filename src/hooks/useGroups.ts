@@ -116,5 +116,10 @@ export function useGroup(groupId: string) {
     });
   };
 
-  return { group, loading, linkedMemberId, updateMembers, removeMember, removeGroup, claimMember, leaveGroup };
+  const updateGroupInfo = async (name: string, description: string) => {
+    await groupsService.updateGroupInfo(groupId, name, description, user?.uid, getActorName());
+    setGroup((prev) => (prev ? { ...prev, name, description } : null));
+  };
+
+  return { group, loading, linkedMemberId, updateMembers, removeMember, removeGroup, claimMember, leaveGroup, updateGroupInfo };
 }

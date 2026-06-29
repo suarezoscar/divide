@@ -11,6 +11,7 @@ export type EventType =
   | "member_left"
   | "member_claimed"
   | "group_created"
+  | "group_updated"
   | "group_deleted";
 
 export interface EventDetails {

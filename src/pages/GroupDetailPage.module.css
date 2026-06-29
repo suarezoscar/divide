@@ -4,24 +4,55 @@
   gap: 24px;
 }
 
+/* ── Header: single row ── */
 .header {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 18px 20px 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
   border-radius: 14px;
-  margin-bottom: 4px;
+  gap: 8px;
+}
+
+.headerTitle {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  flex-shrink: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .headerActions {
   display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-  width: 100%;
-  margin-top: 10px;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
 }
 
-/* Tabs */
+.headerIconBtn {
+  background: none;
+  border: none;
+  color: #6B7280;
+  cursor: pointer;
+  padding: 8px;
+  min-width: 40px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  transition: all 0.15s;
+}
+
+.headerIconBtn:hover {
+  background: #F3F4F6;
+  color: #07819C;
+}
+
+/* ── Tabs ── */
 .tabs {
   display: flex;
   gap: 4px;
@@ -54,6 +85,7 @@
   box-shadow: 0 1px 2px rgba(0,0,0,0.06);
 }
 
+/* ── Tab content ── */
 .tabContent {
   display: flex;
   flex-direction: column;
@@ -66,20 +98,7 @@
   to { opacity: 1; }
 }
 
-.muted {
-  text-align: center;
-  color: #6B7280;
-  padding: 20px;
-}
-
-.empty {
-  text-align: center;
-  padding: 40px 24px;
-  color: #4B5563;
-  font-size: 14px;
-}
-
-/* Summary bar */
+/* ── Summary bar ── */
 .summaryBar {
   background: rgba(7, 129, 156, 0.06);
   border: 1px solid rgba(7, 129, 156, 0.15);
@@ -104,7 +123,7 @@
   font-weight: 700;
 }
 
-/* Expenses */
+/* ── Expense card animations ── */
 .expenseList {
   display: flex;
   flex-direction: column;
@@ -138,6 +157,7 @@
   border: 1.5px solid rgba(7,129,156,0.15);
 }
 
+/* ── Expense card internals ── */
 .avatarRow {
   display: flex;
   gap: 6px;
@@ -256,17 +276,6 @@
   flex: 1;
 }
 
-.payerChip {
-  font-size: 10px;
-  font-weight: 700;
-  color: #07819C;
-  background: #ECFEFF;
-  padding: 1px 7px;
-  border-radius: 999px;
-  border: 1px solid #A5F3FC;
-  white-space: nowrap;
-}
-
 .splitAmount {
   font-weight: 600;
   font-size: 14px;
@@ -281,50 +290,137 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
-/* Members */
+/* ── Settings modal ── */
+.settingsBody {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+}
+
+.settingsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settingsSectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1F2937;
+  margin: 0;
+}
+
+.settingsDivider {
+  border: none;
+  border-top: 1px solid #E5E7EB;
+  margin: 20px 0;
+}
+
+/* ── Members within settings ── */
 .memberList {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
-.memberCard {
+.memberRow {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
+  gap: 10px;
+  padding: 8px 4px;
 }
 
-.memberName {
+.memberRowName {
+  flex: 1;
   font-size: 15px;
   font-weight: 500;
+  color: #1F2937;
 }
 
+.memberRemoveBtn {
+  background: none;
+  border: none;
+  color: #9CA3AF;
+  cursor: pointer;
+  padding: 8px;
+  min-width: 40px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.15s;
+}
+
+.memberRemoveBtn:hover {
+  color: #DC2626;
+  background: #FEF2F2;
+}
+
+.memberRemoveBtnDisabled {
+  opacity: 0.35;
+  cursor: not-allowed !important;
+}
+
+.memberRemoveBtnDisabled:hover {
+  color: #9CA3AF !important;
+  background: transparent !important;
+}
+
+/* ── Notifications toggle ── */
+.notifRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.notifLabel {
+  font-size: 15px;
+  color: #1F2937;
+}
+
+.notifToggle {
+  position: relative;
+  width: 48px;
+  height: 26px;
+  background: #D1D5DB;
+  border: none;
+  border-radius: 13px;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s;
+}
+
+.notifToggleOn {
+  background: #07819C;
+}
+
+.notifToggleKnob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  transition: transform 0.2s;
+}
+
+.notifToggleOn .notifToggleKnob {
+  transform: translateX(22px);
+}
+
+/* ── Add member form ── */
 .addMemberForm {
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 
-/* Admin zone (wraps members + danger zone) */
-.adminZone {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.adminZoneTitle {
-  font-size: 12px;
-  font-weight: 600;
-  color: #6B7280;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin: 0;
-}
-
-/* Danger zone */
+/* ── Danger zone (inside settings) ── */
 .dangerZone {
-  margin-top: 0;
   padding: 16px;
   border: 1px dashed #FECACA;
   border-radius: 12px;

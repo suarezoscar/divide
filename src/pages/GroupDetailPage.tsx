@@ -19,10 +19,10 @@ import { ActivityLog } from "../components/activity/ActivityLog";
 import { GroupDetailSkeleton } from "../components/ui/Skeleton";
 import { Skeleton } from "../components/ui/Skeleton";
 import { showToast } from "../components/ui/Toast";
-import { Plus, Receipt, Clock, ArrowRightLeft, Share, Pencil, Trash2, Bell, BellOff, LogOut } from "lucide-react";
+import { Plus, Receipt, Clock, ArrowRightLeft, Share, Pencil, Trash2, Bell, BellOff, LogOut, Settings } from "lucide-react";
 import { formatCurrency, formatDate } from "../utils/format";
 import { getCategory } from "../utils/categories";
-import { getGroupColor, getGroupColorRgba } from "../utils/groupColors";
+import { getGroupColorRgba } from "../utils/groupColors";
 import type { Member } from "../types";
 import styles from "./GroupDetailPage.module.css";
 
@@ -32,7 +32,7 @@ export function GroupDetailPage() {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { group, loading, linkedMemberId, updateMembers, removeMember, removeGroup, claimMember, leaveGroup } = useGroup(groupId!);
+  const { group, loading, linkedMemberId, updateMembers, removeMember, removeGroup, claimMember, leaveGroup, updateGroupInfo } = useGroup(groupId!);
   const { expenses, loading: expLoading, remove, changes, clearChanges } = useExpenses(groupId!);
   const { notify, permission, request } = useNotifications();
   const [notifsOn, setNotifsOn] = useState(() => localStorage.getItem(`notif-${groupId}`) !== "off");
@@ -157,6 +157,23 @@ export function GroupDetailPage() {
     navigate("/dashboard", { replace: true });
   };
 
+  // Settings modal
+  const [showSettings, setShowSettings] = useState(false);
+  const [groupName, setGroupName] = useState("");
+  const [groupDescription, setGroupDescription] = useState("");
+  useEffect(() => {
+    if (group) {
+      setGroupName(group.name);
+      setGroupDescription(group.description ?? "");
+    }
+  }, [group]);
+
+  const handleSaveGroupInfo = async () => {
+    if (!groupName.trim()) return;
+    await updateGroupInfo(groupName.trim(), groupDescription.trim());
+    showToast("Datos del grupo guardados", "success");
+  };
+
   // Invite modal
   const [showInvite, setShowInvite] = useState(false);
 
@@ -188,17 +205,20 @@ export function GroupDetailPage() {
 
   const currentMemberName = user ? group.members.find((m) => m.userId === user.uid)?.name : undefined;
 
-  const groupColor = getGroupColor(group.name);
   const groupColorLight = getGroupColorRgba(group.name, 0.08);
 
   return (
     <div className={styles.page}>
+      {/* Header: single row */}
       <div className={styles.header} style={{ background: `linear-gradient(180deg, ${getGroupColorRgba(group.name, 0.08)}, transparent)` }}>
-        <h1 style={{ borderBottom: `2px solid ${groupColor}`, paddingBottom: 4, width: "100%" }}>{group.name}</h1>
+        <h1 className={styles.headerTitle}>{group.name}</h1>
         <div className={styles.headerActions}>
-          <Button size="sm" variant="ghost" onClick={toggleNotifs} aria-label={notifsOn ? "Desactivar notificaciones" : "Activar notificaciones"}>
-            {notifsOn ? <Bell size={16} /> : <BellOff size={16} />}
-          </Button>
+          <button className={styles.headerIconBtn} onClick={toggleNotifs} aria-label={notifsOn ? "Desactivar notificaciones" : "Activar notificaciones"}>
+            {notifsOn ? <Bell size={18} /> : <BellOff size={18} />}
+          </button>
+          <button className={styles.headerIconBtn} onClick={() => setShowSettings(true)} aria-label="Ajustes del grupo">
+            <Settings size={18} />
+          </button>
           <Button size="sm" variant="ghost" onClick={() => setShowInvite(true)}>
             <Share size={16} />
             Invitar
@@ -378,81 +398,115 @@ export function GroupDetailPage() {
 
       <InviteSection groupId={groupId!} open={showInvite} onClose={() => setShowInvite(false)} />
 
-      {/* Members + Admin zone */}
-      <div className={styles.adminZone}>
-        <p className={styles.adminZoneTitle}>Miembros</p>
-        <div className={styles.memberList}>
-          {group.members.map((m) => {
-            const isInExpense = expenseMemberIds.has(m.id);
-            const isAdmin = user?.uid === group.createdBy;
-            return (
-              <Card key={m.id} className={styles.memberCard}>
-                <Avatar name={m.name} size="md" id={m.id} />
-                <span className={styles.memberName}>{m.name}</span>
-                {isAdmin && (
-                  <button
-                    className={`${styles.actionBtn} ${isInExpense ? styles.actionBtnDisabled : ""}`}
-                    aria-label={isInExpense ? `${m.name} no se puede quitar porque está en gastos` : `Quitar a ${m.name}`}
-                    title={isInExpense ? "No se puede eliminar: está involucrado en uno o más gastos" : undefined}
-                    disabled={isInExpense}
-                    onClick={() => !isInExpense && setDeleteMemberId(m.id)}
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                )}
-              </Card>
-            );
-          })}
-        </div>
+      {/* Settings modal */}
+      <Modal open={showSettings} onClose={() => setShowSettings(false)} title="Ajustes del grupo">
+        <div className={styles.settingsBody}>
+          {/* Section 1: Ajustes */}
+          <section className={styles.settingsSection}>
+            <h3 className={styles.settingsSectionTitle}>📝 Ajustes</h3>
+            <Input label="Nombre" value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="Nombre del grupo" />
+            <Input label="Descripción" value={groupDescription} onChange={(e) => setGroupDescription(e.target.value)} placeholder="Descripción (opcional)" />
+            <Button onClick={handleSaveGroupInfo} disabled={!groupName.trim()} size="lg" style={{ width: "100%" }}>
+              Guardar cambios
+            </Button>
+          </section>
 
-        {user?.uid === group.createdBy && (
-          <Button variant="secondary" size="sm" onClick={() => setShowAddMember(true)} style={{ marginTop: 4 }}>
-            <Plus size={14} /> Añadir miembro
+          <hr className={styles.settingsDivider} />
+
+          {/* Section 2: Miembros */}
+          <section className={styles.settingsSection}>
+            <h3 className={styles.settingsSectionTitle}>👥 Miembros</h3>
+            <div className={styles.memberList}>
+              {group.members.map((m) => {
+                const isInExpense = expenseMemberIds.has(m.id);
+                const isAdmin = user?.uid === group.createdBy;
+                return (
+                  <div key={m.id} className={styles.memberRow}>
+                    <Avatar name={m.name} size="md" id={m.id} />
+                    <span className={styles.memberRowName}>{m.name}</span>
+                    {isAdmin && (
+                      <button
+                        className={`${styles.memberRemoveBtn} ${isInExpense ? styles.memberRemoveBtnDisabled : ""}`}
+                        aria-label={isInExpense ? `${m.name} no se puede quitar` : `Quitar a ${m.name}`}
+                        disabled={isInExpense}
+                        onClick={() => !isInExpense && setDeleteMemberId(m.id)}
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            {user?.uid === group.createdBy && (
+              <Button variant="secondary" size="sm" onClick={() => setShowAddMember(true)}>
+                <Plus size={14} /> Añadir miembro
+              </Button>
+            )}
+          </section>
+
+          <hr className={styles.settingsDivider} />
+
+          {/* Section 3: Notificaciones */}
+          <section className={styles.settingsSection}>
+            <h3 className={styles.settingsSectionTitle}>🔔 Notificaciones</h3>
+            <div className={styles.notifRow}>
+              <span className={styles.notifLabel}>Notificaciones push</span>
+              <button
+                className={`${styles.notifToggle} ${notifsOn ? styles.notifToggleOn : ""}`}
+                onClick={toggleNotifs}
+                role="switch"
+                aria-checked={notifsOn}
+              >
+                <span className={styles.notifToggleKnob} />
+              </button>
+            </div>
+          </section>
+
+          <hr className={styles.settingsDivider} />
+
+          {/* Section 4: Zona peligrosa */}
+          <section className={styles.settingsSection}>
+            <h3 className={styles.settingsSectionTitle}>☠️ Zona peligrosa</h3>
+            {user?.uid === group.createdBy ? (
+              <Button
+                size="md"
+                variant="ghost"
+                onClick={() => { setShowSettings(false); setShowDeleteGroup(true); }}
+                style={{ width: "100%", color: "#DC2626", borderColor: "#FECACA", background: "#FEF2F2" }}
+              >
+                <Trash2 size={16} />
+                Eliminar grupo
+              </Button>
+            ) : (
+              <Button
+                size="md"
+                variant="ghost"
+                onClick={() => { setShowSettings(false); setShowLeaveGroup(true); }}
+                style={{ width: "100%", color: "#DC2626", borderColor: "#FECACA", background: "#FEF2F2" }}
+              >
+                <LogOut size={16} />
+                Salir del grupo
+              </Button>
+            )}
+          </section>
+        </div>
+      </Modal>
+
+      {/* Add member modal (inside settings) */}
+      <Modal open={showAddMember} onClose={() => setShowAddMember(false)} title="Añadir miembro">
+        <div className={styles.addMemberForm}>
+          <Input
+            label="Nombre"
+            value={newMemberName}
+            onChange={(e) => setNewMemberName(e.target.value)}
+            placeholder="Nombre del miembro"
+          />
+          <Button onClick={handleAddMember} disabled={!newMemberName.trim()} size="lg" style={{ width: "100%" }}>
+            Añadir
           </Button>
-        )}
-
-        <Modal open={showAddMember} onClose={() => setShowAddMember(false)} title="Añadir miembro">
-          <div className={styles.addMemberForm}>
-            <Input
-              label="Nombre"
-              value={newMemberName}
-              onChange={(e) => setNewMemberName(e.target.value)}
-              placeholder="Nombre del miembro"
-            />
-            <Button onClick={handleAddMember} disabled={!newMemberName.trim()} size="lg" style={{ width: "100%" }}>
-              Añadir
-            </Button>
-          </div>
-        </Modal>
-
-        <div className={styles.dangerZone}>
-          <p className={styles.dangerZoneTitle}>
-            {user?.uid === group.createdBy ? "Administración del grupo" : "Tus acciones"}
-          </p>
-
-          {user?.uid === group.createdBy ? (
-            <Button
-              size="md"
-              variant="ghost"
-              onClick={() => setShowDeleteGroup(true)}
-              style={{ width: "100%", color: "#DC2626", borderColor: "#FECACA", background: "#FEF2F2" }}
-            >
-              <Trash2 size={16} />
-              Eliminar grupo
-            </Button>
-          ) : (
-            <Button
-              size="md"
-              variant="ghost"
-              onClick={() => setShowLeaveGroup(true)}
-              style={{ width: "100%", color: "#DC2626", borderColor: "#FECACA", background: "#FEF2F2" }}
-            >
-              <LogOut size={16} />
-              Salir del grupo
-            </Button>
-          )}
         </div>
-      </div>
+      </Modal>
 
       <ConfirmDialog
         open={!!deleteExpenseId}
