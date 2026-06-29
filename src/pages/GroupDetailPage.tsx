@@ -219,14 +219,9 @@ export function GroupDetailPage() {
           <button className={styles.headerIconBtn} onClick={() => setShowSettings(true)} aria-label="Ajustes del grupo">
             <Settings size={18} />
           </button>
-          <Button size="sm" variant="ghost" onClick={() => setShowInvite(true)}>
-            <Share size={16} />
-            Invitar
-          </Button>
-          <Button size="sm" onClick={() => navigate(`/group/${groupId}/expense/new`)}>
-            <Plus size={16} />
-            Añadir gasto
-          </Button>
+          <button className={styles.headerIconBtn} onClick={() => setShowInvite(true)} aria-label="Invitar miembros">
+            <Share size={18} />
+          </button>
         </div>
       </div>
 
@@ -576,6 +571,15 @@ export function GroupDetailPage() {
           ))}
         </div>
       </Modal>
+
+      {/* Floating Action Button */}
+      <button
+        className={styles.fab}
+        onClick={() => navigate(`/group/${groupId}/expense/new`)}
+        aria-label="Añadir gasto"
+      >
+        <Plus size={24} />
+      </button>
     </div>
   );
 }
