@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 import { db } from "./firebase";
 import type { Group, Member } from "../types";
+import { logEvent } from "./auditLog";
 
 function docToGroup(id: string, data: DocumentData): Group {
   return {
@@ -32,7 +33,8 @@ export async function createGroup(
   userId: string,
   name: string,
   description: string,
-  members: Member[]
+  members: Member[],
+  actorName?: string
 ): Promise<Group> {
   if (!members.length) throw new Error("El grupo debe tener al menos un miembro");
   const ref = await addDoc(collection(db, "groups"), {
@@ -42,6 +44,9 @@ export async function createGroup(
     userIds: [userId],
     createdBy: userId,
     createdAt: Timestamp.now(),
+  });
+  logEvent(ref.id, "group_created", userId, actorName ?? userId, {
+    memberName: name,
   });
   return {
     id: ref.id,
@@ -74,12 +79,17 @@ export async function updateGroupMembers(groupId: string, members: Member[]): Pr
   await updateDoc(doc(db, "groups", groupId), { members });
 }
 
-export async function removeMemberFromGroup(groupId: string, memberId: string): Promise<void> {
+export async function removeMemberFromGroup(
+  groupId: string,
+  memberId: string,
+  actorUserId?: string,
+  actorName?: string
+): Promise<void> {
   const snap = await getDoc(doc(db, "groups", groupId));
   const data = snap.data();
   if (!data) return;
-  const members: Member[] = (data.members ?? []).filter((m: Member) => m.id !== memberId);
   const removedMember = (data.members ?? []).find((m: Member) => m.id === memberId);
+  const members: Member[] = (data.members ?? []).filter((m: Member) => m.id !== memberId);
   // If the removed member had a linked userId, remove it from userIds too
   const userIds: string[] = removedMember?.userId
     ? (data.userIds ?? []).filter((uid: string) => uid !== removedMember.userId)
@@ -89,37 +99,62 @@ export async function removeMemberFromGroup(groupId: string, memberId: string): 
   } else {
     await updateDoc(doc(db, "groups", groupId), { members, userIds });
   }
+  if (actorUserId) {
+    logEvent(groupId, "member_removed", actorUserId, actorName ?? actorUserId, {
+      memberId,
+      memberName: removedMember?.name ?? memberId,
+    });
+  }
 }
 
-export async function leaveGroup(groupId: string, userId: string, memberId: string): Promise<void> {
+export async function leaveGroup(
+  groupId: string,
+  userId: string,
+  memberId: string,
+  memberName?: string
+): Promise<void> {
   const snap = await getDoc(doc(db, "groups", groupId));
   const data = snap.data();
   if (!data) return;
   const members: Member[] = (data.members ?? []).filter((m: Member) => m.id !== memberId);
   const userIds: string[] = (data.userIds ?? []).filter((uid: string) => uid !== userId);
   await updateDoc(doc(db, "groups", groupId), { members, userIds });
+  logEvent(groupId, "member_left", userId, memberName ?? userId, {
+    memberId,
+    memberName,
+  });
 }
 
 export async function addUserToGroup(
   groupId: string,
   userId: string,
   memberNameOrId: string,
-  claimExisting = false
+  claimExisting = false,
+  actorUserId?: string,
+  actorName?: string
 ): Promise<void> {
+  let addedMemberName: string | undefined;
   if (claimExisting) {
-    // Update existing member to link userId
     const snap = await getDoc(doc(db, "groups", groupId));
     const data = snap.data();
     if (!data) return;
+    const existingMember = (data.members ?? []).find((m: Member) => m.id === memberNameOrId);
+    addedMemberName = existingMember?.name;
     const members: Member[] = (data.members ?? []).map((m: Member) =>
       m.id === memberNameOrId ? { ...m, userId } : m
     );
     await updateDoc(doc(db, "groups", groupId), { members, userIds: arrayUnion(userId) });
   } else {
+    addedMemberName = memberNameOrId;
     const member: Member = { id: crypto.randomUUID(), name: memberNameOrId, userId };
     await updateDoc(doc(db, "groups", groupId), {
       userIds: arrayUnion(userId),
       members: arrayUnion(member),
+    });
+  }
+  if (actorUserId) {
+    logEvent(groupId, "member_added", actorUserId, actorName ?? actorUserId, {
+      memberName: addedMemberName ?? memberNameOrId,
     });
   }
 }
@@ -127,15 +162,21 @@ export async function addUserToGroup(
 export async function claimMember(
   groupId: string,
   memberId: string,
-  userId: string
+  userId: string,
+  actorName?: string
 ): Promise<void> {
   const snap = await getDoc(doc(db, "groups", groupId));
   const data = snap.data();
   if (!data) return;
+  const claimedMember = (data.members ?? []).find((m: Member) => m.id === memberId);
   const members: Member[] = (data.members ?? []).map((m: Member) =>
     m.id === memberId ? { ...m, userId } : m
   );
   await updateDoc(doc(db, "groups", groupId), { members, userIds: arrayUnion(userId) });
+  logEvent(groupId, "member_claimed", userId, actorName ?? userId, {
+    memberId,
+    memberName: claimedMember?.name ?? memberId,
+  });
 }
 
 const CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no I, O, 0, 1
@@ -167,7 +208,12 @@ export async function getGroupByInviteCode(code: string): Promise<Group | null> 
   return docToGroup(snap.docs[0].id, snap.docs[0].data());
 }
 
-export async function deleteGroup(groupId: string): Promise<void> {
+export async function deleteGroup(
+  groupId: string,
+  actorUserId?: string,
+  actorName?: string,
+  groupName?: string
+): Promise<void> {
   // 1. Delete all expenses for this group
   const expensesSnap = await getDocs(
     query(collection(db, "expenses"), where("groupId", "==", groupId))
@@ -183,4 +229,9 @@ export async function deleteGroup(groupId: string): Promise<void> {
   // 3. Wait for all deletions, then delete the group itself
   await Promise.all([...expenseDeletions, ...settlementDeletions]);
   await deleteDoc(doc(db, "groups", groupId));
+  if (actorUserId) {
+    logEvent(groupId, "group_deleted", actorUserId, actorName ?? actorUserId, {
+      memberName: groupName,
+    });
+  }
 }

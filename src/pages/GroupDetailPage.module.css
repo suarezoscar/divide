@@ -306,9 +306,25 @@
   gap: 14px;
 }
 
+/* Admin zone (wraps members + danger zone) */
+.adminZone {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.adminZoneTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
 /* Danger zone */
 .dangerZone {
-  margin-top: 24px;
+  margin-top: 0;
   padding: 16px;
   border: 1px dashed #FECACA;
   border-radius: 12px;

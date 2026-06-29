@@ -71,13 +71,19 @@ export function useGroup(groupId: string) {
     return group.members.find((m) => m.userId === user.uid)?.id ?? null;
   }, [group, user]);
 
+  const getActorName = (): string => {
+    if (!user || !group) return "Alguien";
+    const member = group.members.find((m) => m.userId === user.uid);
+    return member?.name ?? "Alguien";
+  };
+
   const updateMembers = async (members: Member[]) => {
     await groupsService.updateGroupMembers(groupId, members);
     setGroup((prev) => (prev ? { ...prev, members } : null));
   };
 
   const removeMember = async (memberId: string) => {
-    await groupsService.removeMemberFromGroup(groupId, memberId);
+    await groupsService.removeMemberFromGroup(groupId, memberId, user?.uid, getActorName());
     setGroup((prev) =>
       prev
         ? { ...prev, members: prev.members.filter((m) => m.id !== memberId) }
@@ -86,18 +92,18 @@ export function useGroup(groupId: string) {
   };
 
   const removeGroup = async () => {
-    await groupsService.deleteGroup(groupId);
+    await groupsService.deleteGroup(groupId, user?.uid, getActorName(), group?.name);
   };
 
   const leaveGroup = async () => {
     if (!user || !linkedMemberId) return;
-    await groupsService.leaveGroup(groupId, user.uid, linkedMemberId);
+    await groupsService.leaveGroup(groupId, user.uid, linkedMemberId, getActorName());
     setGroup(null);
   };
 
   const claimMember = async (memberId: string) => {
     if (!user) return;
-    await groupsService.claimMember(groupId, memberId, user.uid);
+    await groupsService.claimMember(groupId, memberId, user.uid, getActorName());
     setGroup((prev) => {
       if (!prev) return null;
       return {

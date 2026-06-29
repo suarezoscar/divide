@@ -9,6 +9,7 @@ import {
 } from "firebase/firestore";
 import { db } from "./firebase";
 import type { Settlement } from "../types";
+import { logEvent } from "./auditLog";
 
 function docToSettlement(id: string, data: DocumentData): Settlement {
   return {
@@ -26,7 +27,11 @@ export async function createSettlement(
   groupId: string,
   from: string,
   to: string,
-  amount: number
+  amount: number,
+  actorUserId?: string,
+  actorName?: string,
+  fromName?: string,
+  toName?: string
 ): Promise<Settlement> {
   if (from === to) throw new Error("No puedes saldar una deuda contigo mismo");
   if (amount <= 0) throw new Error("El importe debe ser positivo");
@@ -38,6 +43,14 @@ export async function createSettlement(
     amount,
     date: Timestamp.now(),
   });
+  if (actorUserId) {
+    logEvent(groupId, "settlement_created", actorUserId, actorName ?? actorUserId, {
+      amount,
+      memberId: from,
+      memberName: fromName,
+      details: `${fromName ?? from} → ${toName ?? to}`,
+    });
+  }
   return {
     id: ref.id,
     groupId,

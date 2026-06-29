@@ -35,9 +35,17 @@ export function useBalances(groupId: string, expenses: Expense[], memberNames: M
   const balances: MemberBalance[] = computeBalances(expenses, settlements, memberNames);
   const debts: DebtEdge[] = minimizeDebts(balances);
 
-  const addSettlement = async (from: string, to: string, amount: number) => {
+  const addSettlement = async (
+    from: string,
+    to: string,
+    amount: number,
+    actorUserId?: string,
+    actorName?: string,
+    fromName?: string,
+    toName?: string
+  ) => {
     // Firestore write; onSnapshot will update settlements automatically
-    await settlementsService.createSettlement(groupId, from, to, amount);
+    await settlementsService.createSettlement(groupId, from, to, amount, actorUserId, actorName, fromName, toName);
   };
 
   return { settlements, balances, debts, addSettlement, loadingSettlements };

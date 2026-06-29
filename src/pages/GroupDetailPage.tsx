@@ -15,17 +15,18 @@ import { BalanceSummary } from "../components/balances/BalanceSummary";
 import { SettlementList } from "../components/balances/SettlementList";
 import { ExpenseDonut } from "../components/balances/ExpenseDonut";
 import { InviteSection } from "../components/groups/InviteSection";
+import { ActivityLog } from "../components/activity/ActivityLog";
 import { GroupDetailSkeleton } from "../components/ui/Skeleton";
 import { Skeleton } from "../components/ui/Skeleton";
 import { showToast } from "../components/ui/Toast";
-import { Plus, Receipt, Users, ArrowRightLeft, Share, Pencil, Trash2, Bell, BellOff, LogOut } from "lucide-react";
+import { Plus, Receipt, Clock, ArrowRightLeft, Share, Pencil, Trash2, Bell, BellOff, LogOut } from "lucide-react";
 import { formatCurrency, formatDate } from "../utils/format";
 import { getCategory } from "../utils/categories";
 import { getGroupColor, getGroupColorRgba } from "../utils/groupColors";
 import type { Member } from "../types";
 import styles from "./GroupDetailPage.module.css";
 
-type Tab = "expenses" | "balances" | "members";
+type Tab = "expenses" | "balances" | "activity";
 
 export function GroupDetailPage() {
   const { groupId } = useParams<{ groupId: string }>();
@@ -182,8 +183,10 @@ export function GroupDetailPage() {
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
     { key: "expenses", label: "Gastos", icon: <Receipt size={16} /> },
     { key: "balances", label: "Balances", icon: <ArrowRightLeft size={16} /> },
-    { key: "members", label: "Miembros", icon: <Users size={16} /> },
+    { key: "activity", label: "Historial", icon: <Clock size={16} /> },
   ];
+
+  const currentMemberName = user ? group.members.find((m) => m.userId === user.uid)?.name : undefined;
 
   const groupColor = getGroupColor(group.name);
   const groupColorLight = getGroupColorRgba(group.name, 0.08);
@@ -357,23 +360,36 @@ export function GroupDetailPage() {
             debts={debts}
             members={group.members}
             onSettle={async (from, to, amount) => {
-              await addSettlement(from, to, amount);
+              const fromMember = memberById.get(from);
+              const toMember = memberById.get(to);
+              await addSettlement(from, to, amount, user?.uid, currentMemberName, fromMember?.name, toMember?.name);
               showToast("Deuda saldada", "success");
             }}
           />
         </div>
       )}
 
-      {/* Members tab */}
-      {tab === "members" && (
+      {/* Activity tab */}
+      {tab === "activity" && (
         <div className={styles.tabContent}>
-          <div className={styles.memberList}>
-            {group.members.map((m) => {
-              const isInExpense = expenseMemberIds.has(m.id);
-              return (
-                <Card key={m.id} className={styles.memberCard}>
-                  <Avatar name={m.name} size="md" id={m.id} />
-                  <span className={styles.memberName}>{m.name}</span>
+          <ActivityLog groupId={groupId!} />
+        </div>
+      )}
+
+      <InviteSection groupId={groupId!} open={showInvite} onClose={() => setShowInvite(false)} />
+
+      {/* Members + Admin zone */}
+      <div className={styles.adminZone}>
+        <p className={styles.adminZoneTitle}>Miembros</p>
+        <div className={styles.memberList}>
+          {group.members.map((m) => {
+            const isInExpense = expenseMemberIds.has(m.id);
+            const isAdmin = user?.uid === group.createdBy;
+            return (
+              <Card key={m.id} className={styles.memberCard}>
+                <Avatar name={m.name} size="md" id={m.id} />
+                <span className={styles.memberName}>{m.name}</span>
+                {isAdmin && (
                   <button
                     className={`${styles.actionBtn} ${isInExpense ? styles.actionBtnDisabled : ""}`}
                     aria-label={isInExpense ? `${m.name} no se puede quitar porque está en gastos` : `Quitar a ${m.name}`}
@@ -383,64 +399,65 @@ export function GroupDetailPage() {
                   >
                     <Trash2 size={15} />
                   </button>
-                </Card>
-              );
-            })}
-          </div>
-          <Button variant="secondary" size="sm" onClick={() => setShowAddMember(true)}>
+                )}
+              </Card>
+            );
+          })}
+        </div>
+
+        {user?.uid === group.createdBy && (
+          <Button variant="secondary" size="sm" onClick={() => setShowAddMember(true)} style={{ marginTop: 4 }}>
             <Plus size={14} /> Añadir miembro
           </Button>
-
-          <Modal open={showAddMember} onClose={() => setShowAddMember(false)} title="Añadir miembro">
-            <div className={styles.addMemberForm}>
-              <Input
-                label="Nombre"
-                value={newMemberName}
-                onChange={(e) => setNewMemberName(e.target.value)}
-                placeholder="Nombre del miembro"
-              />
-              <Button onClick={handleAddMember} disabled={!newMemberName.trim()} size="lg" style={{ width: "100%" }}>
-                Añadir
-              </Button>
-            </div>
-          </Modal>
-        </div>
-      )}
-
-      <InviteSection groupId={groupId!} open={showInvite} onClose={() => setShowInvite(false)} />
-
-      <div className={styles.dangerZone}>
-        <p className={styles.dangerZoneTitle}>
-          {user?.uid === group.createdBy ? "Administración del grupo" : "Tus acciones"}
-        </p>
-
-        {user?.uid === group.createdBy ? (
-          <Button
-            size="md"
-            variant="ghost"
-            onClick={() => setShowDeleteGroup(true)}
-            style={{ width: "100%", color: "#DC2626", borderColor: "#FECACA", background: "#FEF2F2" }}
-          >
-            <Trash2 size={16} />
-            Eliminar grupo
-          </Button>
-        ) : (
-          <Button
-            size="md"
-            variant="ghost"
-            onClick={() => setShowLeaveGroup(true)}
-            style={{ width: "100%", color: "#DC2626", borderColor: "#FECACA", background: "#FEF2F2" }}
-          >
-            <LogOut size={16} />
-            Salir del grupo
-          </Button>
         )}
+
+        <Modal open={showAddMember} onClose={() => setShowAddMember(false)} title="Añadir miembro">
+          <div className={styles.addMemberForm}>
+            <Input
+              label="Nombre"
+              value={newMemberName}
+              onChange={(e) => setNewMemberName(e.target.value)}
+              placeholder="Nombre del miembro"
+            />
+            <Button onClick={handleAddMember} disabled={!newMemberName.trim()} size="lg" style={{ width: "100%" }}>
+              Añadir
+            </Button>
+          </div>
+        </Modal>
+
+        <div className={styles.dangerZone}>
+          <p className={styles.dangerZoneTitle}>
+            {user?.uid === group.createdBy ? "Administración del grupo" : "Tus acciones"}
+          </p>
+
+          {user?.uid === group.createdBy ? (
+            <Button
+              size="md"
+              variant="ghost"
+              onClick={() => setShowDeleteGroup(true)}
+              style={{ width: "100%", color: "#DC2626", borderColor: "#FECACA", background: "#FEF2F2" }}
+            >
+              <Trash2 size={16} />
+              Eliminar grupo
+            </Button>
+          ) : (
+            <Button
+              size="md"
+              variant="ghost"
+              onClick={() => setShowLeaveGroup(true)}
+              style={{ width: "100%", color: "#DC2626", borderColor: "#FECACA", background: "#FEF2F2" }}
+            >
+              <LogOut size={16} />
+              Salir del grupo
+            </Button>
+          )}
+        </div>
       </div>
 
       <ConfirmDialog
         open={!!deleteExpenseId}
         onClose={() => setDeleteExpenseId(null)}
-        onConfirm={() => { if (deleteExpenseId) { remove(deleteExpenseId); showToast("Gasto eliminado", "success"); } }}
+        onConfirm={() => { if (deleteExpenseId) { remove(deleteExpenseId, user?.uid, currentMemberName); showToast("Gasto eliminado", "success"); } }}
         title="¿Eliminar este gasto?"
         message="Se eliminará el gasto y se recalcularán los balances. Esta acción no se puede deshacer."
         confirmLabel="Eliminar gasto"

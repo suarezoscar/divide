@@ -79,13 +79,14 @@ export function useExpenses(groupId: string) {
     splits: Split[],
     date?: Date,
     category?: string,
-    userId?: string
+    userId?: string,
+    actorName?: string
   ) => {
-    return await expensesService.createExpense(groupId, description, amount, paidBy, splits, date, category, userId);
+    return await expensesService.createExpense(groupId, description, amount, paidBy, splits, date, category, userId, actorName);
   };
 
-  const remove = async (expenseId: string) => {
-    await expensesService.deleteExpense(expenseId);
+  const remove = async (expenseId: string, actorUserId?: string, actorName?: string) => {
+    await expensesService.deleteExpense(expenseId, actorUserId, actorName);
   };
 
   const update = async (
@@ -95,12 +96,14 @@ export function useExpenses(groupId: string) {
     paidBy: string,
     splits: Split[],
     date?: Date,
-    category?: string
+    category?: string,
+    actorUserId?: string,
+    actorName?: string
   ) => {
     await expensesService.updateExpense(expenseId, {
       description, amount, paidBy, splits, category,
       date: date ? Timestamp.fromDate(date) : undefined,
-    } as any);
+    } as any, actorUserId, actorName);
   };
 
   const clearChanges = () => setChanges(null);
