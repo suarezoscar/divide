@@ -18,7 +18,7 @@ import { InviteSection } from "../components/groups/InviteSection";
 import { GroupDetailSkeleton } from "../components/ui/Skeleton";
 import { Skeleton } from "../components/ui/Skeleton";
 import { showToast } from "../components/ui/Toast";
-import { Plus, Receipt, Users, ArrowRightLeft, Share, Pencil, Trash2, Bell, BellOff } from "lucide-react";
+import { Plus, Receipt, Users, ArrowRightLeft, Share, Pencil, Trash2, Bell, BellOff, LogOut } from "lucide-react";
 import { formatCurrency, formatDate } from "../utils/format";
 import { getCategory } from "../utils/categories";
 import { getGroupColor, getGroupColorRgba } from "../utils/groupColors";
@@ -31,7 +31,7 @@ export function GroupDetailPage() {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { group, loading, linkedMemberId, updateMembers, removeMember, removeGroup, claimMember } = useGroup(groupId!);
+  const { group, loading, linkedMemberId, updateMembers, removeMember, removeGroup, claimMember, leaveGroup } = useGroup(groupId!);
   const { expenses, loading: expLoading, remove, changes, clearChanges } = useExpenses(groupId!);
   const { notify, permission, request } = useNotifications();
   const [notifsOn, setNotifsOn] = useState(() => localStorage.getItem(`notif-${groupId}`) !== "off");
@@ -148,6 +148,7 @@ export function GroupDetailPage() {
   const [deleteExpenseId, setDeleteExpenseId] = useState<string | null>(null);
   const [deleteMemberId, setDeleteMemberId] = useState<string | null>(null);
   const [showDeleteGroup, setShowDeleteGroup] = useState(false);
+  const [showLeaveGroup, setShowLeaveGroup] = useState(false);
 
   const handleDeleteGroup = async () => {
     await removeGroup();
@@ -408,9 +409,12 @@ export function GroupDetailPage() {
 
       <InviteSection groupId={groupId!} open={showInvite} onClose={() => setShowInvite(false)} />
 
-      {user?.uid === group.createdBy && (
-        <div className={styles.dangerZone}>
-          <p className={styles.dangerZoneTitle}>Administración del grupo</p>
+      <div className={styles.dangerZone}>
+        <p className={styles.dangerZoneTitle}>
+          {user?.uid === group.createdBy ? "Administración del grupo" : "Tus acciones"}
+        </p>
+
+        {user?.uid === group.createdBy ? (
           <Button
             size="md"
             variant="ghost"
@@ -420,8 +424,18 @@ export function GroupDetailPage() {
             <Trash2 size={16} />
             Eliminar grupo
           </Button>
-        </div>
-      )}
+        ) : (
+          <Button
+            size="md"
+            variant="ghost"
+            onClick={() => setShowLeaveGroup(true)}
+            style={{ width: "100%", color: "#DC2626", borderColor: "#FECACA", background: "#FEF2F2" }}
+          >
+            <LogOut size={16} />
+            Salir del grupo
+          </Button>
+        )}
+      </div>
 
       <ConfirmDialog
         open={!!deleteExpenseId}
@@ -450,6 +464,20 @@ export function GroupDetailPage() {
         title="¿Eliminar este grupo?"
         message="Se eliminarán el grupo, todos sus gastos y todos los pagos registrados. Esta acción no se puede deshacer."
         confirmLabel="Eliminar grupo"
+        variant="danger"
+      />
+
+      <ConfirmDialog
+        open={showLeaveGroup}
+        onClose={() => setShowLeaveGroup(false)}
+        onConfirm={async () => {
+          await leaveGroup();
+          showToast("Has salido del grupo", "success");
+          navigate("/dashboard", { replace: true });
+        }}
+        title="¿Salir del grupo?"
+        message="Tus gastos anteriores se conservarán en el historial, pero dejarás de ver el grupo. Si el creador te invita de nuevo, podrás volver a unirte."
+        confirmLabel="Salir del grupo"
         variant="danger"
       />
 

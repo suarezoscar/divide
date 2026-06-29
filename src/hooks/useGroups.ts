@@ -89,6 +89,12 @@ export function useGroup(groupId: string) {
     await groupsService.deleteGroup(groupId);
   };
 
+  const leaveGroup = async () => {
+    if (!user || !linkedMemberId) return;
+    await groupsService.leaveGroup(groupId, user.uid, linkedMemberId);
+    setGroup(null);
+  };
+
   const claimMember = async (memberId: string) => {
     if (!user) return;
     await groupsService.claimMember(groupId, memberId, user.uid);
@@ -104,5 +110,5 @@ export function useGroup(groupId: string) {
     });
   };
 
-  return { group, loading, linkedMemberId, updateMembers, removeMember, removeGroup, claimMember };
+  return { group, loading, linkedMemberId, updateMembers, removeMember, removeGroup, claimMember, leaveGroup };
 }

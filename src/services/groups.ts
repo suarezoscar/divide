@@ -79,12 +79,25 @@ export async function removeMemberFromGroup(groupId: string, memberId: string): 
   const data = snap.data();
   if (!data) return;
   const members: Member[] = (data.members ?? []).filter((m: Member) => m.id !== memberId);
-  // If no members left, clean userIds to prevent zombie group access
+  const removedMember = (data.members ?? []).find((m: Member) => m.id === memberId);
+  // If the removed member had a linked userId, remove it from userIds too
+  const userIds: string[] = removedMember?.userId
+    ? (data.userIds ?? []).filter((uid: string) => uid !== removedMember.userId)
+    : (data.userIds ?? []);
   if (members.length === 0) {
     await updateDoc(doc(db, "groups", groupId), { members: [], userIds: [] });
   } else {
-    await updateDoc(doc(db, "groups", groupId), { members });
+    await updateDoc(doc(db, "groups", groupId), { members, userIds });
   }
+}
+
+export async function leaveGroup(groupId: string, userId: string, memberId: string): Promise<void> {
+  const snap = await getDoc(doc(db, "groups", groupId));
+  const data = snap.data();
+  if (!data) return;
+  const members: Member[] = (data.members ?? []).filter((m: Member) => m.id !== memberId);
+  const userIds: string[] = (data.userIds ?? []).filter((uid: string) => uid !== userId);
+  await updateDoc(doc(db, "groups", groupId), { members, userIds });
 }
 
 export async function addUserToGroup(
