@@ -28,11 +28,23 @@ function normalize(text: string): string[] {
 
 /** Detect category from description text. Returns category ID or null if no match. */
 export function detectCategory(text: string): string | null {
-  const words = normalize(text);
-  if (words.length === 0) return null;
+  const normalized = normalize(text);
+  if (normalized.length === 0) return null;
 
+  const lowerText = text.toLowerCase();
+
+  // Fase 1: multi-word keywords primero (más específicos, ej: "escape room")
   for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
-    for (const word of words) {
+    for (const kw of keywords) {
+      if (kw.includes(" ") && lowerText.includes(kw)) {
+        return category;
+      }
+    }
+  }
+
+  // Fase 2: single-word fallback
+  for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+    for (const word of normalized) {
       if (keywords.some((kw) => word === kw || word.includes(kw) || kw.includes(word))) {
         return category;
       }

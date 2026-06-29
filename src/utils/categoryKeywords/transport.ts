@@ -18,7 +18,7 @@ export const TRANSPORT_KEYWORDS: string[] = [
   "seguro", "poliza", "póliza", "itv", "revision", "revisión", "mantenimiento",
   "aceite", "rueda", "neumatico", "neumático", "michelin", "bridgestone",
   "cambio", "filtro", "bateria", "batería", "bujia", "bujía", "correa",
-  "freno", "pastilla", "disco", "embrague", "amortiguador", "escape",
+  "freno", "pastilla", "disco", "embrague", "amortiguador",
   "tubo", "silenciador", "catalizador", "inyector", "turbo", "radiador",
   "anticongelante", "refrigerante", "limpiaparabrisas", "escobilla",
   "lavado", "lavadero", "taller", "mecanico", "mecánico", "chapa", "pintura",
