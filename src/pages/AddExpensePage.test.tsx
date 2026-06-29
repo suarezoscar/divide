@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
@@ -88,13 +88,19 @@ describe("AddExpensePage", () => {
     expect(checkboxes[1]).toHaveAttribute("aria-checked", "false");
   });
 
-  it("shows date inputs", () => {
+  it("shows date inputs after clicking toggle", () => {
     render(
       <MemoryRouter>
         <AddExpensePage />
       </MemoryRouter>
     );
-    expect(screen.getByText("Fecha (opcional)")).toBeInTheDocument();
+
+    // Date is hidden by default — click toggle to reveal
+    const toggle = screen.getByText("+ Añadir fecha");
+    expect(toggle).toBeInTheDocument();
+    fireEvent.click(toggle);
+
+    expect(screen.getByText("Fecha")).toBeInTheDocument();
   });
 
   it("shows category chips", () => {

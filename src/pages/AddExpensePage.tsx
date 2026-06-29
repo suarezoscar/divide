@@ -31,18 +31,22 @@ export function AddExpensePage() {
   const [submitting, setSubmitting] = useState(false);
 
   // Auto-select linked member as payer (new expenses only)
+  const [showPayerPicker, setShowPayerPicker] = useState(false);
   useEffect(() => {
     if (isEditing) return;
     if (!group) return;
     if (linkedMemberId) {
       setPaidBy(linkedMemberId);
+      setShowPayerPicker(false);
     } else if (group.members.length > 0 && !paidBy) {
       setPaidBy(group.members[0].id);
+      setShowPayerPicker(true);
     }
   }, [linkedMemberId, group?.id, isEditing]);
   const [error, setError] = useState("");
   const [expenseDate, setExpenseDate] = useState("");
   const [expenseTime, setExpenseTime] = useState("");
+  const [showDate, setShowDate] = useState(isEditing);
   const [category, setCategory] = useState("other");
   const [categoryManuallySet, setCategoryManuallySet] = useState(false);
   const [includedMembers, setIncludedMembers] = useState<Set<string>>(new Set());
@@ -147,11 +151,23 @@ export function AddExpensePage() {
 
   const effectiveAmount = parseFloat((amount || "0").replace(",", "."));
 
+  // Precompute split amounts for display
+  const splitAmounts = (() => {
+    const map = new Map<string, string>();
+    if (includedMembers.size > 0 && !isNaN(effectiveAmount) && effectiveAmount > 0) {
+      const memberIds = [...includedMembers];
+      const amounts = splitEvenCents(effectiveAmount, memberIds.length);
+      memberIds.forEach((id, i) => map.set(id, amounts[i].toFixed(2)));
+    }
+    return map;
+  })();
+
   return (
     <div className={styles.page}>
       <h1 className={styles.pageTitle}>{isEditing ? "Editar gasto" : "Nuevo gasto"}</h1>
 
       <form onSubmit={handleSubmit} className={styles.form}>
+        {/* Fields + payer */}
         <Card className={styles.card}>
           <Input
             label="Descripción"
@@ -170,41 +186,6 @@ export function AddExpensePage() {
             placeholder="Cena en el italiano"
           />
 
-          <Input
-            label="Importe total"
-            type="text"
-            inputMode="decimal"
-            pattern="[0-9]*[.,]?[0-9]*"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="0.00"
-          />
-
-          <div className={styles.field}>
-            <label className={styles.label}>Fecha (opcional)</label>
-            <div className={styles.dateRow}>
-              <Input type="date" value={expenseDate} onChange={(e) => setExpenseDate(e.target.value)} />
-              <Input type="time" value={expenseTime} onChange={(e) => setExpenseTime(e.target.value)} />
-            </div>
-          </div>
-
-          <div className={styles.field}>
-            <label className={styles.label}>¿Quién pagó?</label>
-            <div className={styles.payerList}>
-              {group.members.map((m) => (
-                <button
-                  key={m.id}
-                  type="button"
-                  className={`${styles.payerBtn} ${paidBy === m.id ? styles.payerActive : ""}`}
-                  onClick={() => setPaidBy(m.id)}
-                >
-                  <Avatar name={m.name} size="sm" id={m.id} />
-                  <span>{m.name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
           <div className={styles.field}>
             <label className={styles.label}>Categoría</label>
             <div className={styles.categoryList}>
@@ -220,24 +201,81 @@ export function AddExpensePage() {
               ))}
             </div>
           </div>
+
+          <Input
+            label="Importe total"
+            type="text"
+            inputMode="decimal"
+            pattern="[0-9]*[.,]?[0-9]*"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="0.00"
+          />
+
+          {/* Payer — collapsible when auto-selected */}
+          {showPayerPicker || isEditing ? (
+            <div className={styles.field}>
+              <label className={styles.label}>¿Quién pagó?</label>
+              <div className={styles.payerList}>
+                {group.members.map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    className={`${styles.payerBtn} ${paidBy === m.id ? styles.payerActive : ""}`}
+                    onClick={() => setPaidBy(m.id)}
+                  >
+                    <Avatar name={m.name} size="sm" id={m.id} />
+                    <span>{m.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className={styles.payerCompact}>
+              <span className={styles.payingLabel}>
+                Pagando:{" "}
+                <Avatar name={group.members.find((m) => m.id === paidBy)?.name ?? ""} size="sm" id={paidBy} />
+                <span>{group.members.find((m) => m.id === paidBy)?.name ?? ""}</span>
+              </span>
+              <button type="button" className={styles.toggleLink} onClick={() => setShowPayerPicker(true)}>
+                (cambiar)
+              </button>
+            </div>
+          )}
         </Card>
 
-        {/* Split — always even */}
+        {/* Date (collapsed) + split */}
         <Card className={styles.card}>
+          {!showDate ? (
+            <button type="button" className={styles.toggleLinkCentered} onClick={() => setShowDate(true)}>
+              + Añadir fecha
+            </button>
+          ) : (
+            <div className={styles.field}>
+              <div className={styles.dateHeader}>
+                <label className={styles.label}>Fecha</label>
+                <button
+                  type="button"
+                  className={styles.toggleLink}
+                  onClick={() => { setShowDate(false); setExpenseDate(""); setExpenseTime(""); }}
+                >
+                  Quitar
+                </button>
+              </div>
+              <div className={styles.dateRow}>
+                <Input type="date" value={expenseDate} onChange={(e) => setExpenseDate(e.target.value)} />
+                <Input type="time" value={expenseTime} onChange={(e) => setExpenseTime(e.target.value)} />
+              </div>
+            </div>
+          )}
+
+          {/* Split — always even */}
           <h2 className={styles.splitTitle}>Reparto equitativo</h2>
 
           <div className={styles.splitList}>
-            {(() => {
-              const splitMap = new Map<string, string>();
-              if (includedMembers.size > 0 && !isNaN(effectiveAmount) && effectiveAmount > 0) {
-                const memberIds = [...includedMembers];
-                const amounts = splitEvenCents(effectiveAmount, memberIds.length);
-                memberIds.forEach((id, i) => splitMap.set(id, amounts[i].toFixed(2)));
-              }
-
-              return group.members.map((m) => {
+            {group.members.map((m) => {
               const isIncluded = includedMembers.has(m.id);
-              const amountStr = splitMap.get(m.id);
+              const amountStr = splitAmounts.get(m.id);
 
               return (
                 <div
@@ -270,7 +308,7 @@ export function AddExpensePage() {
                   </div>
                 </div>
               );
-            })})()}
+            })}
           </div>
         </Card>
 

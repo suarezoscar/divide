@@ -206,6 +206,82 @@
   flex-shrink: 0;
 }
 
+/* Payer collapsed row */
+.payerCompact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #F5F5F7;
+  border-radius: 12px;
+  padding: 8px 12px;
+}
+
+.payingLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1A1A2E;
+}
+
+/* Toggle link style (cambiar, quitar) */
+.toggleLink {
+  background: none;
+  border: none;
+  color: #07819C;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 4px 8px;
+  min-height: 36px;
+  border-radius: 8px;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.toggleLink:hover {
+  background: rgba(7, 129, 156, 0.08);
+}
+
+.toggleLink:active {
+  transform: scale(0.97);
+}
+
+/* Centered toggle (Añadir fecha) */
+.toggleLinkCentered {
+  background: none;
+  border: 1.5px dashed #D1D5DB;
+  color: #07819C;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 10px;
+  min-height: 44px;
+  width: 100%;
+  border-radius: 12px;
+  transition: all 0.15s;
+}
+
+.toggleLinkCentered:hover {
+  border-color: #07819C;
+  background: rgba(7, 129, 156, 0.04);
+}
+
+.toggleLinkCentered:active {
+  transform: scale(0.98);
+}
+
+/* Date header row (label + Quitar) */
+.dateHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .error {
   color: #DC2626;
   font-size: 13px;
