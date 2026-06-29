@@ -14,10 +14,8 @@ import { showToast } from "../components/ui/Toast";
 import { friendlyError } from "../utils/errors";
 import { Skeleton } from "../components/ui/Skeleton";
 import type { Split } from "../types";
-import { eur, splitEvenCents, equal } from "../utils/money";
+import { splitEvenCents } from "../utils/money";
 import styles from "./AddExpensePage.module.css";
-
-type SplitMode = "even" | "custom";
 
 export function AddExpensePage() {
   const { groupId, expenseId } = useParams<{ groupId: string; expenseId?: string }>();
@@ -30,8 +28,6 @@ export function AddExpensePage() {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [paidBy, setPaidBy] = useState("");
-  const [splitMode, setSplitMode] = useState<SplitMode>("even");
-  const [customSplits, setCustomSplits] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
   // Auto-select linked member as payer (new expenses only)
@@ -73,21 +69,6 @@ export function AddExpensePage() {
       setCategory(exp.category ?? "other");
       setCategoryManuallySet(true);
       setIncludedMembers(new Set(exp.splits.map((s) => s.memberId)));
-      if (exp.splits.length > 0) {
-        const firstAmount = exp.splits[0].amount;
-        const allEven = exp.splits.every((s) => equal(eur(s.amount), eur(firstAmount)))
-          || exp.splits.length === 1;
-        if (allEven) {
-          setSplitMode("even");
-        } else {
-          setSplitMode("custom");
-          const custom: Record<string, string> = {};
-          for (const s of exp.splits) {
-            custom[s.memberId] = String(s.amount).replace(".", ",");
-          }
-          setCustomSplits(custom);
-        }
-      }
     });
   }, [expenseId, group, groupId]);
 
@@ -119,28 +100,12 @@ export function AddExpensePage() {
       return;
     }
 
-    let splits: Split[];
-
-    if (splitMode === "even") {
-      const memberIds = [...includedMembers];
-      const amounts = splitEvenCents(numAmount, memberIds.length);
-      splits = memberIds.map((memberId, i) => ({
-        memberId,
-        amount: amounts[i],
-      }));
-    } else {
-      const customAmounts: Split[] = [];
-      for (const id of includedMembers) {
-        const val = parseFloat(customSplits[id] || "0");
-        customAmounts.push({ memberId: id, amount: val });
-      }
-      const totalCustom = customAmounts.reduce((s, v) => s + v.amount, 0);
-      if (Math.abs(totalCustom - numAmount) > 0.01) {
-        setError(`La suma de los splits (${totalCustom.toFixed(2)}) debe ser igual al total (${numAmount.toFixed(2)})`);
-        return;
-      }
-      splits = customAmounts;
-    }
+    const memberIds = [...includedMembers];
+    const amounts = splitEvenCents(numAmount, memberIds.length);
+    const splits: Split[] = memberIds.map((memberId, i) => ({
+      memberId,
+      amount: amounts[i],
+    }));
 
     setSubmitting(true);
     try {
@@ -163,10 +128,6 @@ export function AddExpensePage() {
     }
   };
 
-  const updateCustomSplit = (memberId: string, value: string) => {
-    setCustomSplits((prev) => ({ ...prev, [memberId]: value }));
-  };
-
   const toggleMember = (id: string) => {
     setIncludedMembers((prev) => {
       const next = new Set(prev);
@@ -184,10 +145,6 @@ export function AddExpensePage() {
     });
   };
 
-  const totalCustom = [...includedMembers].reduce(
-    (s, id) => s + parseFloat(customSplits[id] || "0"),
-    0
-  );
   const effectiveAmount = parseFloat((amount || "0").replace(",", "."));
 
   return (
@@ -265,48 +222,22 @@ export function AddExpensePage() {
           </div>
         </Card>
 
-        {/* Split mode */}
+        {/* Split — always even */}
         <Card className={styles.card}>
-          <div className={styles.splitHeader}>
-            <h2>División del gasto</h2>
-            <div className={styles.splitToggle}>
-              <button
-                type="button"
-                aria-pressed={splitMode === "even"}
-                className={`${styles.splitToggleBtn} ${splitMode === "even" ? styles.splitToggleActive : ""}`}
-                onClick={() => setSplitMode("even")}
-              >
-                Equitativo
-              </button>
-              <button
-                type="button"
-                aria-pressed={splitMode === "custom"}
-                className={`${styles.splitToggleBtn} ${splitMode === "custom" ? styles.splitToggleActive : ""}`}
-                onClick={() => setSplitMode("custom")}
-              >
-                Personalizado
-              </button>
-            </div>
-          </div>
+          <h2 className={styles.splitTitle}>Reparto equitativo</h2>
 
           <div className={styles.splitList}>
             {(() => {
-              const splitMap = new Map<string, number>();
-              if (splitMode === "even" && includedMembers.size > 0 && !isNaN(effectiveAmount) && effectiveAmount > 0) {
+              const splitMap = new Map<string, string>();
+              if (includedMembers.size > 0 && !isNaN(effectiveAmount) && effectiveAmount > 0) {
                 const memberIds = [...includedMembers];
                 const amounts = splitEvenCents(effectiveAmount, memberIds.length);
-                memberIds.forEach((id, i) => splitMap.set(id, amounts[i]));
+                memberIds.forEach((id, i) => splitMap.set(id, amounts[i].toFixed(2)));
               }
 
               return group.members.map((m) => {
               const isIncluded = includedMembers.has(m.id);
-              const evenAmount =
-                splitMode === "even" && isIncluded
-                  ? (() => {
-                      const sa = splitMap.get(m.id);
-                      return sa !== undefined && !isNaN(sa) ? sa.toFixed(2) : "—";
-                    })()
-                  : null;
+              const amountStr = splitMap.get(m.id);
 
               return (
                 <div
@@ -333,33 +264,14 @@ export function AddExpensePage() {
                     </div>
                     {!isIncluded ? (
                       <span className={styles.excludedLabel}>Excluido</span>
-                    ) : splitMode === "even" ? (
-                      <span className={styles.splitValue}>{evenAmount}</span>
                     ) : (
-                      <input
-                        type="text"
-                        inputMode="decimal"
-                        pattern="[0-9]*[.,]?[0-9]*"
-                        className={styles.splitInput}
-                        value={customSplits[m.id] || ""}
-                        onChange={(e) => updateCustomSplit(m.id, e.target.value)}
-                        placeholder="0.00"
-                      />
+                      <span className={styles.splitValue}>{amountStr ?? "—"}</span>
                     )}
                   </div>
                 </div>
               );
             })})()}
           </div>
-
-          {splitMode === "custom" && (
-            <div className={styles.customTotal}>
-              Total splits: <strong>{totalCustom.toFixed(2)}</strong>
-              {Math.abs(totalCustom - effectiveAmount) > 0.01 && (
-                <span className={styles.splitMismatch}> (no coincide)</span>
-              )}
-            </div>
-          )}
         </Card>
 
         {error && <p className={styles.error} role="alert">{error}</p>}
