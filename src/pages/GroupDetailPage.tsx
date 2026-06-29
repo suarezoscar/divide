@@ -208,9 +208,9 @@ export function GroupDetailPage() {
   const groupColorLight = getGroupColorRgba(group.name, 0.08);
 
   return (
-    <div className={styles.page} style={{ background: `linear-gradient(180deg, ${getGroupColorRgba(group.name, 0.06)} 0%, transparent 65%)` }}>
+    <div className={styles.page}>
       {/* Header: single row */}
-      <div className={styles.header}>
+      <div className={styles.header} style={{ background: `linear-gradient(180deg, ${getGroupColorRgba(group.name, 0.08)} 0%, transparent 100%)` }}>
         <h1 className={styles.headerTitle}>{group.name}</h1>
         <div className={styles.headerActions}>
           <button className={styles.headerIconBtn} onClick={toggleNotifs} aria-label={notifsOn ? "Desactivar notificaciones" : "Activar notificaciones"}>
