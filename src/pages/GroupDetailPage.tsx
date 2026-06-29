@@ -14,6 +14,7 @@ import { ConfirmDialog } from "../components/ui/ConfirmDialog";
 import { BalanceSummary } from "../components/balances/BalanceSummary";
 import { SettlementList } from "../components/balances/SettlementList";
 import { ExpenseDonut } from "../components/balances/ExpenseDonut";
+import { CategoryBreakdown } from "../components/balances/CategoryBreakdown";
 import { InviteSection } from "../components/groups/InviteSection";
 import { ActivityLog } from "../components/activity/ActivityLog";
 import { GroupDetailSkeleton } from "../components/ui/Skeleton";
@@ -55,6 +56,21 @@ export function GroupDetailPage() {
     }
     return ids;
   }, [expenses]);
+
+  // Category totals for breakdown
+  const categoryTotals = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const exp of expenses) {
+      const cat = exp.category ?? "other";
+      map.set(cat, (map.get(cat) ?? 0) + exp.amount);
+    }
+    return Array.from(map.entries()).map(([categoryId, amount]) => ({ categoryId, amount }));
+  }, [expenses]);
+
+  const categoryTotalAmount = useMemo(
+    () => expenses.reduce((s, e) => s + e.amount, 0),
+    [expenses]
+  );
 
   // Auto-claim modal: if no linked member, ask "Who are you?"
   const [showClaimModal, setShowClaimModal] = useState(false);
@@ -366,9 +382,10 @@ export function GroupDetailPage() {
       {/* Balances tab */}
       {tab === "balances" && (
         <div className={styles.tabContent}>
+          <CategoryBreakdown items={categoryTotals} total={categoryTotalAmount} />
           <ExpenseDonut
             balances={balances.map((b) => ({ memberId: b.memberId, memberName: b.memberName, amount: b.owed }))}
-            total={expenses.reduce((s, e) => s + e.amount, 0)}
+            total={categoryTotalAmount}
           />
           <BalanceSummary balances={balances} />
           <SettlementList
