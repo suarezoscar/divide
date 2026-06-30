@@ -226,8 +226,15 @@ export function GroupDetailPage() {
 
   return (
     <div className={styles.page}>
+      {/* Full-bleed gradient background (starts right below navbar, fades mid-page) */}
+      <div
+        className={styles.bgGradient}
+        style={{
+          background: `linear-gradient(180deg, ${getGroupColorRgba(group.name, 0.12)} 0%, ${getGroupColorRgba(group.name, 0.04)} 30%, transparent 60%)`,
+        }}
+      />
       {/* Header: single row */}
-      <div className={styles.header} style={{ background: `linear-gradient(180deg, ${getGroupColorRgba(group.name, 0.08)} 0%, transparent 100%)` }}>
+      <div className={styles.header}>
         <h1 className={styles.headerTitle}>{group.name}</h1>
         <div className={styles.headerActions}>
           <button className={styles.headerIconBtn} onClick={toggleNotifs} aria-label={notifsOn ? "Desactivar notificaciones" : "Activar notificaciones"}>

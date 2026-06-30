@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { formatCurrency } from "../../utils/format";
 import { getMemberColor } from "../../utils/memberColor";
+import { Card } from "../ui/Card";
 import type { DebtEdge, Member } from "../../types";
 import styles from "./DebtGraph.module.css";
 
@@ -118,7 +119,7 @@ export function DebtGraph({ debts, members }: Props) {
   if (debts.length === 0 || positions.size < 2) return null;
 
   return (
-    <div className={styles.wrap}>
+    <Card className={styles.card}>
       <h3 className={styles.heading}>Grafo de deudas</h3>
       <div className={styles.graphContainer}>
         <svg
@@ -191,6 +192,6 @@ export function DebtGraph({ debts, members }: Props) {
           ))}
         </svg>
       </div>
-    </div>
+    </Card>
   );
 }
