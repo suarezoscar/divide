@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useState } from "react";
 import { Button } from "../components/ui/Button";
@@ -13,9 +13,10 @@ import styles from "./LoginPage.module.css";
 
 export function LoginPage() {
   const { user, loading, login, register, resetPassword } = useAuth();
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isRegister, setIsRegister] = useState(false);
+  const [isRegister, setIsRegister] = useState(searchParams.get("mode") === "register");
   const [error, setError] = useState("");
 
   // Forgot password

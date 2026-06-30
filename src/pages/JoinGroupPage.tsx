@@ -5,6 +5,7 @@ import * as groupsService from "../services/groups";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
+import { Avatar } from "../components/ui/Avatar";
 import { Users, LogIn } from "lucide-react";
 import { showToast } from "../components/ui/Toast";
 import { friendlyError } from "../utils/errors";
@@ -19,9 +20,9 @@ export function JoinGroupPage() {
 
   const [group, setGroup] = useState<Group | null>(null);
   const [loading, setLoading] = useState(true);
-  const [memberName, setMemberName] = useState("");
-  const [claimExisting, setClaimExisting] = useState(false);
-  const [selectedMemberId, setSelectedMemberId] = useState("");
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+  const [showNewMember, setShowNewMember] = useState(false);
+  const [newMemberName, setNewMemberName] = useState("");
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState("");
 
@@ -62,7 +63,7 @@ export function JoinGroupPage() {
                 Iniciar sesión
               </Button>
             </Link>
-            <Link to="/login" onClick={saveAndGo}>
+            <Link to="/login?mode=register" onClick={saveAndGo}>
               <Button size="lg" variant="secondary" style={{ width: "100%" }}>
                 Registrarse
               </Button>
@@ -102,25 +103,22 @@ export function JoinGroupPage() {
     return null;
   }
 
+  const unclaimed = group.members.filter((m) => !m.userId);
+
   const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-
-    if (claimExisting) {
-      if (!selectedMemberId) return;
-    } else {
-      if (!memberName.trim()) return;
-    }
-
     setJoining(true);
     setError("");
     try {
-      await groupsService.addUserToGroup(
-        group.id,
-        user.uid,
-        claimExisting ? selectedMemberId : memberName.trim(),
-        claimExisting
-      );
+      if (selectedMemberId) {
+        await groupsService.addUserToGroup(group.id, user.uid, selectedMemberId, true);
+      } else if (newMemberName.trim()) {
+        await groupsService.addUserToGroup(group.id, user.uid, newMemberName.trim(), false);
+      } else {
+        setJoining(false);
+        return;
+      }
       showToast("¡Te has unido al grupo!", "success");
       navigate(`/group/${group.id}`, { replace: true });
     } catch (err) {
@@ -129,7 +127,7 @@ export function JoinGroupPage() {
     }
   };
 
-  const canSubmit = claimExisting ? !!selectedMemberId : !!memberName.trim();
+  const canSubmit = !!selectedMemberId || newMemberName.trim().length > 0;
 
   return (
     <div className={styles.shell}>
@@ -143,55 +141,61 @@ export function JoinGroupPage() {
         </div>
 
         <form onSubmit={handleJoin} className={styles.form}>
-          <div className={styles.claimToggle}>
-            <button
-              type="button"
-              aria-pressed={!claimExisting}
-              className={`${styles.claimBtn} ${!claimExisting ? styles.claimActive : ""}`}
-              onClick={() => setClaimExisting(false)}
-            >
-              Soy nuevo
-            </button>
-            <button
-              type="button"
-              aria-pressed={claimExisting}
-              className={`${styles.claimBtn} ${claimExisting ? styles.claimActive : ""}`}
-              onClick={() => setClaimExisting(true)}
-            >
-              Ya soy miembro
-            </button>
-          </div>
-
-          {claimExisting ? (
-            <div className={styles.selectWrapper}>
-              <label className={styles.selectLabel}>Elige tu nombre</label>
+          {/* Unclaimed members */}
+          {unclaimed.length > 0 && (
+            <>
+              <h2 className={styles.sectionTitle}>¿Eres uno de estos?</h2>
               <div className={styles.memberOptions}>
-                {group.members
-                  .filter((m) => !group.userIds.includes(user.uid) || m.id === selectedMemberId)
-                  .map((m) => (
-                    <button
-                      key={m.id}
-                      type="button"
-                      className={`${styles.memberOption} ${selectedMemberId === m.id ? styles.memberOptionActive : ""}`}
-                      onClick={() => setSelectedMemberId(m.id)}
-                    >
-                      <span>{m.name}</span>
-                    </button>
-                  ))}
+                {unclaimed.map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    className={`${styles.memberOption} ${selectedMemberId === m.id ? styles.memberOptionActive : ""}`}
+                    onClick={() => {
+                      setSelectedMemberId(m.id);
+                      setShowNewMember(false);
+                      setNewMemberName("");
+                    }}
+                  >
+                    <Avatar name={m.name} size="sm" id={m.id} />
+                    <span>{m.name}</span>
+                  </button>
+                ))}
               </div>
-            </div>
-          ) : (
-            <Input
-              label="Tu nombre en el grupo"
-              value={memberName}
-              onChange={(e) => setMemberName(e.target.value)}
-              placeholder="¿Cómo te llamas?"
-              required
-            />
+
+              <div className={styles.divider}>
+                <span>o</span>
+              </div>
+            </>
           )}
+
+          {/* New member */}
+          {!showNewMember ? (
+            <button
+              type="button"
+              className={styles.toggleNew}
+              onClick={() => {
+                setShowNewMember(true);
+                setSelectedMemberId(null);
+              }}
+            >
+              + No estoy en la lista
+            </button>
+          ) : (
+            <div className={styles.newMemberSection}>
+              <Input
+                label="Tu nombre en el grupo"
+                value={newMemberName}
+                onChange={(e) => setNewMemberName(e.target.value)}
+                placeholder="¿Cómo te llamas?"
+              />
+            </div>
+          )}
+
           {error && <p className={styles.error} role="alert">{error}</p>}
+
           <Button type="submit" size="lg" isLoading={joining} disabled={!canSubmit} style={{ width: "100%" }}>
-            Unirse al grupo
+            {selectedMemberId ? "Identificarse en el grupo" : "Unirse al grupo"}
           </Button>
         </form>
       </Card>
