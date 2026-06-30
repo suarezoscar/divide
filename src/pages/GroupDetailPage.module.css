@@ -473,7 +473,7 @@
   right: max(16px, env(safe-area-inset-right));
   width: 56px;
   height: 56px;
-  border-radius: 50%;
+  border-radius: 12px;
   background: var(--color-primary);
   color: #fff;
   border: none;

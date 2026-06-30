@@ -43,6 +43,7 @@ export function AddExpensePage() {
       setShowPayerPicker(true);
     }
   }, [linkedMemberId, group?.id, isEditing]);
+  const currentMemberName = user && group?.members.find((m) => m.userId === user.uid)?.name;
   const [error, setError] = useState("");
   const [expenseDate, setExpenseDate] = useState("");
   const [expenseTime, setExpenseTime] = useState("");
@@ -118,10 +119,10 @@ export function AddExpensePage() {
         : undefined;
       const cat = category || undefined;
       if (isEditing) {
-        await update(expenseId!, description.trim(), numAmount, paidBy, splits, date, cat);
+        await update(expenseId!, description.trim(), numAmount, paidBy, splits, date, cat, user?.uid, currentMemberName);
         showToast("Gasto actualizado", "success");
       } else {
-        const created = await add(description.trim(), numAmount, paidBy, splits, date, cat, user?.uid);
+        const created = await add(description.trim(), numAmount, paidBy, splits, date, cat, user?.uid, currentMemberName);
         sessionStorage.setItem(`lastAdded-${groupId}`, created.id);
         showToast("Gasto añadido", "success");
       }

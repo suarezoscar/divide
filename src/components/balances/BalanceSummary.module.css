@@ -3,10 +3,12 @@
 }
 
 .title {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
-  margin-bottom: 14px;
-  color: #1A1A2E;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 16px;
 }
 
 .list {
