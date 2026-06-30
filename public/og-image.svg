@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#07819C"/>
+      <stop offset="100%" stop-color="#056475"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Decorative circles -->
+  <circle cx="1050" cy="100" r="180" fill="rgba(255,255,255,0.04)"/>
+  <circle cx="1100" cy="450" r="120" fill="rgba(255,255,255,0.03)"/>
+  <circle cx="150" cy="500" r="100" fill="rgba(255,255,255,0.03)"/>
+
+  <!-- Divide symbol ÷ -->
+  <g transform="translate(320, 315)">
+    <!-- Top dot -->
+    <circle cx="0" cy="-50" r="18" fill="white"/>
+    <!-- Bottom dot -->
+    <circle cx="0" cy="50" r="18" fill="white"/>
+    <!-- Middle line -->
+    <rect x="-60" y="-8" width="120" height="16" rx="8" fill="white"/>
+  </g>
+
+  <!-- Text: Divide -->
+  <text x="440" y="290" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="72" font-weight="700" fill="white">Divide</text>
+
+  <!-- Text: subtitle -->
+  <text x="440" y="345" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="28" font-weight="400" fill="rgba(255,255,255,0.85)">Gastos en grupo, sin esfuerzo</text>
+
+  <!-- Subtle bottom line -->
+  <rect x="440" y="370" width="60" height="4" rx="2" fill="rgba(255,255,255,0.3)"/>
+</svg>
