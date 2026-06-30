@@ -12,8 +12,6 @@ import { Skeleton } from "../components/ui/Skeleton";
 import type { Group } from "../types";
 import styles from "./JoinGroupPage.module.css";
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
 export function JoinGroupPage() {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
@@ -29,11 +27,7 @@ export function JoinGroupPage() {
 
   useEffect(() => {
     if (!groupId) return;
-    const isUuid = UUID_RE.test(groupId);
-    const promise = isUuid
-      ? groupsService.getGroup(groupId)
-      : groupsService.getGroupByInviteCode(groupId);
-    promise
+    groupsService.getGroupByInviteCode(groupId)
       .then(setGroup)
       .catch(() => setGroup(null))
       .finally(() => setLoading(false));

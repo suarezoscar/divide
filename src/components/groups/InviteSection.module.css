@@ -89,3 +89,43 @@
   color: #07819C;
   font-family: "SF Mono", "Fira Code", monospace;
 }
+
+/* ── Loading skeleton ── */
+.skeletonWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 8px 0;
+}
+
+.qrSkeleton {
+  width: 180px;
+  height: 180px;
+  background: #F3F4F6;
+  border-radius: 16px;
+}
+
+/* ── Error state ── */
+.errorWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 0;
+  text-align: center;
+}
+
+.errorMsg {
+  font-size: 14px;
+  font-weight: 600;
+  color: #DC2626;
+  margin: 0;
+}
+
+.errorHint {
+  font-size: 13px;
+  color: #6B7280;
+  margin: 0 0 4px;
+}
