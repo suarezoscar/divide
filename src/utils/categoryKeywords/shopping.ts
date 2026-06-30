@@ -14,10 +14,13 @@ export const SHOPPING_KEYWORDS: string[] = [
   // ES
   "supermercado", "super", "mercadona", "carrefour", "lidl", "aldi", "eroski", "alcampo",
   "dia", "consum", "ahorramas", "hipercor", "el corte ingles",
+  "gadis", "froiz", "coviran", "bonpreu", "condis", "caprabo", "supersol",
+  "masymas", "makro", "simply", "auchan", "supercor", "opencor",
+  "sorli", "bonarea", "cash fresh",
   // EN
   "supermarket", "grocery",
   // GL
-  "supermercado",
+  "supermercado", "gadis", "froiz",
 
   // ── Ropa / Moda ──────────────────────────────────────────────────
   // ES

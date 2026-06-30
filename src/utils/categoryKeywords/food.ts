@@ -129,6 +129,9 @@ export const FOOD_KEYWORDS: string[] = [
   "super", "mercadona", "carrefour", "lidl", "aldi", "dia", "compra", "despensa",
   "nevera", "congelado", "preparado", "eroski", "alcampo", "consum", "ahorramas",
   "hipercor", "el corte ingles",
+  "gadis", "froiz", "coviran", "bonpreu", "condis", "caprabo", "supersol",
+  "masymas", "makro", "simply", "auchan", "supercor", "opencor",
+  "sorli", "bonarea", "cash fresh",
   "fruta", "verdura", "mercado", "fruteria",
   "naranja", "manzana", "pera", "uva", "fresa", "melon", "sandia",
   "cereza", "kiwi", "mango", "papaya", "maracuya", "aguacate", "palta",
@@ -140,6 +143,7 @@ export const FOOD_KEYWORDS: string[] = [
   "aldi", "lidl",
   // GL
   "supermercado", "compra", "mercado", "feira", "froitas", "verduras",
+  "gadis", "froiz",
 
   // ── Delivery ─────────────────────────────────────────────────────
   // ES

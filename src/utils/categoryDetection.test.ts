@@ -137,6 +137,27 @@ describe("detectCategory", () => {
     expect(detectCategory("store")).toBe("shopping");
   });
 
+  // ── Spanish supermarket detection ─────────────────────────────────
+  it("detects 'gadis' as food", () => {
+    expect(detectCategory("gadis")).toBe("food");
+  });
+
+  it("detects 'coviran' as food", () => {
+    expect(detectCategory("coviran")).toBe("food");
+  });
+
+  it("detects 'bonpreu' as food", () => {
+    expect(detectCategory("bonpreu")).toBe("food");
+  });
+
+  it("detects 'condis' as food", () => {
+    expect(detectCategory("condis")).toBe("food");
+  });
+
+  it("detects 'caprabo' as food", () => {
+    expect(detectCategory("caprabo")).toBe("food");
+  });
+
   it("detects 'beer' as nightlife (en)", () => {
     expect(detectCategory("beer")).toBe("nightlife");
   });
