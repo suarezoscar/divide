@@ -94,4 +94,50 @@ describe("detectCategory", () => {
     // "en" and "la" are stop words, "playa" should still match leisure
     expect(detectCategory("en la playa")).toBe("leisure");
   });
+
+  // ── Galician detection ───────────────────────────────────────────
+  it("detects 'polbo' as food (gl)", () => {
+    expect(detectCategory("polbo")).toBe("food");
+  });
+
+  it("detects 'aluguer' as housing (gl)", () => {
+    expect(detectCategory("aluguer")).toBe("housing");
+  });
+
+  it("detects 'praia' as leisure (gl)", () => {
+    expect(detectCategory("praia")).toBe("leisure");
+  });
+
+  it("detects 'cervexa' as nightlife (gl)", () => {
+    expect(detectCategory("cervexa")).toBe("nightlife");
+  });
+
+  it("detects 'tenda' as shopping (gl)", () => {
+    expect(detectCategory("tenda")).toBe("shopping");
+  });
+
+  // ── English detection ────────────────────────────────────────────
+  it("detects 'dinner' as food (en)", () => {
+    expect(detectCategory("dinner")).toBe("food");
+  });
+
+  it("detects 'underground' as transport (en)", () => {
+    expect(detectCategory("underground")).toBe("transport");
+  });
+
+  it("detects 'rent' as housing (en)", () => {
+    expect(detectCategory("rent")).toBe("housing");
+  });
+
+  it("detects 'movie' as leisure (en)", () => {
+    expect(detectCategory("movie")).toBe("leisure");
+  });
+
+  it("detects 'store' as shopping (en)", () => {
+    expect(detectCategory("store")).toBe("shopping");
+  });
+
+  it("detects 'beer' as nightlife (en)", () => {
+    expect(detectCategory("beer")).toBe("nightlife");
+  });
 });

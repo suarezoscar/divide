@@ -1,72 +1,173 @@
 export const LEISURE_KEYWORDS: string[] = [
-  "cine", "pelicula", "película", "film", "estreno", "sala", "palomitas",
-  "entrada", "entradas", "ticket", "espectaculo", "espectáculo", "taquilla",
-  "concierto", "festival", "musica", "música", "banda", "grupo", "cantante", "dj",
+  // ── Cine / Teatro / Conciertos ───────────────────────────────────
+  // ES
+  "cine", "pelicula", "film", "estreno", "sala", "palomitas",
+  "entrada", "ticket", "espectaculo", "taquilla",
+  "concierto", "festival", "musica", "banda", "grupo", "cantante", "dj",
   "fiesta", "noche",
-  "cumpleaños", "cumple", "celebracion", "celebración", "aniversario",
-  "despedida", "bienvenida", "reunion", "reunión", "quedada", "encuentro",
   "teatro", "obra", "musical", "comedia", "drama", "impro", "standup", "monologo",
-  "museo", "exposicion", "exposición", "galeria", "galería", "arte", "coleccion",
-  "gym", "gimnasio", "fitness", "crossfit", "yoga", "pilates", "spinning", "zumba",
-  "deporte", "partido", "futbol", "fútbol", "baloncesto", "tenis", "padel", "pádel",
-  "paddle tenis", "paddle tennis",
-  "golf", "esquiar", "esqui", "esquí", "snowboard",
-  "surf", "kitesurf", "windsurf", "paddle surf", "paddleboarding", "stand up paddle", "sup",
-  "kart", "karts", "karting", "go kart",
-  "moto de agua", "jet ski", "moto náutica", "moto nautica",
-  "buceo", "natacion", "submarinismo", "snorkel",
-  "spa", "balneario", "masaje", "sauna", "jacuzzi", "termas", "relax", "bienestar",
-  "paseo", "pasear", "andar", "caminata", "correr", "running", "footing",
-  "maraton", "maratón", "media maraton", "carrera popular",
-  "triatlon", "triatlón", "duatlon", "duatlón", "ironman",
-  "boxeo", "mma", "judo", "karate", "taekwondo", "aikido", "jiujitsu", "capoeira",
-  "danza", "baile", "salsa", "bachata", "tango", "flamenco", "sevillanas",
-  "subscripcion", "suscripción", "spotify", "apple music", "youtube premium",
-  "youtube", "twitch", "patreon", "onlyfans", "substack", "medium",
-  "audible", "podimo", "ivoox", "podcast", "membresia", "membresía",
-  "premium", "plus", "familiar", "duo", "individual", "anual", "mensual",
-  "ps5", "ps4", "xbox series", "xbox one", "nintendo switch", "switch oled",
-  "steam deck", "pc gaming", "juego", "dlc", "expansion", "expansión",
-  "pase batalla", "skins", "moneda virtual", "vbucks", "robux", "fifa points",
-  "tablero", "catan", "monopoly", "trivial", "scrabble", "dixit",
-  "magic", "pokemon", "pokémon", "yu gi oh", "warhammer", "d&d", "rol",
-  "escape room", "room escape", "scape room", "enigma",
-  "libreria", "librería", "libro", "novela", "comic", "cómic", "manga",
-  "revista", "periodico", "periódico", "prensa",
-  "conferencia", "charla", "taller", "curso", "masterclass", "workshop",
-  "seminario", "webinar", "formacion", "formación", "aprendizaje",
-  "idioma", "clase", "profesor", "academia", "escuela", "universidad",
-  "conservatorio", "auditorio", "palacio congresos", "feria",
-  "excursion", "excursión", "escapada", "fin de semana", "puente", "vacaciones",
-  "viaje", "circuito", "tour", "guia", "guía",
-  "agencia viajes", "touroperador", "paquete", "todo incluido", "ida vuelta",
-  "reserva", "reservar", "hostal", "hostel", "cabaña", "refugio", "parador",
-  "casa rural", "turismo rural",
+  // EN
+  "cinema", "movie", "film", "theatre", "theater", "concert", "show",
+  "ticket", "entertainment",
+  // GL
+  "cine", "pelicula", "concerto", "festival", "teatro",
+
+  // ── Celebraciones ────────────────────────────────────────────────
+  // ES
+  "cumpleanos", "cumple", "celebracion", "aniversario",
+  "despedida", "bienvenida", "reunion", "quedada", "encuentro",
+  // EN
+  "birthday", "celebration", "anniversary", "party",
+  // GL
+  "cumpreanos", "celebracion", "festa",
+
+  // ── Museos / Cultura ─────────────────────────────────────────────
+  // ES
+  "museo", "exposicion", "galeria", "arte", "coleccion",
   "monumento", "catedral", "iglesia", "castillo", "alcazaba", "palacio",
   "ruina", "yacimiento", "templo", "mezquita", "sinagoga",
-  "peluqueria", "peluquería", "barberia", "barbería", "corte pelo",
-  "tinte", "mechas", "manicura", "pedicura", "uñas", "depilacion", "depilación",
-  "laser", "láser", "cera", "hilo", "cejas", "pestañas",
-  "masaje", "quiromasaje", "drenaje", "fisioterapia", "osteopatia", "osteopatía",
-  "quiropractico", "quiropráctico", "acupuntura",
-  "meditacion", "meditación", "mindfulness", "retiro", "terapia",
-  "psicologo", "psicólogo", "coach", "coaching",
-  "netflix", "hbo", "prime video", "disney plus", "streaming",
-  "apuesta", "lotería", "loteria", "once", "primitiva", "euromillon", "euromillón",
-  "cigarro", "tabaco", "estanco", "liar", "vapear", "vaporizador",
-  "zoo", "acuario", "parque tematico", "parque de atracciones", "disney", "portaventura",
-  "piscina", "playa", "mar", "montaña", "parque",
-  "juego", "videojuego", "consola", "playstation", "xbox", "nintendo",
-  "steam", "arcade", "maquina", "pinball", "billar", "futbolin",
-  "bolera", "bolos", "laser tag", "paintball",
-  "airsoft", "tiro con arco",
+  // EN
+  "museum", "exhibition", "gallery", "art", "culture",
+  // GL
+  "museo", "exposicion", "galeria", "arte",
+
+  // ── Deportes / Gym ───────────────────────────────────────────────
+  // ES
+  "gym", "gimnasio", "fitness", "crossfit", "yoga", "pilates", "spinning", "zumba",
+  "deporte", "partido", "futbol", "baloncesto", "tenis", "padel",
+  "paddle tenis", "paddle tennis",
+  "golf", "esquiar", "esqui", "snowboard",
+  "surf", "kitesurf", "windsurf", "paddle surf", "paddleboarding", "stand up paddle", "sup",
+  "kart", "karting", "go kart",
+  "moto de agua", "jet ski", "moto nautica",
+  "buceo", "natacion", "submarinismo", "snorkel",
+  "boxeo", "mma", "judo", "karate", "taekwondo", "aikido", "jiujitsu", "capoeira",
+  "danza", "baile", "salsa", "bachata", "tango", "flamenco", "sevillanas",
   "parapente", "puenting", "rafting", "barranquismo",
-  "escalada", "boulder", "rocódromo", "rocodromo",
+  "escalada", "boulder", "rocodromo",
   "senderismo", "trekking",
   "ciclismo", "bici", "bicicleta", "mtb", "btt",
-  "patinaje", "patinar", "monopatín", "monopatin", "skate", "skateboard",
-  "kayak", "piragüismo", "piraguismo", "vela", "navegar",
-  "equitación", "equitacion", "hípica", "hipica", "montar a caballo",
+  "patinaje", "patinar", "monopatin", "skate", "skateboard",
+  "kayak", "piraguismo", "vela", "navegar",
+  "equitacion", "hipica", "montar a caballo",
+  "airsoft", "tiro con arco",
+  "bolera", "bolos", "laser tag", "paintball",
+  // EN
+  "sports", "football", "soccer", "basketball", "tennis", "golf", "swimming",
+  "running", "hiking", "cycling", "skating", "skiing", "surfing",
+  "gym", "fitness", "yoga", "pilates",
+  "go kart", "karting", "jetski",
+  // GL
+  "deporte", "futbol", "baloncesto", "tenis", "natacion",
+  "carreiras", "andaina", "cicloturismo",
+
+  // ── Spa / Bienestar ──────────────────────────────────────────────
+  // ES
+  "spa", "balneario", "masaje", "sauna", "jacuzzi", "termas", "relax", "bienestar",
+  // EN
+  "spa", "massage", "sauna", "wellness",
+  // GL
+  "spa", "masaxe", "termas",
+
+  // ── Paseos / Aire libre ──────────────────────────────────────────
+  // ES
+  "paseo", "pasear", "andar", "caminata", "correr", "running", "footing",
+  "maraton", "media maraton", "carrera popular",
+  "triatlon", "duatlon", "ironman",
+  "zoo", "acuario", "parque tematico", "parque de atracciones", "disney", "portaventura",
+  "piscina", "playa", "mar", "montana", "parque",
   "acampada", "camping", "pesca", "pescar",
-  "birdwatching", "observación aves", "observacion aves", "pajaros",
+  "birdwatching", "observacion aves", "pajaros",
+  // EN
+  "walk", "hike", "trail", "camping", "fishing", "birdwatching",
+  "park", "beach", "pool", "amusement park",
+  // GL
+  "paseo", "praia", "montana", "parque", "acampada", "pesca",
+
+  // ── Suscripciones digitales ──────────────────────────────────────
+  // ES
+  "suscripcion", "spotify", "apple music", "youtube premium",
+  "youtube", "twitch", "patreon", "onlyfans", "substack", "medium",
+  "audible", "podimo", "ivoox", "podcast", "membresia",
+  "premium", "plus", "familiar", "duo", "individual", "anual", "mensual",
+  "netflix", "hbo", "prime video", "disney plus", "streaming",
+  // EN
+  "subscription", "netflix", "spotify", "hbo", "disney+",
+  "streaming", "membership",
+  // GL
+  "subscricion", "membresia", "streaming",
+
+  // ── Videojuegos ──────────────────────────────────────────────────
+  // ES
+  "ps5", "ps4", "xbox series", "xbox one", "nintendo switch", "switch oled",
+  "steam deck", "pc gaming", "juego", "dlc", "expansion",
+  "pase batalla", "skins", "moneda virtual", "vbucks", "robux", "fifa points",
+  "steam", "arcade", "maquina", "pinball", "billar", "futbolin",
+  "videojuego", "consola", "playstation", "xbox", "nintendo",
+  // EN
+  "gaming", "video game", "game", "console", "playstation", "xbox", "nintendo",
+  "steam", "pc gaming",
+  // GL
+  "videoxogo", "consola", "xogo",
+
+  // ── Juegos de mesa ───────────────────────────────────────────────
+  // ES
+  "tablero", "catan", "monopoly", "trivial", "scrabble", "dixit",
+  "magic", "pokemon", "yu gi oh", "warhammer", "d&d", "rol",
+  "escape room", "room escape", "scape room", "enigma",
+  // EN
+  "board game", "escape room", "role playing", "rpg", "dnd",
+  // GL
+  "xogo mesa", "rol",
+
+  // ── Lectura / Educación ──────────────────────────────────────────
+  // ES
+  "libreria", "libro", "novela", "comic", "manga",
+  "revista", "periodico", "prensa",
+  "conferencia", "charla", "taller", "curso", "masterclass", "workshop",
+  "seminario", "webinar", "formacion", "aprendizaje",
+  "idioma", "clase", "profesor", "academia", "escuela", "universidad",
+  "conservatorio", "auditorio", "palacio congresos", "feria",
+  // EN
+  "book", "library", "course", "class", "workshop", "seminar",
+  "conference", "training",
+  // GL
+  "libro", "libreria", "curso", "clase", "formacion",
+
+  // ── Viajes ───────────────────────────────────────────────────────
+  // ES
+  "excursion", "escapada", "fin de semana", "puente", "vacaciones",
+  "viaje", "circuito", "tour", "guia",
+  "agencia viajes", "touroperador", "paquete", "todo incluido", "ida vuelta",
+  "reserva", "reservar", "hostal", "hostel", "cabana", "refugio", "parador",
+  "casa rural", "turismo rural",
+  // EN
+  "travel", "trip", "vacation", "holiday", "tour", "excursion",
+  "reservation", "hostel", "hostel",
+  // GL
+  "viaxe", "vacacions", "excursion", "reserva",
+
+  // ── Peluquería / Estética ────────────────────────────────────────
+  // ES
+  "peluqueria", "barberia", "corte pelo",
+  "tinte", "mechas", "manicura", "pedicura", "unas", "depilacion",
+  "laser", "cera", "hilo", "cejas", "pestanas",
+  "quiromasaje", "drenaje", "fisioterapia", "osteopatia",
+  "quiropractico", "acupuntura",
+  "meditacion", "mindfulness", "retiro", "terapia",
+  "psicologo", "coach", "coaching",
+  // EN
+  "hairdresser", "barber", "salon", "manicure", "pedicure",
+  "massage", "physiotherapy",
+  // GL
+  "perruqueria", "barberia", "masaxe",
+
+  // ── Apuestas / Tabaco (compartido con nightlife) ─────────────────
+  // ES
+  "apuesta", "loteria", "once", "primitiva", "euromillon",
+  "cigarro", "tabaco", "estanco", "liar", "vapear", "vaporizador",
+  // EN
+  "bet", "lottery", "cigarette", "tobacco", "vape",
+  // GL
+  "aposta", "loteria", "tabaco",
 ];

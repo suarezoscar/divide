@@ -1,29 +1,55 @@
 // Copas, bares, discotecas, juego, tabaco
 export const NIGHTLIFE_KEYWORDS: string[] = [
-  // Bebidas alcohólicas (movidas de food.ts)
-  "cerveza", "birra", "caña", "jarra", "pinta", "vino", "tinto", "blanco", "rosado",
+  // ── Bebidas alcohólicas ──────────────────────────────────────────
+  // ES
+  "cerveza", "birra", "canya", "jarra", "pinta", "vino", "tinto", "blanco", "rosado",
   "copa", "cocktail", "coctel", "mojito", "gin", "gintonic", "ron", "whisky", "vodka",
-  "whisky", "vermuth", "vermut", "aperol", "spritz", "campari",
+  "vermuth", "vermut", "aperol", "spritz", "campari",
   "martini", "negroni", "margarita", "daiquiri", "pina colada",
-  "sangria", "sangría", "tinto verano", "clara", "radler", "shandy",
-  "champan", "champán", "cava", "prosecco", "lambrusco", "txakoli",
-  "sidra", "orujo", "pacharan", "pacharán", "licor", "crema", "anís",
+  "sangria", "tinto verano", "clara", "radler", "shandy",
+  "champan", "cava", "prosecco", "lambrusco", "txakoli",
+  "sidra", "orujo", "pacharan", "licor", "crema", "anis",
   "sake", "soju",
-  // Bebidas de discoteca/barra
-  "chupito", "cubata", "calimocho", "kalimotxo", "combinado", "garrafon", "garrafón",
+  "chupito", "cubata", "calimocho", "kalimotxo", "combinado", "garrafon",
   "tequila", "mezcal", "absenta",
-  // Salidas nocturnas (movidas de leisure.ts)
+  // EN
+  "beer", "wine", "cocktail", "spirit", "liquor", "whiskey", "vodka", "rum", "gin",
+  "tequila", "champagne", "prosecco", "sangria",
+  // GL
+  "cervexa", "vino", "canha", "licor", "sidra",
+
+  // ── Salidas nocturnas ────────────────────────────────────────────
+  // ES
   "discoteca", "disco", "club", "pub", "club nocturno",
-  "after", "afterparty", "botellon", "botellón", "previa",
+  "after", "afterparty", "botellon", "previa",
   "garito", "antro", "pachanga", "juerga", "farra", "marcha", "salir",
   "rumba", "perreo", "reggaeton",
-  // Reservas / VIP
-  "reserva mesa", "vip", "lista", "guest", "abono",
-  // Juego y apuestas (movidas de leisure.ts)
-  "apuesta", "lotería", "loteria", "once", "primitiva", "euromillon", "euromillón",
-  "quiniela", "casino", "bingo", "tragaperras", "poker", "póquer",
-  // Tabaco (movido de leisure.ts)
-  "cigarro", "tabaco", "estanco", "liar", "vapear", "vaporizador",
-  // Extras de ambiente nocturno
   "striptease", "table dance", "afterhour", "karaoke",
+  // EN
+  "nightclub", "club", "bar", "pub", "disco", "party", "night out",
+  // GL
+  "discoteca", "pub", "bar", "festa", "marcha",
+
+  // ── Reservas / VIP ───────────────────────────────────────────────
+  // ES
+  "reserva mesa", "vip", "lista", "guest", "abono",
+  // EN
+  "vip", "guest list", "reservation", "table reservation",
+
+  // ── Juego / Apuestas ─────────────────────────────────────────────
+  // ES
+  "apuesta", "loteria", "once", "primitiva", "euromillon",
+  "quiniela", "casino", "bingo", "tragaperras", "poker", "poquer",
+  // EN
+  "bet", "betting", "lottery", "casino", "bingo", "poker", "gambling",
+  // GL
+  "aposta", "loteria", "casino",
+
+  // ── Tabaco / Vapeo ───────────────────────────────────────────────
+  // ES
+  "cigarro", "tabaco", "estanco", "liar", "vapear", "vaporizador",
+  // EN
+  "cigarette", "cigar", "tobacco", "vape", "vaping",
+  // GL
+  "cigarro", "tabaco",
 ];

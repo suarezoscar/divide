@@ -1,44 +1,120 @@
 export const HOUSING_KEYWORDS: string[] = [
+  // ── Alquiler / Vivienda ──────────────────────────────────────────
+  // ES
   "alquiler", "renta", "arriendo", "alquilar", "rentar", "mes", "mensualidad",
-  "piso", "apartamento", "estudio", "loft", "atico", "ático", "duplex", "dúplex",
-  "casa", "chalet", "vivienda", "habitacion", "habitación", "dormitorio", "cuarto",
-  "hipoteca", "prestamo", "préstamo", "cuota", "banco", "hipotecario",
-  "comunidad", "gastos comunes", "derrama", "porteria", "portería",
+  "piso", "apartamento", "estudio", "loft", "atico", "duplex",
+  "casa", "chalet", "vivienda", "habitacion", "dormitorio", "cuarto",
+  "hipoteca", "prestamo", "cuota", "banco", "hipotecario",
+  "comunidad", "gastos comunes", "derrama", "porteria",
+  // EN
+  "rent", "mortgage", "apartment", "house", "flat", "studio", "room",
+  // GL
+  "aluguer", "casa", "piso", "vivenda",
+
+  // ── Suministros ──────────────────────────────────────────────────
+  // ES
   "luz", "electricidad", "endesa", "iberdrola", "naturgy", "factura", "recibo",
   "consumo", "potencia", "contador", "kwh", "vatio",
-  "agua", "fontaneria", "fontanería", "grifo", "calentador", "termo", "ducha",
-  "gas", "calefaccion", "calefacción", "caldera", "radiador", "butano", "gasnatural",
+  "agua", "fontaneria", "grifo", "calentador", "termo", "ducha",
+  "gas", "calefaccion", "caldera", "radiador", "butano", "gasnatural",
   "internet", "fibra", "wifi", "router", "movistar", "vodafone", "orange",
-  "digi", "jazztel", "masmovil", "masmóvil", "operador", "datos", "banda ancha",
-  "telefono", "telefónica", "móvil", "fijo", "linea", "línea", "tarifa plana",
-  "limpieza", "limpiador", "aspiradora", "productos", "detergente", "jabon", "jabón",
-  "piscina", "terraza", "balcon", "balcón", "trastero", "sotano", "sótano",
+  "digi", "jazztel", "masmovil", "operador", "datos", "banda ancha",
+  "telefono", "telefonica", "movil", "fijo", "linea", "tarifa plana",
+  // EN
+  "electricity", "gas", "water", "internet", "wifi", "phone", "utility",
+  "bill", "power", "heating",
+  // GL
+  "luz", "auga", "gas", "internet", "factura",
+
+  // ── Limpieza / Hogar ─────────────────────────────────────────────
+  // ES
+  "limpieza", "limpiador", "aspiradora", "productos", "detergente", "jabon",
+  "piscina", "terraza", "balcon", "trastero", "sotano",
   "mudanza", "mudarse", "fianza", "deposito", "contrato", "inmobiliaria", "agencia",
-  "airbnb", "booking", "hotel", "hostal", "albergue", "pension", "pensión",
+  // EN
+  "cleaning", "supplies", "detergent", "move", "deposit",
+  // GL
+  "limpeza", "mudanza",
+
+  // ── Alojamiento temporal ─────────────────────────────────────────
+  // ES
+  "airbnb", "booking", "hotel", "hostal", "albergue", "pension",
   "alojamiento", "hospedaje", "acampar", "camping", "glamping", "tienda",
-  "mueble", "muebles", "ikea", "decoracion", "decoración", "pintura", "obra",
-  "reforma", "reparacion", "reparación", "manitas", "bricolaje", "bricolage",
-  "fontanero", "electricista", "cerrajero", "pintor", "albañil",
+  // EN
+  "hotel", "hostel", "airbnb", "accommodation", "lodging",
+  // GL
+  "hotel", "albergue", "aloxamento",
+
+  // ── Muebles / Decoración ─────────────────────────────────────────
+  // ES
+  "mueble", "ikea", "decoracion", "pintura", "obra",
+  "reforma", "reparacion", "manitas", "bricolaje", "bricolage",
+  "fontanero", "electricista", "cerrajero", "pintor", "albanil",
   "yesero", "carpintero", "parquetista", "tapicero", "cristalero",
-  "persianista", "calderista", "gasista", "instalador", "tecnico", "técnico",
-  "aire acondicionado", "split", "frio", "frío", "calor", "bomba calor",
-  "termo electrico", "termo eléctrico", "calentador gas",
-  "averia", "avería", "rotura", "gotera", "humedad", "mancha", "fuga",
+  "persianista", "calderista", "gasista", "instalador", "tecnico",
+  // EN
+  "furniture", "decoration", "repair", "plumber", "electrician",
+  "handyman", "renovation",
+  // GL
+  "mobles", "decoracion", "reparacion",
+
+  // ── Climatización ────────────────────────────────────────────────
+  // ES
+  "aire acondicionado", "split", "frio", "calor", "bomba calor",
+  "termo electrico", "calentador gas",
+  // EN
+  "air conditioning", "heating", "boiler",
+  // GL
+  "calefaccion", "frio",
+
+  // ── Averías / Problemas ──────────────────────────────────────────
+  // ES
+  "averia", "rotura", "gotera", "humedad", "mancha", "fuga",
   "escape", "atasco", "embozo", "cortocircuito", "salto diferencial",
   "tejado", "cubierta", "fachada", "pared", "techo", "suelo", "moho", "grieta",
+  // EN
+  "leak", "repair", "damage", "breakdown",
+  // GL
+  "avaria", "rotura",
+
+  // ── Comunidad / Vecinos ──────────────────────────────────────────
+  // ES
   "junta", "presidente", "administrador", "finca", "conserje", "portero",
-  "normas", "horario", "ruido", "mascota", "votacion", "votación", "acta",
-  "compra", "venta", "traspaso", "cesion", "cesión",
-  "aval", "nominativa", "nómina", "solvencia", "referencia", "visita",
+  "normas", "horario", "ruido", "mascota", "votacion", "acta",
+  // EN
+  "neighbors", "community", "rules",
+  // GL
+  "comunidade", "veciños",
+
+  // ── Compra / Traspaso ────────────────────────────────────────────
+  // ES
+  "compra", "venta", "traspaso", "cesion",
+  "aval", "nominativa", "nomina", "solvencia", "referencia", "visita",
   "inventario", "entrada", "salida", "checkin", "check-in", "checkout", "check-out",
+  // EN
+  "sale", "transfer", "inspection",
+
+  // ── Bricolaje / Ferretería ───────────────────────────────────────
+  // ES
   "leroy merlin", "bricomart", "brico depot", "bauhaus", "aki",
   "brocha", "rodillo", "cinta carrocero", "lijar", "lija",
-  "masilla", "yeso", "espatula", "espátula", "destornillador", "martillo",
+  "masilla", "yeso", "espatula", "destornillador", "martillo",
   "taladro", "atornillador", "taco", "tornillo", "alcayata", "clavo",
-  "estanteria", "estantería", "balda", "perchero", "cortina", "persiana",
-  "estores", "lampara", "lámpara", "bombilla", "led", "halogena", "halógena",
+  "estanteria", "balda", "perchero", "cortina", "persiana",
+  "estores", "lampara", "bombilla", "led", "halogena",
+  // EN
+  "tools", "hardware", "shelf", "curtain", "light",
+  // GL
+  "ferraxaría", "ferramentas",
+
+  // ── Energía / Eficiencia ─────────────────────────────────────────
+  // ES
   "placa solar", "aerotermia", "biomasa", "pellet",
   "bono social", "descuento", "ahorro", "eficiencia", "renovable",
-  "suministro", "contratacion", "contratación", "alta", "baja", "cambio titular",
-  "domiciliacion", "domiciliación", "adeudo", "cobro",
+  "suministro", "contratacion", "alta", "baja", "cambio titular",
+  "domiciliacion", "adeudo", "cobro",
+  // EN
+  "solar", "renewable", "efficiency",
+  // GL
+  "renovable", "eficiencia",
 ];
