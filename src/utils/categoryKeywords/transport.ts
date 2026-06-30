@@ -12,7 +12,7 @@ export const TRANSPORT_KEYWORDS: string[] = [
   "avion", "avión", "vuelo", "aeropuerto", "ryanair", "vueling", "iberia",
   "air europa", "maleta", "equipaje", "facturar", "embarque", "despegar",
   "barco", "ferry", "transbordador", "puerto", "crucero", "naviera",
-  "autocaravana", "camper", "furgoneta", "alquiler", "renting", "rent a car",
+  "autocaravana", "camper", "furgoneta", "renting", "rent a car",
   "billete", "ticket", "bono", "abono", "tarjeta transporte",
   "andando", "caminando", "a pie", "ruta", "camino", "senderismo", "trekking",
   "seguro", "poliza", "póliza", "itv", "revision", "revisión", "mantenimiento",
