@@ -14,6 +14,7 @@ const ICONS: Record<string, string> = {
   member_left: "🚪",
   member_claimed: "🔗",
   group_created: "🎉",
+  group_updated: "⚙️",
   group_deleted: "💥",
 };
 
@@ -44,7 +45,7 @@ function formatMessage(event: ActivityEvent): string {
     case "expense_deleted":
       return `${name} eliminó "${details?.expenseDescription ?? ""}" (${formatCurrency((details?.amount as number) ?? 0)})`;
     case "settlement_created":
-      return `${name} saldó una deuda de ${formatCurrency((details?.amount as number) ?? 0)}`;
+      return `${name} saldó ${formatCurrency((details?.amount as number) ?? 0)} con ${details?.toName ?? "alguien"}`;
     case "member_added":
       return `${name} añadió a "${details?.memberName ?? ""}" al grupo`;
     case "member_removed":
@@ -52,9 +53,13 @@ function formatMessage(event: ActivityEvent): string {
     case "member_left":
       return `${name} salió del grupo`;
     case "member_claimed":
-      return `${name} se identificó en el grupo`;
+      return details?.memberName
+        ? `${name} se identificó como "${details.memberName}" en el grupo`
+        : `${name} se identificó en el grupo`;
     case "group_created":
       return `${name} creó el grupo`;
+    case "group_updated":
+      return `${name} actualizó el grupo`;
     case "group_deleted":
       return `${name} eliminó el grupo`;
     default:

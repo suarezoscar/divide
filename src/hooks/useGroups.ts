@@ -46,7 +46,7 @@ export function useGroups() {
 
   const create = async (name: string, description: string, members: Member[]) => {
     if (!user) throw new Error("No has iniciado sesión");
-    const g = await groupsService.createGroup(user.uid, name, description, members);
+    const g = await groupsService.createGroup(user.uid, name, description, members, user.displayName ?? user.email ?? name);
     setGroups((prev) => [g, ...prev]);
     return g;
   };

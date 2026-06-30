@@ -48,7 +48,7 @@ export async function createSettlement(
       amount,
       memberId: from,
       memberName: fromName,
-      details: `${fromName ?? from} → ${toName ?? to}`,
+      toName,
     });
   }
   return {

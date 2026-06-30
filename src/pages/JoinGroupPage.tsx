@@ -112,9 +112,9 @@ export function JoinGroupPage() {
     setError("");
     try {
       if (selectedMemberId) {
-        await groupsService.addUserToGroup(group.id, user.uid, selectedMemberId, true);
+        await groupsService.addUserToGroup(group.id, user.uid, selectedMemberId, true, user.uid);
       } else if (newMemberName.trim()) {
-        await groupsService.addUserToGroup(group.id, user.uid, newMemberName.trim(), false);
+        await groupsService.addUserToGroup(group.id, user.uid, newMemberName.trim(), false, user.uid);
       } else {
         setJoining(false);
         return;

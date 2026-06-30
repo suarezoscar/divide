@@ -70,7 +70,8 @@ export function JoinByCode({ open, onClose }: Props) {
         group.id,
         user.uid,
         claimExisting ? selectedMemberId : newName.trim(),
-        claimExisting
+        claimExisting,
+        user.uid
       );
       showToast("¡Te has unido al grupo!", "success");
       onClose();

@@ -20,6 +20,7 @@ export interface EventDetails {
   amount?: number;
   memberId?: string;
   memberName?: string;
+  toName?: string;
   [key: string]: unknown;
 }
 
