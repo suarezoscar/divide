@@ -43,7 +43,7 @@ export function AddExpensePage() {
       setShowPayerPicker(true);
     }
   }, [linkedMemberId, group?.id, isEditing]);
-  const currentMemberName = user && group?.members.find((m) => m.userId === user.uid)?.name;
+  const currentMemberName = group?.members.find((m) => m.userId === user?.uid)?.name;
   const [error, setError] = useState("");
   const [expenseDate, setExpenseDate] = useState("");
   const [expenseTime, setExpenseTime] = useState("");
