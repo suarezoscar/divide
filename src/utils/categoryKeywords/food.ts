@@ -124,26 +124,6 @@ export const FOOD_KEYWORDS: string[] = [
   // GL
   "pan", "pastel", "torta", "helado", "chocolate", "doces",
 
-  // ── Supermercado ─────────────────────────────────────────────────
-  // ES
-  "super", "mercadona", "carrefour", "lidl", "aldi", "dia", "compra", "despensa",
-  "nevera", "congelado", "preparado", "eroski", "alcampo", "consum", "ahorramas",
-  "hipercor", "el corte ingles",
-  "gadis", "froiz", "coviran", "bonpreu", "condis", "caprabo", "supersol",
-  "masymas", "makro", "simply", "auchan", "supercor", "opencor",
-  "sorli", "bonarea", "cash fresh",
-  "fruta", "verdura", "mercado", "fruteria",
-  "naranja", "manzana", "pera", "uva", "fresa", "melon", "sandia",
-  "cereza", "kiwi", "mango", "papaya", "maracuya", "aguacate", "palta",
-  "tomate", "lechuga", "cebolla", "ajo", "pimiento", "zanahoria", "patata",
-  "calabacin", "berenjena", "esparrago", "espinaca", "brocoli",
-  // EN
-  "supermarket", "grocery", "groceries", "costco", "walmart", "tesco",
-  "sainsbury", "asda", "waitrose", "morrisons", "whole foods", "trader joe's",
-  "aldi", "lidl",
-  // GL
-  "supermercado", "compra", "mercado", "feira", "froitas", "verduras",
-  "gadis", "froiz",
 
   // ── Delivery ─────────────────────────────────────────────────────
   // ES
@@ -155,14 +135,7 @@ export const FOOD_KEYWORDS: string[] = [
   // GL
   "recolleita", "levar", "domicilio",
 
-  // ── Menaje / cocina ──────────────────────────────────────────────
+  // ── Guisos / platos de cuchara ────────────────────────────────────
   // ES
-  "sarten", "cacerola", "cazuela", "puchero", "olla expres",
-  "batidora", "thermomix", "tupper", "tupperware", "fiambrera",
-  "papel aluminio", "film transparente", "servilleta", "mantel",
   "estofado", "guiso", "ropa vieja", "caldero", "caldereta", "marmita",
-  // EN
-  "kitchen", "cookware", "pan", "pot", "utensils",
-  // GL
-  "cocina", "tarteira", "potas",
 ];

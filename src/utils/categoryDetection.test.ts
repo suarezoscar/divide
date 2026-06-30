@@ -19,8 +19,8 @@ describe("detectCategory", () => {
     expect(detectCategory("alquiler")).toBe("housing");
   });
 
-  it("detects 'mercadona' as food", () => {
-    expect(detectCategory("mercadona")).toBe("food");
+  it("detects 'mercadona' as shopping", () => {
+    expect(detectCategory("mercadona")).toBe("shopping");
   });
 
   it("detects 'zara' as shopping", () => {
@@ -65,8 +65,8 @@ describe("detectCategory", () => {
     expect(detectCategory("escape room enigma")).toBe("leisure");
   });
 
-  it("still detects 'el corte ingles' as food (supermarket)", () => {
-    expect(detectCategory("el corte ingles")).toBe("food");
+  it("still detects 'el corte ingles' as shopping (supermarket)", () => {
+    expect(detectCategory("el corte ingles")).toBe("shopping");
   });
 
   it("still detects '100 montaditos' as food", () => {
@@ -138,24 +138,24 @@ describe("detectCategory", () => {
   });
 
   // ── Spanish supermarket detection ─────────────────────────────────
-  it("detects 'gadis' as food", () => {
-    expect(detectCategory("gadis")).toBe("food");
+  it("detects 'gadis' as shopping", () => {
+    expect(detectCategory("gadis")).toBe("shopping");
   });
 
-  it("detects 'coviran' as food", () => {
-    expect(detectCategory("coviran")).toBe("food");
+  it("detects 'coviran' as shopping", () => {
+    expect(detectCategory("coviran")).toBe("shopping");
   });
 
-  it("detects 'bonpreu' as food", () => {
-    expect(detectCategory("bonpreu")).toBe("food");
+  it("detects 'bonpreu' as shopping", () => {
+    expect(detectCategory("bonpreu")).toBe("shopping");
   });
 
-  it("detects 'condis' as food", () => {
-    expect(detectCategory("condis")).toBe("food");
+  it("detects 'condis' as shopping", () => {
+    expect(detectCategory("condis")).toBe("shopping");
   });
 
-  it("detects 'caprabo' as food", () => {
-    expect(detectCategory("caprabo")).toBe("food");
+  it("detects 'caprabo' as shopping", () => {
+    expect(detectCategory("caprabo")).toBe("shopping");
   });
 
   it("detects 'beer' as nightlife (en)", () => {
