@@ -7,6 +7,7 @@ import { friendlyError } from "../../utils/errors";
 import { Modal } from "../ui/Modal";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
+import { Avatar } from "../ui/Avatar";
 import type { Group } from "../../types";
 import styles from "./JoinByCode.module.css";
 
@@ -21,9 +22,9 @@ export function JoinByCode({ open, onClose }: Props) {
   const [code, setCode] = useState("");
   const [group, setGroup] = useState<Group | null>(null);
   const [checking, setChecking] = useState(false);
-  const [claimExisting, setClaimExisting] = useState(false);
-  const [newName, setNewName] = useState("");
-  const [selectedMemberId, setSelectedMemberId] = useState("");
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+  const [showNewMember, setShowNewMember] = useState(false);
+  const [newMemberName, setNewMemberName] = useState("");
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState("");
 
@@ -47,9 +48,9 @@ export function JoinByCode({ open, onClose }: Props) {
         return;
       } else {
         setGroup(g);
-        setSelectedMemberId("");
-        setNewName("");
-        setClaimExisting(false);
+        setSelectedMemberId(null);
+        setShowNewMember(false);
+        setNewMemberName("");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al buscar el grupo");
@@ -60,19 +61,17 @@ export function JoinByCode({ open, onClose }: Props) {
 
   const handleJoin = async () => {
     if (!user || !group) return;
-    if (claimExisting && !selectedMemberId) return;
-    if (!claimExisting && !newName.trim()) return;
-
     setJoining(true);
     setError("");
     try {
-      await groupsService.addUserToGroup(
-        group.id,
-        user.uid,
-        claimExisting ? selectedMemberId : newName.trim(),
-        claimExisting,
-        user.uid
-      );
+      if (selectedMemberId) {
+        await groupsService.addUserToGroup(group.id, user.uid, selectedMemberId, true, user.uid);
+      } else if (newMemberName.trim()) {
+        await groupsService.addUserToGroup(group.id, user.uid, newMemberName.trim(), false, user.uid);
+      } else {
+        setJoining(false);
+        return;
+      }
       showToast("¡Te has unido al grupo!", "success");
       onClose();
       setCode("");
@@ -84,24 +83,18 @@ export function JoinByCode({ open, onClose }: Props) {
     }
   };
 
-  const canSubmit = group
-    ? (claimExisting ? !!selectedMemberId : !!newName.trim())
-    : false;
+  const canSubmit = !!selectedMemberId || newMemberName.trim().length > 0;
 
-  const filteredMembers = group
-    ? group.members.filter(
-        (m) => !group.userIds.includes(user?.uid ?? "") || m.id === selectedMemberId
-      )
-    : [];
+  const unclaimed = group ? group.members.filter((m) => !m.userId) : [];
 
   // Reset state when modal opens/closes
   const handleClose = () => {
     setCode("");
     setGroup(null);
     setError("");
-    setNewName("");
-    setClaimExisting(false);
-    setSelectedMemberId("");
+    setNewMemberName("");
+    setShowNewMember(false);
+    setSelectedMemberId(null);
     onClose();
   };
 
@@ -131,59 +124,63 @@ export function JoinByCode({ open, onClose }: Props) {
               <span className={styles.resultName}>{group.name}</span>
             </div>
 
-            <div className={styles.claimToggle}>
-              <button
-                type="button"
-                aria-pressed={!claimExisting}
-                className={`${styles.claimBtn} ${!claimExisting ? styles.claimActive : ""}`}
-                onClick={() => setClaimExisting(false)}
-              >
-                Soy nuevo
-              </button>
-              <button
-                type="button"
-                aria-pressed={claimExisting}
-                className={`${styles.claimBtn} ${claimExisting ? styles.claimActive : ""}`}
-                onClick={() => setClaimExisting(true)}
-              >
-                Ya soy miembro
-              </button>
-            </div>
-
-            {claimExisting ? (
-              <div className={styles.memberOptions}>
-                {filteredMembers.length === 0 ? (
-                  <p className={styles.emptyMembers}>No hay miembros disponibles para reclamar</p>
-                ) : (
-                  filteredMembers.map((m) => (
+            {/* Unclaimed members */}
+            {unclaimed.length > 0 && (
+              <>
+                <h2 className={styles.sectionTitle}>¿Eres uno de estos?</h2>
+                <div className={styles.memberOptions}>
+                  {unclaimed.map((m) => (
                     <button
                       key={m.id}
                       type="button"
                       className={`${styles.memberOption} ${selectedMemberId === m.id ? styles.memberOptionActive : ""}`}
-                      onClick={() => setSelectedMemberId(m.id)}
+                      onClick={() => {
+                        setSelectedMemberId(m.id);
+                        setShowNewMember(false);
+                        setNewMemberName("");
+                      }}
                     >
+                      <Avatar name={m.name} size="sm" id={m.id} />
                       <span>{m.name}</span>
                     </button>
-                  ))
-                )}
-              </div>
-            ) : (
-              <Input
-                label="Tu nombre en el grupo"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                placeholder="¿Cómo te llamas?"
-              />
+                  ))}
+                </div>
+
+                <div className={styles.divider}>
+                  <span>o</span>
+                </div>
+              </>
             )}
+
+            {/* New member */}
+            {!showNewMember ? (
+              <button
+                type="button"
+                className={styles.toggleNew}
+                onClick={() => {
+                  setShowNewMember(true);
+                  setSelectedMemberId(null);
+                }}
+              >
+                + No estoy en la lista
+              </button>
+            ) : (
+              <div className={styles.newMemberSection}>
+                <Input
+                  label="Tu nombre en el grupo"
+                  value={newMemberName}
+                  onChange={(e) => setNewMemberName(e.target.value)}
+                  placeholder="¿Cómo te llamas?"
+                />
+              </div>
+            )}
+
+            {error && <p className={styles.error} role="alert">{error}</p>}
+
+            <Button onClick={handleJoin} isLoading={joining} disabled={!canSubmit} size="lg" style={{ width: "100%" }}>
+              {selectedMemberId ? "Identificarse en el grupo" : "Unirse al grupo"}
+            </Button>
           </>
-        )}
-
-        {error && <p className={styles.error} role="alert">{error}</p>}
-
-        {group && (
-          <Button onClick={handleJoin} isLoading={joining} disabled={!canSubmit} size="lg" style={{ width: "100%" }}>
-            Unirse al grupo
-          </Button>
         )}
       </div>
     </Modal>
