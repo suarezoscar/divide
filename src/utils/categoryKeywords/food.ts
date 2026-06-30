@@ -85,12 +85,16 @@ export const FOOD_KEYWORDS: string[] = [
   "lomo", "chorizo", "salchichon", "sobrasada", "morcilla",
   "queso", "manchego", "curado", "semicurado", "fresco", "cabra", "oveja",
   "aceituna", "oliva", "encurtido",
-  "barbacoa", "bbq", "parrillada", "picnic", "asado", "paella", "fideua",
+  "barbacoa", "bbq", "parrilla", "parrillada", "picnic", "asado", "paella", "fideua",
   "marisco", "pescado", "carne", "chuleton", "entrecot", "solomillo",
+  "churrasco", "churrascada", "churrasqueria", "bife", "costillas", "picanha",
+  "vacio", "matambre", "chimichurri",
+  // EN
+  "steak", "grill", "ribs", "barbecue", "roast",
   // GL
   "polbo", "lacon", "filloa", "chourizo", "caldo", "empanada",
   "orella", "raxo", "zetas", "pementos", "froita", "leite", "queixo",
-  "pan", "auga", "cebolas", "patacas", "lombarda",
+  "pan", "auga", "cebolas", "patacas", "lombarda", "churrasco",
 
   // ── Cocina latina ────────────────────────────────────────────────
   // ES
