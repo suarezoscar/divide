@@ -1,5 +1,6 @@
 import { formatCurrency } from "../../utils/format";
 import { getMemberColor } from "../../utils/memberColor";
+import { Card } from "../ui/Card";
 import styles from "./ExpenseDonut.module.css";
 
 interface Props {
@@ -25,39 +26,42 @@ export function ExpenseDonut({ balances, total }: Props) {
   });
 
   return (
-    <div className={styles.donutWrap}>
-      <svg viewBox="0 0 160 160" className={styles.donut}>
-        {segments.map((s, i) => (
-          <circle
-            key={i}
-            cx="80"
-            cy="80"
-            r={radius}
-            fill="none"
-            stroke={s.color}
-            strokeWidth={strokeWidth}
-            strokeDasharray={`${s.dash} ${circumference - s.dash}`}
-            strokeDashoffset={-s.offset}
-            transform="rotate(-90 80 80)"
-          />
-        ))}
-        <text x="80" y="76" textAnchor="middle" className={styles.donutTotal}>
-          {formatCurrency(total)}
-        </text>
-        <text x="80" y="94" textAnchor="middle" className={styles.donutLabel}>
-          total gastos
-        </text>
-      </svg>
-      <div className={styles.legend}>
-        {segments.map((s, i) => (
-          <div key={i} className={styles.legendItem}>
-            <span className={styles.legendDot} style={{ background: s.color }} />
-            <span className={styles.legendName}>{s.memberName}</span>
-            <span className={styles.legendAmount}>{formatCurrency(s.amount)}</span>
-            <span className={styles.legendPct}>{Math.round(s.pct * 100)}%</span>
-          </div>
-        ))}
+    <Card className={styles.card}>
+      <h3 className={styles.cardTitle}>Desglose</h3>
+      <div className={styles.donutWrap}>
+        <svg viewBox="0 0 160 160" className={styles.donut}>
+          {segments.map((s, i) => (
+            <circle
+              key={i}
+              cx="80"
+              cy="80"
+              r={radius}
+              fill="none"
+              stroke={s.color}
+              strokeWidth={strokeWidth}
+              strokeDasharray={`${s.dash} ${circumference - s.dash}`}
+              strokeDashoffset={-s.offset}
+              transform="rotate(-90 80 80)"
+            />
+          ))}
+          <text x="80" y="76" textAnchor="middle" className={styles.donutTotal}>
+            {formatCurrency(total)}
+          </text>
+          <text x="80" y="94" textAnchor="middle" className={styles.donutLabel}>
+            total gastos
+          </text>
+        </svg>
+        <div className={styles.legend}>
+          {segments.map((s, i) => (
+            <div key={i} className={styles.legendItem}>
+              <span className={styles.legendDot} style={{ background: s.color }} />
+              <span className={styles.legendName}>{s.memberName}</span>
+              <span className={styles.legendAmount}>{formatCurrency(s.amount)}</span>
+              <span className={styles.legendPct}>{Math.round(s.pct * 100)}%</span>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+    </Card>
   );
 }

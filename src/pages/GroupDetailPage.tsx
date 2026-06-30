@@ -13,6 +13,7 @@ import { Input } from "../components/ui/Input";
 import { ConfirmDialog } from "../components/ui/ConfirmDialog";
 import { BalanceSummary } from "../components/balances/BalanceSummary";
 import { SettlementList } from "../components/balances/SettlementList";
+import { DebtGraph } from "../components/balances/DebtGraph";
 import { ExpenseDonut } from "../components/balances/ExpenseDonut";
 import { CategoryBreakdown } from "../components/balances/CategoryBreakdown";
 import { InviteSection } from "../components/groups/InviteSection";
@@ -398,6 +399,7 @@ export function GroupDetailPage() {
               showToast("Deuda saldada", "success");
             }}
           />
+          <DebtGraph debts={debts} members={group.members} />
         </div>
       )}
 

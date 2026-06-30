@@ -1,8 +1,21 @@
+.card {
+  padding: 16px;
+}
+
+.cardTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 16px;
+}
+
 .donutWrap {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .donut {
@@ -21,29 +34,30 @@
   fill: #6B7280;
 }
 
+/* 2-column grid legend */
 .legend {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 24px;
   width: 100%;
 }
 
 .legendItem {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
+  gap: 6px;
+  font-size: 12px;
+  min-width: 0;
 }
 
 .legendDot {
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
 .legendName {
-  flex: 1;
   min-width: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -55,19 +69,25 @@
 .legendAmount {
   font-weight: 600;
   color: #4B5563;
+  white-space: nowrap;
+  margin-left: auto;
 }
 
 .legendPct {
   font-size: 11px;
   font-weight: 600;
   color: #9CA3AF;
-  width: 32px;
   text-align: right;
+  min-width: 32px;
 }
 
 @media (max-width: 380px) {
   .donut {
     width: 140px;
     height: 140px;
+  }
+
+  .legend {
+    grid-template-columns: 1fr;
   }
 }

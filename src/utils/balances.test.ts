@@ -141,4 +141,88 @@ describe("minimizeDebts", () => {
     expect(debts).toHaveLength(1);
     expect(debts[0].amount).toBe(33.33);
   });
+
+  // ── Minimum transaction count proofs ──
+  // The greedy max-debtor→max-creditor algorithm guarantees ≤ N-1
+  // transactions for N non-zero participants.
+
+  it("produces ≤ N-1 edges for N=3 chain", () => {
+    // Alice paid 30, owes 0   → +30
+    // Bob paid 0, owes 20     → -20
+    // Carol paid 0, owes 10   → -10
+    const balances: MemberBalance[] = [
+      { memberId: "alice", memberName: "Alice", paid: 30, owed: 0, balance: 30 },
+      { memberId: "bob", memberName: "Bob", paid: 0, owed: 20, balance: -20 },
+      { memberId: "carol", memberName: "Carol", paid: 0, owed: 10, balance: -10 },
+    ];
+    const debts = minimizeDebts(balances);
+    const nonZero = balances.filter((b) => b.balance !== 0).length;
+    expect(debts.length).toBeLessThanOrEqual(nonZero - 1);
+    expect(debts.length).toBe(2);
+    // Verify total transfer matches
+    const totalTransfer = debts.reduce((s, d) => s + d.amount, 0);
+    expect(totalTransfer).toBe(30);
+  });
+
+  it("produces 0 edges for all-zero balances", () => {
+    const balances: MemberBalance[] = [
+      { memberId: "a", memberName: "A", paid: 0, owed: 0, balance: 0 },
+      { memberId: "b", memberName: "B", paid: 0, owed: 0, balance: 0 },
+    ];
+    const debts = minimizeDebts(balances);
+    expect(debts).toEqual([]);
+  });
+
+  it("produces ≤ N-1 edges for N=5 random-like scenario", () => {
+    // Random-ish balances: +40, -25, -10, +15, -20
+    const balances: MemberBalance[] = [
+      { memberId: "a", memberName: "A", paid: 40, owed: 0, balance: 40 },
+      { memberId: "b", memberName: "B", paid: 0, owed: 25, balance: -25 },
+      { memberId: "c", memberName: "C", paid: 0, owed: 10, balance: -10 },
+      { memberId: "d", memberName: "D", paid: 15, owed: 0, balance: 15 },
+      { memberId: "e", memberName: "E", paid: 0, owed: 20, balance: -20 },
+    ];
+    const debts = minimizeDebts(balances);
+    const nonZero = balances.filter((b) => b.balance !== 0).length;
+    expect(debts.length).toBeLessThanOrEqual(nonZero - 1);
+    // Verify net-zero: sum of all transfer amounts from debtors = sum to creditors
+    const totalFrom = debts.reduce((s, d) => s + d.amount, 0);
+    const totalPos = balances.reduce((s, b) => s + Math.max(b.balance, 0), 0);
+    expect(Math.abs(totalFrom - totalPos)).toBeLessThan(0.01);
+  });
+
+  it("handles disconnected subgraphs with ≤ N-1 edges", () => {
+    // Subgraph 1: Alice owes Bob 20
+    // Subgraph 2: Carol owes Dave 15
+    // No relation between subgraphs → 2 edges needed
+    const balances: MemberBalance[] = [
+      { memberId: "alice", memberName: "Alice", paid: 0, owed: 20, balance: -20 },
+      { memberId: "bob", memberName: "Bob", paid: 20, owed: 0, balance: 20 },
+      { memberId: "carol", memberName: "Carol", paid: 0, owed: 15, balance: -15 },
+      { memberId: "dave", memberName: "Dave", paid: 15, owed: 0, balance: 15 },
+    ];
+    const debts = minimizeDebts(balances);
+    const nonZero = balances.filter((b) => b.balance !== 0).length;
+    expect(debts.length).toBeLessThanOrEqual(nonZero - 1);
+    expect(debts.length).toBe(2);
+  });
+
+  it("handles N=10 with all non-zero balances", () => {
+    // 10 participants, each with a unique balance that sums to zero
+    const amounts = [100, 50, 25, 10, 5, -30, -40, -60, -20, -40];
+    const balances: MemberBalance[] = amounts.map((a, i) => ({
+      memberId: `m${i}`,
+      memberName: `M${i}`,
+      paid: a > 0 ? a : 0,
+      owed: a < 0 ? -a : 0,
+      balance: a,
+    }));
+    const debts = minimizeDebts(balances);
+    const nonZero = balances.filter((b) => b.balance !== 0).length;
+    expect(debts.length).toBeLessThanOrEqual(nonZero - 1);
+    // Verify settlement is exact (all debts cleared)
+    const totalTransfer = debts.reduce((s, d) => s + d.amount, 0);
+    const totalPositive = amounts.filter((a) => a > 0).reduce((s, a) => s + a, 0);
+    expect(Math.abs(totalTransfer - totalPositive)).toBeLessThan(0.01);
+  });
 });
