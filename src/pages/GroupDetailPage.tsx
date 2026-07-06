@@ -221,14 +221,11 @@ export function GroupDetailPage() {
       const original = captureRef.current;
       const clone = original.cloneNode(true) as HTMLElement;
 
-      // 2. Crear contenedor rectangular con borde primary + pequeño margen
+      // 2. Crear contenedor sin marco, solo fondo blanco
       const wrapper = document.createElement("div");
       wrapper.style.cssText = `
-        border: 4px solid #07819C;
-        border-radius: 0;
         padding: 20px 24px;
         background: #FFFFFF;
-        margin: 8px;
         display: flex;
         flex-direction: column;
         gap: 16px;
@@ -237,13 +234,14 @@ export function GroupDetailPage() {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       `;
 
-      // 3. Header: nombre del grupo + fecha/hora
+      // 3. Header: nombre del grupo centrado + fecha/hora
       const header = document.createElement("div");
       header.style.cssText = `
         display: flex;
         flex-direction: column;
+        align-items: center;
         gap: 2px;
-        margin-bottom: 2px;
+        margin-bottom: 6px;
       `;
       const groupNameEl = document.createElement("span");
       groupNameEl.textContent = group.name;
@@ -292,31 +290,28 @@ export function GroupDetailPage() {
         btn.style.display = "none";
       });
 
-      // 7. Footer con el símbolo ÷ (mismo estilo que el logo lucide Divide del navbar)
+      // 7. Footer: símbolo ÷ + "Divide" en pequeño, alineado a la derecha
       const svgNS = "http://www.w3.org/2000/svg";
       const divideSvg = document.createElementNS(svgNS, "svg");
-      divideSvg.setAttribute("width", "26");
-      divideSvg.setAttribute("height", "26");
+      divideSvg.setAttribute("width", "16");
+      divideSvg.setAttribute("height", "16");
       divideSvg.setAttribute("viewBox", "0 0 24 24");
       divideSvg.setAttribute("fill", "none");
       divideSvg.setAttribute("stroke", "#07819C");
       divideSvg.setAttribute("stroke-width", "2.5");
       divideSvg.setAttribute("stroke-linecap", "round");
       divideSvg.setAttribute("stroke-linejoin", "round");
-      // Círculo superior
       const topDot = document.createElementNS(svgNS, "circle");
       topDot.setAttribute("cx", "12");
       topDot.setAttribute("cy", "5");
       topDot.setAttribute("r", "1.5");
       topDot.setAttribute("fill", "#07819C");
       topDot.setAttribute("stroke", "none");
-      // Línea horizontal
       const line = document.createElementNS(svgNS, "line");
       line.setAttribute("x1", "4");
       line.setAttribute("y1", "12");
       line.setAttribute("x2", "20");
       line.setAttribute("y2", "12");
-      // Círculo inferior
       const bottomDot = document.createElementNS(svgNS, "circle");
       bottomDot.setAttribute("cx", "12");
       bottomDot.setAttribute("cy", "19");
@@ -328,12 +323,22 @@ export function GroupDetailPage() {
       const footer = document.createElement("div");
       footer.style.cssText = `
         display: flex;
-        justify-content: center;
+        justify-content: flex-end;
         align-items: center;
-        padding-top: 6px;
-        opacity: 0.5;
+        gap: 4px;
+        padding-top: 8px;
+        opacity: 0.45;
       `;
       footer.appendChild(divideSvg);
+      const label = document.createElement("span");
+      label.textContent = "Divide";
+      label.style.cssText = `
+        font-size: 11px;
+        font-weight: 600;
+        color: #07819C;
+        font-family: inherit;
+      `;
+      footer.appendChild(label);
       wrapper.appendChild(footer);
 
       // 8. Renderizar wrapper directamente
