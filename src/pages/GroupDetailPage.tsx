@@ -630,7 +630,7 @@ export function GroupDetailPage() {
           <BalanceSummary balances={balances} />
 
           {/* Solo esto se captura: donut + pagos necesarios */}
-          <div ref={captureRef}>
+          <div ref={captureRef} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <ExpenseDonut
               balances={balances.map((b) => ({ memberId: b.memberId, memberName: b.memberName, amount: b.owed }))}
               total={categoryTotalAmount}
