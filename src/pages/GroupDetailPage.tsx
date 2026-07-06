@@ -226,7 +226,7 @@ export function GroupDetailPage() {
       wrapper.style.cssText = `
         border: 4px solid #07819C;
         border-radius: 20px;
-        padding: 40px 40px 80px;
+        padding: 40px;
         background: #FFFFFF;
         position: relative;
         display: flex;
@@ -311,54 +311,71 @@ export function GroupDetailPage() {
         btn.style.display = "none";
       });
 
-      // 7. Logo abajo a la derecha (cargado como data URL para asegurar visibilidad)
-      const logoSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="100" fill="#07819C"/><rect x="146" y="234" width="220" height="44" rx="22" fill="#fff"/><circle cx="256" cy="148" r="40" fill="#fff"/><circle cx="256" cy="364" r="40" fill="#fff"/></svg>';
-      const logoDataUrl = 'data:image/svg+xml,' + encodeURIComponent(logoSvg);
-      const logo = document.createElement("img");
-      logo.src = logoDataUrl;
-      logo.alt = "Divide";
-      logo.style.cssText = `
-        width: 52px;
-        height: 52px;
-        opacity: 0.7;
-        position: absolute;
-        bottom: 20px;
-        right: 24px;
-        z-index: 2;
-        border-radius: 8px;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-      `;
-      wrapper.appendChild(logo);
+      // 7. Logo abajo a la derecha (SVG inline en DOM para que html2canvas lo renderice sin problemas)
+      const svgNS = "http://www.w3.org/2000/svg";
+      const logoSvg = document.createElementNS(svgNS, "svg");
+      logoSvg.setAttribute("width", "56");
+      logoSvg.setAttribute("height", "56");
+      logoSvg.setAttribute("viewBox", "0 0 512 512");
+      logoSvg.style.cssText = `display: block;`;
+      // Fondo teal redondeado
+      const bg = document.createElementNS(svgNS, "rect");
+      bg.setAttribute("width", "512");
+      bg.setAttribute("height", "512");
+      bg.setAttribute("rx", "100");
+      bg.setAttribute("fill", "#07819C");
+      // Barra central
+      const bar = document.createElementNS(svgNS, "rect");
+      bar.setAttribute("x", "146");
+      bar.setAttribute("y", "234");
+      bar.setAttribute("width", "220");
+      bar.setAttribute("height", "44");
+      bar.setAttribute("rx", "22");
+      bar.setAttribute("fill", "#fff");
+      // Círculo superior
+      const c1 = document.createElementNS(svgNS, "circle");
+      c1.setAttribute("cx", "256");
+      c1.setAttribute("cy", "148");
+      c1.setAttribute("r", "40");
+      c1.setAttribute("fill", "#fff");
+      // Círculo inferior
+      const c2 = document.createElementNS(svgNS, "circle");
+      c2.setAttribute("cx", "256");
+      c2.setAttribute("cy", "364");
+      c2.setAttribute("r", "40");
+      c2.setAttribute("fill", "#fff");
+      logoSvg.append(bg, bar, c1, c2);
 
-      // 8. Contenedor externo (fondo de la app) + renderizar off-screen
-      const container = document.createElement("div");
-      container.style.cssText = `
-        position: fixed;
-        left: -9999px;
-        top: 0;
-        background: #F5F5F7;
-        padding: 48px;
+      // Contenedor flex para el logo, alineado a la derecha
+      const logoContainer = document.createElement("div");
+      logoContainer.style.cssText = `
         display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: -1000;
+        justify-content: flex-end;
+        margin-top: 8px;
+        opacity: 0.65;
       `;
-      container.appendChild(wrapper);
-      document.body.appendChild(container);
+      logoContainer.appendChild(logoSvg);
+      wrapper.appendChild(logoContainer);
+
+      // 8. Renderizar wrapper directamente (sin contenedor externo, el borde primary es el borde de la imagen)
+      wrapper.style.position = "fixed";
+      wrapper.style.left = "-9999px";
+      wrapper.style.top = "0";
+      document.body.appendChild(wrapper);
 
       // 9. Capturar con html2canvas (scale 3 para ultra-resolución)
-      const canvas = await html2canvas(container, {
+      const canvas = await html2canvas(wrapper, {
         scale: 3,
-        backgroundColor: "#F5F5F7",
+        backgroundColor: "#FFFFFF",
         useCORS: true,
         logging: false,
         allowTaint: false,
-        width: container.scrollWidth,
-        height: container.scrollHeight,
+        width: wrapper.scrollWidth,
+        height: wrapper.scrollHeight,
       });
 
       // 10. Limpiar clon del DOM
-      document.body.removeChild(container);
+      document.body.removeChild(wrapper);
 
       // 11. Convertir a blob y compartir
       const blob = await new Promise<Blob | null>((resolve) =>
