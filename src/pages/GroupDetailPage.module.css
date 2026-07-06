@@ -494,3 +494,47 @@
 .fab:active {
   transform: scale(0.95);
 }
+
+/* ── Share card ── */
+.shareRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.shareText {
+  font-size: 14px;
+  font-weight: 500;
+  color: #4B5563;
+}
+
+.shareBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 10px;
+  background: #07819C;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.shareBtn:hover {
+  background: #056475;
+}
+
+.shareBtn:active {
+  transform: scale(0.96);
+}
+
+.shareBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

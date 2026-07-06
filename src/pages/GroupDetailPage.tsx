@@ -21,7 +21,7 @@ import { ActivityLog } from "../components/activity/ActivityLog";
 import { GroupDetailSkeleton } from "../components/ui/Skeleton";
 import { Skeleton } from "../components/ui/Skeleton";
 import { showToast } from "../components/ui/Toast";
-import { Plus, Receipt, Clock, ArrowRightLeft, Share, Pencil, Trash2, Bell, BellOff, LogOut, Settings } from "lucide-react";
+import { Plus, Receipt, Clock, ArrowRightLeft, Share, Share2, Pencil, Trash2, Bell, BellOff, LogOut, Settings } from "lucide-react";
 import { formatCurrency, formatDate } from "../utils/format";
 import { getCategory } from "../utils/categories";
 import { getGroupColorRgba } from "../utils/groupColors";
@@ -40,6 +40,8 @@ export function GroupDetailPage() {
   const [notifsOn, setNotifsOn] = useState(() => localStorage.getItem(`notif-${groupId}`) !== "off");
   const pendingNotifs = useRef<any[]>([]);
   const notifTimer = useRef<ReturnType<typeof setTimeout>>(null);
+  const captureRef = useRef<HTMLDivElement>(null);
+  const [sharing, setSharing] = useState(false);
 
   // Member maps — built once (declared early for notification effect)
   const memberNames = new Map<string, string>();
@@ -204,6 +206,166 @@ export function GroupDetailPage() {
     setNewMemberName("");
     setShowAddMember(false);
     showToast("Miembro añadido", "success");
+  };
+
+  // ── Compartir captura de balances ──
+  const handleShareBalances = async () => {
+    if (!captureRef.current || !group) return;
+    setSharing(true);
+    showToast("Generando captura...", "success");
+    try {
+      // Dynamic import para no cargar html2canvas hasta que se use
+      const html2canvas = (await import("html2canvas")).default;
+
+      // 1. Clonar el contenido a capturar
+      const original = captureRef.current;
+      const clone = original.cloneNode(true) as HTMLElement;
+
+      // 2. Crear contenedor con marco, padding, fondo blanco
+      const wrapper = document.createElement("div");
+      wrapper.style.cssText = `
+        border: 3px solid #07819C;
+        border-radius: 16px;
+        padding: 24px;
+        background: #FFFFFF;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      `;
+
+      // 3. Header: nombre del grupo + fecha/hora
+      const header = document.createElement("div");
+      header.style.cssText = `
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        margin-bottom: 8px;
+      `;
+      const groupName = document.createElement("span");
+      groupName.textContent = group.name;
+      groupName.style.cssText = `
+        font-size: 18px;
+        font-weight: 700;
+        color: #1A1A2E;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      `;
+      const dateTime = document.createElement("span");
+      const now = new Date();
+      const formattedDate = now.toLocaleDateString("es-ES", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+      const formattedTime = now.toLocaleTimeString("es-ES", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      dateTime.textContent = `${formattedDate} · ${formattedTime}`;
+      dateTime.style.cssText = `
+        font-size: 12px;
+        color: #6B7280;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      `;
+      header.appendChild(groupName);
+      header.appendChild(dateTime);
+      wrapper.appendChild(header);
+
+      // 4. Añadir contenido clonado
+      wrapper.appendChild(clone);
+
+      // 5. Eliminar botones "Saldar" del clon
+      const removeBtns = wrapper.querySelectorAll<HTMLElement>('[data-capture-role="remove"]');
+      removeBtns.forEach((btn) => {
+        const row = btn.closest('[class*="debtActions"]') as HTMLElement | null;
+        if (row) {
+          // Oculta solo el botón, no el monto
+          btn.style.display = "none";
+        }
+      });
+
+      // 6. Logo abajo a la derecha
+      const logo = document.createElement("img");
+      logo.src = "/logo.svg";
+      logo.alt = "Divide";
+      logo.style.cssText = `
+        width: 36px;
+        height: 36px;
+        opacity: 0.4;
+        position: absolute;
+        bottom: 16px;
+        right: 16px;
+      `;
+      wrapper.appendChild(logo);
+
+      // 7. Contenedor externo (fondo de la app) + renderizar off-screen
+      const container = document.createElement("div");
+      container.style.cssText = `
+        position: fixed;
+        left: -9999px;
+        top: 0;
+        background: #F5F5F7;
+        padding: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: -1000;
+      `;
+      container.appendChild(wrapper);
+      document.body.appendChild(container);
+
+      // 8. Capturar con html2canvas
+      const canvas = await html2canvas(container, {
+        scale: 2,
+        backgroundColor: "#F5F5F7",
+        useCORS: true,
+        logging: false,
+        allowTaint: false,
+        width: container.scrollWidth,
+        height: container.scrollHeight,
+      });
+
+      // 9. Limpiar clon del DOM
+      document.body.removeChild(container);
+
+      // 10. Convertir a blob y compartir
+      const blob = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob(resolve, "image/png")
+      );
+      if (!blob) throw new Error("No se pudo generar la imagen");
+
+      const file = new File([blob], `balances-${group.name.replace(/\s+/g, "-")}.png`, {
+        type: "image/png",
+      });
+
+      // 11. Intentar Web Share API (móvil → WhatsApp, etc.)
+      if (navigator.canShare?.({
+        files: [file],
+        title: `Balances - ${group.name}`,
+      })) {
+        await navigator.share({
+          files: [file],
+          title: `Balances - ${group.name}`,
+        });
+        showToast("Compartido con éxito", "success");
+      } else {
+        // 12. Fallback: descargar imagen
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `balances-${group.name.replace(/\s+/g, "-")}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast("Imagen descargada", "success");
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Error al generar la captura", "error");
+    } finally {
+      setSharing(false);
+    }
   };
 
   if (loading) {
@@ -390,23 +552,42 @@ export function GroupDetailPage() {
       {/* Balances tab */}
       {tab === "balances" && (
         <div className={styles.tabContent}>
-          <CategoryBreakdown items={categoryTotals} total={categoryTotalAmount} />
-          <ExpenseDonut
-            balances={balances.map((b) => ({ memberId: b.memberId, memberName: b.memberName, amount: b.owed }))}
-            total={categoryTotalAmount}
-          />
-          <BalanceSummary balances={balances} />
-          <SettlementList
-            debts={debts}
-            members={group.members}
-            onSettle={async (from, to, amount) => {
-              const fromMember = memberById.get(from);
-              const toMember = memberById.get(to);
-              await addSettlement(from, to, amount, user?.uid, currentMemberName, fromMember?.name, toMember?.name);
-              showToast("Deuda saldada", "success");
-            }}
-          />
-          <DebtGraph debts={debts} members={group.members} />
+          {/* Botón compartir (fuera del captureRef para no salir en la captura) */}
+          <Card>
+            <div className={styles.shareRow}>
+              <span className={styles.shareText}>Compartir balances con el grupo</span>
+              <button
+                className={styles.shareBtn}
+                onClick={handleShareBalances}
+                disabled={sharing}
+                aria-label="Compartir balances"
+              >
+                <Share2 size={18} />
+                {sharing ? "Generando…" : "Compartir"}
+              </button>
+            </div>
+          </Card>
+
+          {/* Contenido a capturar */}
+          <div ref={captureRef}>
+            <CategoryBreakdown items={categoryTotals} total={categoryTotalAmount} />
+            <ExpenseDonut
+              balances={balances.map((b) => ({ memberId: b.memberId, memberName: b.memberName, amount: b.owed }))}
+              total={categoryTotalAmount}
+            />
+            <BalanceSummary balances={balances} />
+            <SettlementList
+              debts={debts}
+              members={group.members}
+              onSettle={async (from, to, amount) => {
+                const fromMember = memberById.get(from);
+                const toMember = memberById.get(to);
+                await addSettlement(from, to, amount, user?.uid, currentMemberName, fromMember?.name, toMember?.name);
+                showToast("Deuda saldada", "success");
+              }}
+            />
+            <DebtGraph debts={debts} members={group.members} />
+          </div>
         </div>
       )}
 
