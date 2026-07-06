@@ -74,6 +74,7 @@ export const SettlementList = memo(function SettlementList({ debts, members, onS
                     variant="secondary"
                     onClick={() => setPendingSettle(d)}
                     disabled={settling === key}
+                    data-capture-role="remove"
                   >
                     <Check size={14} />
                     {settling === key ? "…" : "Saldar"}

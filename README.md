@@ -17,6 +17,7 @@ Divide es una app web para dividir gastos entre grupos de personas. Crea un grup
 | Estilos | CSS Modules + design tokens |
 | Iconos | Lucide React |
 | QR | qrcode |
+| Captura de pantalla | html2canvas |
 | Deploy | Netlify |
 | Package manager | pnpm |
 
@@ -53,6 +54,7 @@ Divide es una app web para dividir gastos entre grupos de personas. Crea un grup
 - Indicador visual: verde = te deben, rojo = debes
 - **Algoritmo de minimización de deudas**: calcula el mínimo número de transacciones necesarias para saldar todas las cuentas
 - Registrar un pago entre miembros (marcar deuda como saldada)
+- **📸 Compartir captura por WhatsApp**: genera una imagen PNG con el resumen de balances, pagos pendientes y el grafo de deudas, y la comparte directamente por WhatsApp (o la descarga en desktop). Incluye nombre del grupo, fecha/hora y el logo de Divide.
 
 ### 🔗 Invitaciones
 
@@ -82,7 +84,7 @@ src/
 │   ├── ui/          → Button, Input, Card, Modal, Avatar
 │   ├── layout/      → Shell (layout principal + navbar)
 │   ├── groups/      → InviteSection, JoinByCode
-│   └── balances/    → BalanceSummary, SettlementList
+│   └── balances/    → BalanceSummary, SettlementList, DebtGraph, ExpenseDonut, CategoryBreakdown
 ├── pages/
 │   ├── LoginPage        → /login
 │   ├── DashboardPage    → /dashboard

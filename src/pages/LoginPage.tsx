@@ -1,6 +1,6 @@
 import { Navigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Card } from "../components/ui/Card";
@@ -18,6 +18,31 @@ export function LoginPage() {
   const [password, setPassword] = useState("");
   const [isRegister, setIsRegister] = useState(searchParams.get("mode") === "register");
   const [error, setError] = useState("");
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // Sincronizar estado de React cuando gestores de contraseñas (Bitwarden, etc.)
+  // autocompletan los campos (no disparan onChange de React directamente)
+  useEffect(() => {
+    const form = formRef.current;
+    if (!form) return;
+
+    const syncState = () => {
+      const emailInput = form.querySelector<HTMLInputElement>('input[name="email"]');
+      const passInput = form.querySelector<HTMLInputElement>('input[name="password"]');
+      if (emailInput && emailInput.value !== email) setEmail(emailInput.value);
+      if (passInput && passInput.value !== password) setPassword(passInput.value);
+    };
+
+    form.addEventListener("input", syncState);
+    // Algunos gestores tardan en llenar los campos, comprobamos al montar
+    const timeout = setTimeout(syncState, 700);
+
+    return () => {
+      form.removeEventListener("input", syncState);
+      clearTimeout(timeout);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Forgot password
   const [showForgot, setShowForgot] = useState(false);
@@ -65,11 +90,17 @@ export function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    // Leer valores del DOM real (gestores de contraseñas pueden no disparar onChange)
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+    const emailVal = (formData.get("email") as string) || email;
+    const passVal = (formData.get("password") as string) || password;
+
     try {
       if (isRegister) {
-        await register(email, password);
+        await register(emailVal, passVal);
       } else {
-        await login(email, password);
+        await login(emailVal, passVal);
       }
     } catch (err: unknown) {
       setError(friendlyError(err));
@@ -84,10 +115,12 @@ export function LoginPage() {
           <h1>Divide</h1>
         </div>
 
-        <form onSubmit={handleSubmit} className={styles.form}>
+        <form ref={formRef} onSubmit={handleSubmit} className={styles.form}>
           <Input
             label="Email"
             type="email"
+            name="email"
+            autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="tu@email.com"
@@ -96,6 +129,8 @@ export function LoginPage() {
           <Input
             label="Contraseña"
             type="password"
+            name="password"
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••"

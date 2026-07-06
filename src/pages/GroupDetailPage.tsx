@@ -21,7 +21,7 @@ import { ActivityLog } from "../components/activity/ActivityLog";
 import { GroupDetailSkeleton } from "../components/ui/Skeleton";
 import { Skeleton } from "../components/ui/Skeleton";
 import { showToast } from "../components/ui/Toast";
-import { Plus, Receipt, Clock, ArrowRightLeft, Share, Pencil, Trash2, Bell, BellOff, LogOut, Settings } from "lucide-react";
+import { Plus, Receipt, Clock, ArrowRightLeft, Share, Share2, Pencil, Trash2, Bell, BellOff, LogOut, Settings } from "lucide-react";
 import { formatCurrency, formatDate } from "../utils/format";
 import { getCategory } from "../utils/categories";
 import { getGroupColorRgba } from "../utils/groupColors";
@@ -40,6 +40,8 @@ export function GroupDetailPage() {
   const [notifsOn, setNotifsOn] = useState(() => localStorage.getItem(`notif-${groupId}`) !== "off");
   const pendingNotifs = useRef<any[]>([]);
   const notifTimer = useRef<ReturnType<typeof setTimeout>>(null);
+  const captureRef = useRef<HTMLDivElement>(null);
+  const [sharing, setSharing] = useState(false);
 
   // Member maps — built once (declared early for notification effect)
   const memberNames = new Map<string, string>();
@@ -204,6 +206,224 @@ export function GroupDetailPage() {
     setNewMemberName("");
     setShowAddMember(false);
     showToast("Miembro añadido", "success");
+  };
+
+  // ── Compartir captura de balances ──
+  const handleShareBalances = async () => {
+    if (!captureRef.current || !group) return;
+    setSharing(true);
+    showToast("Generando captura...", "success");
+    try {
+      // Dynamic import para no cargar html2canvas hasta que se use
+      const html2canvas = (await import("html2canvas")).default;
+
+      // 1. Clonar el contenido a capturar
+      const original = captureRef.current;
+      const clone = original.cloneNode(true) as HTMLElement;
+
+      // 2. Contenedor exterior con fondo de la app (gris claro #F5F5F7)
+      const wrapper = document.createElement("div");
+      wrapper.style.cssText = `
+        padding: 16px;
+        background: #F5F5F7;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      `;
+
+      // 3. Card interior blanca con borde sutil, donde va todo el contenido
+      const card = document.createElement("div");
+      card.style.cssText = `
+        background: #FFFFFF;
+        border: 1px solid #E5E7EB;
+        padding: 24px 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        font-size: 15px;
+        line-height: 1.4;
+        font-family: inherit;
+      `;
+
+      // 4. Header: nombre del grupo centrado + fecha/hora + línea separadora
+      const header = document.createElement("div");
+      header.style.cssText = `
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #E5E7EB;
+        margin-bottom: 4px;
+      `;
+      const groupNameEl = document.createElement("span");
+      groupNameEl.textContent = group.name;
+      groupNameEl.style.cssText = `
+        font-size: 18px;
+        font-weight: 700;
+        color: #07819C;
+        font-family: inherit;
+      `;
+      const dateTime = document.createElement("span");
+      const now = new Date();
+      const formattedDate = now.toLocaleDateString("es-ES", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+      const formattedTime = now.toLocaleTimeString("es-ES", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      dateTime.textContent = `${formattedDate} · ${formattedTime}`;
+      dateTime.style.cssText = `
+        font-size: 11px;
+        color: #6B7280;
+        font-family: inherit;
+      `;
+      header.appendChild(groupNameEl);
+      header.appendChild(dateTime);
+      card.appendChild(header);
+
+      // 5. Style tag: reducir padding, deudas en horizontal
+      const cleanStyle = document.createElement("style");
+      cleanStyle.textContent = `
+        [class*="card"] { padding: 14px !important; }
+        [class*="debtRow"] {
+          flex-direction: row !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          padding: 8px 12px !important;
+          margin-bottom: 2px !important;
+        }
+        [class*="debtMembers"] { flex: 1 !important; min-width: 0 !important; flex-wrap: nowrap !important; }
+        [class*="debtActions"] { width: auto !important; flex-shrink: 0 !important; }
+        [class*="title"], [class*="heading"] { margin-bottom: 10px !important; }
+      `;
+      card.appendChild(cleanStyle);
+
+      // 6. Añadir contenido clonado
+      card.appendChild(clone);
+
+      // 7. Eliminar botones "Saldar" del clon
+      const removeBtns = clone.querySelectorAll<HTMLElement>('[data-capture-role="remove"]');
+      removeBtns.forEach((btn) => {
+        btn.style.display = "none";
+      });
+
+      // 8. Footer: símbolo ÷ + "Divide" en pequeño, alineado a la derecha
+      const svgNS = "http://www.w3.org/2000/svg";
+      const divideSvg = document.createElementNS(svgNS, "svg");
+      divideSvg.setAttribute("width", "14");
+      divideSvg.setAttribute("height", "14");
+      divideSvg.setAttribute("viewBox", "0 0 24 24");
+      divideSvg.setAttribute("fill", "none");
+      divideSvg.setAttribute("stroke", "#07819C");
+      divideSvg.setAttribute("stroke-width", "2.5");
+      divideSvg.setAttribute("stroke-linecap", "round");
+      divideSvg.setAttribute("stroke-linejoin", "round");
+      const topDot = document.createElementNS(svgNS, "circle");
+      topDot.setAttribute("cx", "12");
+      topDot.setAttribute("cy", "5");
+      topDot.setAttribute("r", "1.5");
+      topDot.setAttribute("fill", "#07819C");
+      topDot.setAttribute("stroke", "none");
+      const line = document.createElementNS(svgNS, "line");
+      line.setAttribute("x1", "4");
+      line.setAttribute("y1", "12");
+      line.setAttribute("x2", "20");
+      line.setAttribute("y2", "12");
+      const bottomDot = document.createElementNS(svgNS, "circle");
+      bottomDot.setAttribute("cx", "12");
+      bottomDot.setAttribute("cy", "19");
+      bottomDot.setAttribute("r", "1.5");
+      bottomDot.setAttribute("fill", "#07819C");
+      bottomDot.setAttribute("stroke", "none");
+      divideSvg.append(topDot, line, bottomDot);
+
+      const footer = document.createElement("div");
+      footer.style.cssText = `
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 4px;
+        padding-top: 12px;
+        opacity: 0.4;
+      `;
+      footer.appendChild(divideSvg);
+      const label = document.createElement("span");
+      label.textContent = "Divide";
+      label.style.cssText = `
+        font-size: 10px;
+        font-weight: 600;
+        color: #07819C;
+        font-family: inherit;
+      `;
+      footer.appendChild(label);
+      card.appendChild(footer);
+
+      // 9. Meter la card dentro del wrapper exterior
+      wrapper.appendChild(card);
+
+      // 8. Renderizar wrapper directamente
+      wrapper.style.position = "fixed";
+      wrapper.style.left = "-9999px";
+      wrapper.style.top = "0";
+      document.body.appendChild(wrapper);
+
+      // 9. Capturar con html2canvas
+      const canvas = await html2canvas(wrapper, {
+        scale: 2,
+        backgroundColor: "#FFFFFF",
+        useCORS: true,
+        logging: false,
+        allowTaint: false,
+        width: wrapper.scrollWidth,
+        height: wrapper.scrollHeight,
+      });
+
+      // 10. Limpiar clon del DOM
+      document.body.removeChild(wrapper);
+
+      // 11. Convertir a blob y compartir
+      const blob = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob(resolve, "image/png")
+      );
+      if (!blob) throw new Error("No se pudo generar la imagen");
+
+      const file = new File([blob], `balances-${group.name.replace(/\s+/g, "-")}.png`, {
+        type: "image/png",
+      });
+
+      // 12. Intentar Web Share API (móvil → WhatsApp, etc.)
+      if (navigator.canShare?.({
+        files: [file],
+        title: `Balances - ${group.name}`,
+      })) {
+        await navigator.share({
+          files: [file],
+          title: `Balances - ${group.name}`,
+        });
+        showToast("Compartido con éxito", "success");
+      } else {
+        // 13. Fallback: descargar imagen
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `balances-${group.name.replace(/\s+/g, "-")}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast("Imagen descargada", "success");
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Error al generar la captura", "error");
+    } finally {
+      setSharing(false);
+    }
   };
 
   if (loading) {
@@ -390,22 +610,43 @@ export function GroupDetailPage() {
       {/* Balances tab */}
       {tab === "balances" && (
         <div className={styles.tabContent}>
+          {/* Botón compartir (fuera del captureRef para no salir en la captura) */}
+          <Card>
+            <div className={styles.shareRow}>
+              <span className={styles.shareText}>Compartir balances con el grupo</span>
+              <button
+                className={styles.shareBtn}
+                onClick={handleShareBalances}
+                disabled={sharing}
+                aria-label="Compartir balances"
+              >
+                <Share2 size={20} />
+              </button>
+            </div>
+          </Card>
+
+          {/* Contenido fuera de la captura */}
           <CategoryBreakdown items={categoryTotals} total={categoryTotalAmount} />
-          <ExpenseDonut
-            balances={balances.map((b) => ({ memberId: b.memberId, memberName: b.memberName, amount: b.owed }))}
-            total={categoryTotalAmount}
-          />
           <BalanceSummary balances={balances} />
-          <SettlementList
-            debts={debts}
-            members={group.members}
-            onSettle={async (from, to, amount) => {
-              const fromMember = memberById.get(from);
-              const toMember = memberById.get(to);
-              await addSettlement(from, to, amount, user?.uid, currentMemberName, fromMember?.name, toMember?.name);
-              showToast("Deuda saldada", "success");
-            }}
-          />
+
+          {/* Solo esto se captura: donut + pagos necesarios */}
+          <div ref={captureRef} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <ExpenseDonut
+              balances={balances.map((b) => ({ memberId: b.memberId, memberName: b.memberName, amount: b.owed }))}
+              total={categoryTotalAmount}
+            />
+            <SettlementList
+              debts={debts}
+              members={group.members}
+              onSettle={async (from, to, amount) => {
+                const fromMember = memberById.get(from);
+                const toMember = memberById.get(to);
+                await addSettlement(from, to, amount, user?.uid, currentMemberName, fromMember?.name, toMember?.name);
+                showToast("Deuda saldada", "success");
+              }}
+            />
+          </div>
+
           <DebtGraph debts={debts} members={group.members} />
         </div>
       )}
