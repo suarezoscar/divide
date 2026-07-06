@@ -312,25 +312,6 @@ export function GroupDetailPage() {
         btn.style.display = "none";
       });
 
-      // 7b. Añadir etiquetas (P) y (R) a los nombres en las filas de deuda
-      const debtRows = clone.querySelectorAll<HTMLElement>('[class*="debtRow"]');
-      debtRows.forEach((row) => {
-        const memberEls = row.querySelectorAll<HTMLElement>('[class*="member"]');
-        if (memberEls.length >= 2) {
-          // Primer miembro = deudor (P) en rojo
-          const payerLabel = document.createElement("span");
-          payerLabel.textContent = "(P) ";
-          payerLabel.style.cssText = "font-weight:700;color:#DC2626;font-size:13px;";
-          memberEls[0].insertBefore(payerLabel, memberEls[0].firstChild);
-
-          // Segundo miembro = receptor (R) en verde
-          const receiverLabel = document.createElement("span");
-          receiverLabel.textContent = "(R) ";
-          receiverLabel.style.cssText = "font-weight:700;color:#059669;font-size:13px;";
-          memberEls[1].insertBefore(receiverLabel, memberEls[1].firstChild);
-        }
-      });
-
       // 8. Footer: símbolo ÷ + "Divide" en pequeño, alineado a la derecha
       const svgNS = "http://www.w3.org/2000/svg";
       const divideSvg = document.createElementNS(svgNS, "svg");
