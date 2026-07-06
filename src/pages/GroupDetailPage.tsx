@@ -221,35 +221,35 @@ export function GroupDetailPage() {
       const original = captureRef.current;
       const clone = original.cloneNode(true) as HTMLElement;
 
-      // 2. Crear contenedor con marco, padding amplio, fondo blanco
+      // 2. Crear contenedor rectangular con borde primary + pequeño margen
       const wrapper = document.createElement("div");
       wrapper.style.cssText = `
         border: 4px solid #07819C;
-        border-radius: 20px;
-        padding: 40px;
+        border-radius: 0;
+        padding: 20px 24px;
         background: #FFFFFF;
-        position: relative;
+        margin: 8px;
         display: flex;
         flex-direction: column;
-        gap: 28px;
-        font-size: 18px;
-        line-height: 1.5;
+        gap: 16px;
+        font-size: 15px;
+        line-height: 1.4;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       `;
 
-      // 3. Header: nombre del grupo grande + fecha/hora
+      // 3. Header: nombre del grupo + fecha/hora
       const header = document.createElement("div");
       header.style.cssText = `
         display: flex;
         flex-direction: column;
-        gap: 4px;
-        margin-bottom: 4px;
+        gap: 2px;
+        margin-bottom: 2px;
       `;
       const groupNameEl = document.createElement("span");
       groupNameEl.textContent = group.name;
       groupNameEl.style.cssText = `
-        font-size: 26px;
-        font-weight: 800;
+        font-size: 18px;
+        font-weight: 700;
         color: #1A1A2E;
         font-family: inherit;
       `;
@@ -266,7 +266,7 @@ export function GroupDetailPage() {
       });
       dateTime.textContent = `${formattedDate} · ${formattedTime}`;
       dateTime.style.cssText = `
-        font-size: 14px;
+        font-size: 11px;
         color: #6B7280;
         font-family: inherit;
       `;
@@ -274,33 +274,14 @@ export function GroupDetailPage() {
       header.appendChild(dateTime);
       wrapper.appendChild(header);
 
-      // 4. Style tag para escalar el contenido clonado
-      const scaleStyle = document.createElement("style");
-      scaleStyle.textContent = `
-        /* Escalar títulos de las cards */
-        h2, h3, [class*="title"], [class*="heading"] {
-          font-size: 1.2em !important;
-          margin-bottom: 16px !important;
-        }
-        /* Hacer más grandes los importes */
-        [class*="amount"], [class*="debtAmount"] {
-          font-size: 1.4em !important;
-        }
-        /* Separar filas de deudas */
-        [class*="debtRow"] {
-          padding: 18px !important;
-          margin-bottom: 4px !important;
-        }
-        /* Agrandar textos de miembros */
-        [class*="member"] span, [class*="splitName"] {
-          font-size: 1.1em !important;
-        }
-        /* Más espacio en cards */
-        [class*="card"] {
-          padding: 24px !important;
-        }
+      // 4. Style tag: reducir padding interno, NO escalar fuentes
+      const cleanStyle = document.createElement("style");
+      cleanStyle.textContent = `
+        [class*="card"] { padding: 16px !important; }
+        [class*="debtRow"] { padding: 12px !important; margin-bottom: 2px !important; }
+        [class*="title"], [class*="heading"] { margin-bottom: 12px !important; }
       `;
-      wrapper.appendChild(scaleStyle);
+      wrapper.appendChild(cleanStyle);
 
       // 5. Añadir contenido clonado
       wrapper.appendChild(clone);
@@ -311,61 +292,59 @@ export function GroupDetailPage() {
         btn.style.display = "none";
       });
 
-      // 7. Logo abajo a la derecha (SVG inline en DOM para que html2canvas lo renderice sin problemas)
+      // 7. Footer con el símbolo ÷ (mismo estilo que el logo lucide Divide del navbar)
       const svgNS = "http://www.w3.org/2000/svg";
-      const logoSvg = document.createElementNS(svgNS, "svg");
-      logoSvg.setAttribute("width", "56");
-      logoSvg.setAttribute("height", "56");
-      logoSvg.setAttribute("viewBox", "0 0 512 512");
-      logoSvg.style.cssText = `display: block;`;
-      // Fondo teal redondeado
-      const bg = document.createElementNS(svgNS, "rect");
-      bg.setAttribute("width", "512");
-      bg.setAttribute("height", "512");
-      bg.setAttribute("rx", "100");
-      bg.setAttribute("fill", "#07819C");
-      // Barra central
-      const bar = document.createElementNS(svgNS, "rect");
-      bar.setAttribute("x", "146");
-      bar.setAttribute("y", "234");
-      bar.setAttribute("width", "220");
-      bar.setAttribute("height", "44");
-      bar.setAttribute("rx", "22");
-      bar.setAttribute("fill", "#fff");
+      const divideSvg = document.createElementNS(svgNS, "svg");
+      divideSvg.setAttribute("width", "26");
+      divideSvg.setAttribute("height", "26");
+      divideSvg.setAttribute("viewBox", "0 0 24 24");
+      divideSvg.setAttribute("fill", "none");
+      divideSvg.setAttribute("stroke", "#07819C");
+      divideSvg.setAttribute("stroke-width", "2.5");
+      divideSvg.setAttribute("stroke-linecap", "round");
+      divideSvg.setAttribute("stroke-linejoin", "round");
       // Círculo superior
-      const c1 = document.createElementNS(svgNS, "circle");
-      c1.setAttribute("cx", "256");
-      c1.setAttribute("cy", "148");
-      c1.setAttribute("r", "40");
-      c1.setAttribute("fill", "#fff");
+      const topDot = document.createElementNS(svgNS, "circle");
+      topDot.setAttribute("cx", "12");
+      topDot.setAttribute("cy", "5");
+      topDot.setAttribute("r", "1.5");
+      topDot.setAttribute("fill", "#07819C");
+      topDot.setAttribute("stroke", "none");
+      // Línea horizontal
+      const line = document.createElementNS(svgNS, "line");
+      line.setAttribute("x1", "4");
+      line.setAttribute("y1", "12");
+      line.setAttribute("x2", "20");
+      line.setAttribute("y2", "12");
       // Círculo inferior
-      const c2 = document.createElementNS(svgNS, "circle");
-      c2.setAttribute("cx", "256");
-      c2.setAttribute("cy", "364");
-      c2.setAttribute("r", "40");
-      c2.setAttribute("fill", "#fff");
-      logoSvg.append(bg, bar, c1, c2);
+      const bottomDot = document.createElementNS(svgNS, "circle");
+      bottomDot.setAttribute("cx", "12");
+      bottomDot.setAttribute("cy", "19");
+      bottomDot.setAttribute("r", "1.5");
+      bottomDot.setAttribute("fill", "#07819C");
+      bottomDot.setAttribute("stroke", "none");
+      divideSvg.append(topDot, line, bottomDot);
 
-      // Contenedor flex para el logo, alineado a la derecha
-      const logoContainer = document.createElement("div");
-      logoContainer.style.cssText = `
+      const footer = document.createElement("div");
+      footer.style.cssText = `
         display: flex;
-        justify-content: flex-end;
-        margin-top: 8px;
-        opacity: 0.65;
+        justify-content: center;
+        align-items: center;
+        padding-top: 6px;
+        opacity: 0.5;
       `;
-      logoContainer.appendChild(logoSvg);
-      wrapper.appendChild(logoContainer);
+      footer.appendChild(divideSvg);
+      wrapper.appendChild(footer);
 
-      // 8. Renderizar wrapper directamente (sin contenedor externo, el borde primary es el borde de la imagen)
+      // 8. Renderizar wrapper directamente
       wrapper.style.position = "fixed";
       wrapper.style.left = "-9999px";
       wrapper.style.top = "0";
       document.body.appendChild(wrapper);
 
-      // 9. Capturar con html2canvas (scale 3 para ultra-resolución)
+      // 9. Capturar con html2canvas
       const canvas = await html2canvas(wrapper, {
-        scale: 3,
+        scale: 2,
         backgroundColor: "#FFFFFF",
         useCORS: true,
         logging: false,
@@ -619,14 +598,14 @@ export function GroupDetailPage() {
 
           {/* Contenido fuera de la captura */}
           <CategoryBreakdown items={categoryTotals} total={categoryTotalAmount} />
-          <ExpenseDonut
-            balances={balances.map((b) => ({ memberId: b.memberId, memberName: b.memberName, amount: b.owed }))}
-            total={categoryTotalAmount}
-          />
+          <BalanceSummary balances={balances} />
 
-          {/* Solo esto se captura: desglose + pagos necesarios */}
+          {/* Solo esto se captura: donut + pagos necesarios */}
           <div ref={captureRef}>
-            <BalanceSummary balances={balances} />
+            <ExpenseDonut
+              balances={balances.map((b) => ({ memberId: b.memberId, memberName: b.memberName, amount: b.owed }))}
+              total={categoryTotalAmount}
+            />
             <SettlementList
               debts={debts}
               members={group.members}
