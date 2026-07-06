@@ -307,13 +307,13 @@ export function GroupDetailPage() {
       card.appendChild(clone);
 
       // 7. Eliminar botones "Saldar" del clon
-      const removeBtns = wrapper.querySelectorAll<HTMLElement>('[data-capture-role="remove"]');
+      const removeBtns = clone.querySelectorAll<HTMLElement>('[data-capture-role="remove"]');
       removeBtns.forEach((btn) => {
         btn.style.display = "none";
       });
 
       // 7b. Añadir etiquetas (P) y (R) a los nombres en las filas de deuda
-      const debtRows = wrapper.querySelectorAll<HTMLElement>('[class*="debtRow"]');
+      const debtRows = clone.querySelectorAll<HTMLElement>('[class*="debtRow"]');
       debtRows.forEach((row) => {
         const memberEls = row.querySelectorAll<HTMLElement>('[class*="member"]');
         if (memberEls.length >= 2) {
