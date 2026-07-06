@@ -221,34 +221,48 @@ export function GroupDetailPage() {
       const original = captureRef.current;
       const clone = original.cloneNode(true) as HTMLElement;
 
-      // 2. Crear contenedor sin marco, solo fondo blanco
+      // 2. Contenedor exterior con fondo de la app (gris claro #F5F5F7)
       const wrapper = document.createElement("div");
       wrapper.style.cssText = `
-        padding: 20px 24px;
+        padding: 16px;
+        background: #F5F5F7;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      `;
+
+      // 3. Card interior blanca con borde sutil, donde va todo el contenido
+      const card = document.createElement("div");
+      card.style.cssText = `
         background: #FFFFFF;
+        border: 1px solid #E5E7EB;
+        padding: 24px 28px;
         display: flex;
         flex-direction: column;
         gap: 16px;
         font-size: 15px;
         line-height: 1.4;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-family: inherit;
       `;
 
-      // 3. Header: nombre del grupo centrado + fecha/hora
+      // 4. Header: nombre del grupo centrado + fecha/hora + línea separadora
       const header = document.createElement("div");
       header.style.cssText = `
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 2px;
-        margin-bottom: 6px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #E5E7EB;
+        margin-bottom: 4px;
       `;
       const groupNameEl = document.createElement("span");
       groupNameEl.textContent = group.name;
       groupNameEl.style.cssText = `
         font-size: 18px;
         font-weight: 700;
-        color: #1A1A2E;
+        color: #07819C;
         font-family: inherit;
       `;
       const dateTime = document.createElement("span");
@@ -270,31 +284,31 @@ export function GroupDetailPage() {
       `;
       header.appendChild(groupNameEl);
       header.appendChild(dateTime);
-      wrapper.appendChild(header);
+      card.appendChild(header);
 
-      // 4. Style tag: reducir padding interno, NO escalar fuentes
+      // 5. Style tag: reducir padding interno
       const cleanStyle = document.createElement("style");
       cleanStyle.textContent = `
-        [class*="card"] { padding: 16px !important; }
-        [class*="debtRow"] { padding: 12px !important; margin-bottom: 2px !important; }
-        [class*="title"], [class*="heading"] { margin-bottom: 12px !important; }
+        [class*="card"] { padding: 14px !important; }
+        [class*="debtRow"] { padding: 10px !important; margin-bottom: 2px !important; }
+        [class*="title"], [class*="heading"] { margin-bottom: 10px !important; }
       `;
-      wrapper.appendChild(cleanStyle);
+      card.appendChild(cleanStyle);
 
-      // 5. Añadir contenido clonado
-      wrapper.appendChild(clone);
+      // 6. Añadir contenido clonado
+      card.appendChild(clone);
 
-      // 6. Eliminar botones "Saldar" del clon
+      // 7. Eliminar botones "Saldar" del clon
       const removeBtns = wrapper.querySelectorAll<HTMLElement>('[data-capture-role="remove"]');
       removeBtns.forEach((btn) => {
         btn.style.display = "none";
       });
 
-      // 7. Footer: símbolo ÷ + "Divide" en pequeño, alineado a la derecha
+      // 8. Footer: símbolo ÷ + "Divide" en pequeño, alineado a la derecha
       const svgNS = "http://www.w3.org/2000/svg";
       const divideSvg = document.createElementNS(svgNS, "svg");
-      divideSvg.setAttribute("width", "16");
-      divideSvg.setAttribute("height", "16");
+      divideSvg.setAttribute("width", "14");
+      divideSvg.setAttribute("height", "14");
       divideSvg.setAttribute("viewBox", "0 0 24 24");
       divideSvg.setAttribute("fill", "none");
       divideSvg.setAttribute("stroke", "#07819C");
@@ -326,20 +340,23 @@ export function GroupDetailPage() {
         justify-content: flex-end;
         align-items: center;
         gap: 4px;
-        padding-top: 8px;
-        opacity: 0.45;
+        padding-top: 12px;
+        opacity: 0.4;
       `;
       footer.appendChild(divideSvg);
       const label = document.createElement("span");
       label.textContent = "Divide";
       label.style.cssText = `
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 600;
         color: #07819C;
         font-family: inherit;
       `;
       footer.appendChild(label);
-      wrapper.appendChild(footer);
+      card.appendChild(footer);
+
+      // 9. Meter la card dentro del wrapper exterior
+      wrapper.appendChild(card);
 
       // 8. Renderizar wrapper directamente
       wrapper.style.position = "fixed";
@@ -586,20 +603,14 @@ export function GroupDetailPage() {
       {tab === "balances" && (
         <div className={styles.tabContent}>
           {/* Botón compartir (fuera del captureRef para no salir en la captura) */}
-          <Card>
-            <div className={styles.shareRow}>
-              <span className={styles.shareText}>Compartir balances con el grupo</span>
-              <button
-                className={styles.shareBtn}
-                onClick={handleShareBalances}
-                disabled={sharing}
-                aria-label="Compartir balances"
-              >
-                <Share2 size={18} />
-                {sharing ? "Generando…" : "Compartir"}
-              </button>
-            </div>
-          </Card>
+          <button
+            className={styles.shareBtn}
+            onClick={handleShareBalances}
+            disabled={sharing}
+            aria-label="Compartir balances"
+          >
+            <Share2 size={20} />
+          </button>
 
           {/* Contenido fuera de la captura */}
           <CategoryBreakdown items={categoryTotals} total={categoryTotalAmount} />
