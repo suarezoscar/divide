@@ -221,34 +221,37 @@ export function GroupDetailPage() {
       const original = captureRef.current;
       const clone = original.cloneNode(true) as HTMLElement;
 
-      // 2. Crear contenedor con marco, padding, fondo blanco
+      // 2. Crear contenedor con marco, padding amplio, fondo blanco
       const wrapper = document.createElement("div");
       wrapper.style.cssText = `
-        border: 3px solid #07819C;
-        border-radius: 16px;
-        padding: 24px;
+        border: 4px solid #07819C;
+        border-radius: 20px;
+        padding: 40px 40px 80px;
         background: #FFFFFF;
         position: relative;
         display: flex;
         flex-direction: column;
-        gap: 16px;
+        gap: 28px;
+        font-size: 18px;
+        line-height: 1.5;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       `;
 
-      // 3. Header: nombre del grupo + fecha/hora
+      // 3. Header: nombre del grupo grande + fecha/hora
       const header = document.createElement("div");
       header.style.cssText = `
         display: flex;
         flex-direction: column;
-        gap: 2px;
-        margin-bottom: 8px;
+        gap: 4px;
+        margin-bottom: 4px;
       `;
-      const groupName = document.createElement("span");
-      groupName.textContent = group.name;
-      groupName.style.cssText = `
-        font-size: 18px;
-        font-weight: 700;
+      const groupNameEl = document.createElement("span");
+      groupNameEl.textContent = group.name;
+      groupNameEl.style.cssText = `
+        font-size: 26px;
+        font-weight: 800;
         color: #1A1A2E;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-family: inherit;
       `;
       const dateTime = document.createElement("span");
       const now = new Date();
@@ -263,49 +266,78 @@ export function GroupDetailPage() {
       });
       dateTime.textContent = `${formattedDate} · ${formattedTime}`;
       dateTime.style.cssText = `
-        font-size: 12px;
+        font-size: 14px;
         color: #6B7280;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-family: inherit;
       `;
-      header.appendChild(groupName);
+      header.appendChild(groupNameEl);
       header.appendChild(dateTime);
       wrapper.appendChild(header);
 
-      // 4. Añadir contenido clonado
+      // 4. Style tag para escalar el contenido clonado
+      const scaleStyle = document.createElement("style");
+      scaleStyle.textContent = `
+        /* Escalar títulos de las cards */
+        h2, h3, [class*="title"], [class*="heading"] {
+          font-size: 1.2em !important;
+          margin-bottom: 16px !important;
+        }
+        /* Hacer más grandes los importes */
+        [class*="amount"], [class*="debtAmount"] {
+          font-size: 1.4em !important;
+        }
+        /* Separar filas de deudas */
+        [class*="debtRow"] {
+          padding: 18px !important;
+          margin-bottom: 4px !important;
+        }
+        /* Agrandar textos de miembros */
+        [class*="member"] span, [class*="splitName"] {
+          font-size: 1.1em !important;
+        }
+        /* Más espacio en cards */
+        [class*="card"] {
+          padding: 24px !important;
+        }
+      `;
+      wrapper.appendChild(scaleStyle);
+
+      // 5. Añadir contenido clonado
       wrapper.appendChild(clone);
 
-      // 5. Eliminar botones "Saldar" del clon
+      // 6. Eliminar botones "Saldar" del clon
       const removeBtns = wrapper.querySelectorAll<HTMLElement>('[data-capture-role="remove"]');
       removeBtns.forEach((btn) => {
-        const row = btn.closest('[class*="debtActions"]') as HTMLElement | null;
-        if (row) {
-          // Oculta solo el botón, no el monto
-          btn.style.display = "none";
-        }
+        btn.style.display = "none";
       });
 
-      // 6. Logo abajo a la derecha
+      // 7. Logo abajo a la derecha (cargado como data URL para asegurar visibilidad)
+      const logoSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="100" fill="#07819C"/><rect x="146" y="234" width="220" height="44" rx="22" fill="#fff"/><circle cx="256" cy="148" r="40" fill="#fff"/><circle cx="256" cy="364" r="40" fill="#fff"/></svg>';
+      const logoDataUrl = 'data:image/svg+xml,' + encodeURIComponent(logoSvg);
       const logo = document.createElement("img");
-      logo.src = "/logo.svg";
+      logo.src = logoDataUrl;
       logo.alt = "Divide";
       logo.style.cssText = `
-        width: 36px;
-        height: 36px;
-        opacity: 0.4;
+        width: 52px;
+        height: 52px;
+        opacity: 0.7;
         position: absolute;
-        bottom: 16px;
-        right: 16px;
+        bottom: 20px;
+        right: 24px;
+        z-index: 2;
+        border-radius: 8px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
       `;
       wrapper.appendChild(logo);
 
-      // 7. Contenedor externo (fondo de la app) + renderizar off-screen
+      // 8. Contenedor externo (fondo de la app) + renderizar off-screen
       const container = document.createElement("div");
       container.style.cssText = `
         position: fixed;
         left: -9999px;
         top: 0;
         background: #F5F5F7;
-        padding: 40px;
+        padding: 48px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -314,9 +346,9 @@ export function GroupDetailPage() {
       container.appendChild(wrapper);
       document.body.appendChild(container);
 
-      // 8. Capturar con html2canvas
+      // 9. Capturar con html2canvas (scale 3 para ultra-resolución)
       const canvas = await html2canvas(container, {
-        scale: 2,
+        scale: 3,
         backgroundColor: "#F5F5F7",
         useCORS: true,
         logging: false,
@@ -325,10 +357,10 @@ export function GroupDetailPage() {
         height: container.scrollHeight,
       });
 
-      // 9. Limpiar clon del DOM
+      // 10. Limpiar clon del DOM
       document.body.removeChild(container);
 
-      // 10. Convertir a blob y compartir
+      // 11. Convertir a blob y compartir
       const blob = await new Promise<Blob | null>((resolve) =>
         canvas.toBlob(resolve, "image/png")
       );
@@ -338,7 +370,7 @@ export function GroupDetailPage() {
         type: "image/png",
       });
 
-      // 11. Intentar Web Share API (móvil → WhatsApp, etc.)
+      // 12. Intentar Web Share API (móvil → WhatsApp, etc.)
       if (navigator.canShare?.({
         files: [file],
         title: `Balances - ${group.name}`,
@@ -349,7 +381,7 @@ export function GroupDetailPage() {
         });
         showToast("Compartido con éxito", "success");
       } else {
-        // 12. Fallback: descargar imagen
+        // 13. Fallback: descargar imagen
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -568,13 +600,15 @@ export function GroupDetailPage() {
             </div>
           </Card>
 
-          {/* Contenido a capturar */}
+          {/* Contenido fuera de la captura */}
+          <CategoryBreakdown items={categoryTotals} total={categoryTotalAmount} />
+          <ExpenseDonut
+            balances={balances.map((b) => ({ memberId: b.memberId, memberName: b.memberName, amount: b.owed }))}
+            total={categoryTotalAmount}
+          />
+
+          {/* Solo esto se captura: desglose + pagos necesarios */}
           <div ref={captureRef}>
-            <CategoryBreakdown items={categoryTotals} total={categoryTotalAmount} />
-            <ExpenseDonut
-              balances={balances.map((b) => ({ memberId: b.memberId, memberName: b.memberName, amount: b.owed }))}
-              total={categoryTotalAmount}
-            />
             <BalanceSummary balances={balances} />
             <SettlementList
               debts={debts}
@@ -586,8 +620,9 @@ export function GroupDetailPage() {
                 showToast("Deuda saldada", "success");
               }}
             />
-            <DebtGraph debts={debts} members={group.members} />
           </div>
+
+          <DebtGraph debts={debts} members={group.members} />
         </div>
       )}
 
