@@ -495,7 +495,20 @@
   transform: scale(0.95);
 }
 
-/* ── Share button (solo icono) ── */
+/* ── Share card ── */
+.shareRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.shareText {
+  font-size: 14px;
+  font-weight: 500;
+  color: #4B5563;
+}
+
 .shareBtn {
   display: flex;
   align-items: center;
@@ -508,7 +521,7 @@
   color: #fff;
   cursor: pointer;
   transition: all 0.15s;
-  align-self: flex-end;
+  flex-shrink: 0;
 }
 
 .shareBtn:hover {

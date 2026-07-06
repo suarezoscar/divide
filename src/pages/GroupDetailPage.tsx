@@ -286,11 +286,19 @@ export function GroupDetailPage() {
       header.appendChild(dateTime);
       card.appendChild(header);
 
-      // 5. Style tag: reducir padding interno
+      // 5. Style tag: reducir padding, deudas en horizontal
       const cleanStyle = document.createElement("style");
       cleanStyle.textContent = `
         [class*="card"] { padding: 14px !important; }
-        [class*="debtRow"] { padding: 10px !important; margin-bottom: 2px !important; }
+        [class*="debtRow"] {
+          flex-direction: row !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          padding: 8px 12px !important;
+          margin-bottom: 2px !important;
+        }
+        [class*="debtMembers"] { flex: 1 !important; min-width: 0 !important; flex-wrap: nowrap !important; }
+        [class*="debtActions"] { width: auto !important; flex-shrink: 0 !important; }
         [class*="title"], [class*="heading"] { margin-bottom: 10px !important; }
       `;
       card.appendChild(cleanStyle);
@@ -302,6 +310,25 @@ export function GroupDetailPage() {
       const removeBtns = wrapper.querySelectorAll<HTMLElement>('[data-capture-role="remove"]');
       removeBtns.forEach((btn) => {
         btn.style.display = "none";
+      });
+
+      // 7b. Añadir etiquetas (P) y (R) a los nombres en las filas de deuda
+      const debtRows = wrapper.querySelectorAll<HTMLElement>('[class*="debtRow"]');
+      debtRows.forEach((row) => {
+        const memberEls = row.querySelectorAll<HTMLElement>('[class*="member"]');
+        if (memberEls.length >= 2) {
+          // Primer miembro = deudor (P) en rojo
+          const payerLabel = document.createElement("span");
+          payerLabel.textContent = "(P) ";
+          payerLabel.style.cssText = "font-weight:700;color:#DC2626;font-size:13px;";
+          memberEls[0].insertBefore(payerLabel, memberEls[0].firstChild);
+
+          // Segundo miembro = receptor (R) en verde
+          const receiverLabel = document.createElement("span");
+          receiverLabel.textContent = "(R) ";
+          receiverLabel.style.cssText = "font-weight:700;color:#059669;font-size:13px;";
+          memberEls[1].insertBefore(receiverLabel, memberEls[1].firstChild);
+        }
       });
 
       // 8. Footer: símbolo ÷ + "Divide" en pequeño, alineado a la derecha
@@ -603,14 +630,19 @@ export function GroupDetailPage() {
       {tab === "balances" && (
         <div className={styles.tabContent}>
           {/* Botón compartir (fuera del captureRef para no salir en la captura) */}
-          <button
-            className={styles.shareBtn}
-            onClick={handleShareBalances}
-            disabled={sharing}
-            aria-label="Compartir balances"
-          >
-            <Share2 size={20} />
-          </button>
+          <Card>
+            <div className={styles.shareRow}>
+              <span className={styles.shareText}>Compartir balances con el grupo</span>
+              <button
+                className={styles.shareBtn}
+                onClick={handleShareBalances}
+                disabled={sharing}
+                aria-label="Compartir balances"
+              >
+                <Share2 size={20} />
+              </button>
+            </div>
+          </Card>
 
           {/* Contenido fuera de la captura */}
           <CategoryBreakdown items={categoryTotals} total={categoryTotalAmount} />
