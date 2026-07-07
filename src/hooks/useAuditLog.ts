@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
 import { collection, query, where, onSnapshot, orderBy, Timestamp } from "firebase/firestore";
 import { db } from "../services/firebase";
-import type { EventType, EventDetails } from "../services/auditLog";
+import type { EventType } from "../services/auditLog";
 
 export interface ActivityEvent {
   id: string;
   groupId: string;
   type: EventType;
-  actorUserId: string;
   actorName: string;
   timestamp: Timestamp;
-  details?: EventDetails | null;
+  amount: number;
+  description?: string;
+  toName?: string;
 }
 
 function docToEvent(id: string, data: Record<string, unknown>): ActivityEvent {
@@ -19,10 +20,11 @@ function docToEvent(id: string, data: Record<string, unknown>): ActivityEvent {
     id,
     groupId: d.groupId,
     type: d.type,
-    actorUserId: d.actorUserId,
     actorName: d.actorName,
     timestamp: d.timestamp,
-    details: d.details ?? null,
+    amount: d.amount ?? 0,
+    description: d.description ?? undefined,
+    toName: d.toName ?? undefined,
   };
 }
 

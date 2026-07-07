@@ -9,61 +9,33 @@ const ICONS: Record<string, string> = {
   expense_updated: "✏️",
   expense_deleted: "🗑️",
   settlement_created: "💰",
-  member_added: "➕",
-  member_removed: "➖",
-  member_left: "🚪",
-  member_claimed: "🔗",
-  group_created: "🎉",
-  group_updated: "⚙️",
-  group_deleted: "💥",
 };
 
-function formatTimeAgo(timestamp: { toMillis: () => number }): string {
-  const now = Date.now();
-  const ms = now - timestamp.toMillis();
-  const mins = Math.floor(ms / 60000);
-  if (mins < 1) return "ahora";
-  if (mins < 60) return `hace ${mins} min`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `hace ${hours}h`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `hace ${days}d`;
-  const weeks = Math.floor(days / 7);
-  if (weeks < 5) return `hace ${weeks} sem`;
-  const months = Math.floor(days / 30);
-  return `hace ${months} mes${months > 1 ? "es" : ""}`;
+function formatDateTime(timestamp: { toDate: () => Date }): string {
+  const d = timestamp.toDate();
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  const hours = String(d.getHours()).padStart(2, "0");
+  const mins = String(d.getMinutes()).padStart(2, "0");
+  return `${day}/${month}/${year} ${hours}:${mins}`;
 }
 
 function formatMessage(event: ActivityEvent): string {
-  const { type, actorName, details } = event;
-  const name = actorName;
+  const { type, actorName, amount, description, toName } = event;
+  const fmtAmount = formatCurrency(amount);
+
   switch (type) {
     case "expense_created":
-      return `${name} añadió "${details?.expenseDescription ?? ""}" (${formatCurrency((details?.amount as number) ?? 0)})`;
+      return `${actorName} ha añadido un gasto de ${fmtAmount} (${formatDateTime(event.timestamp)})`;
     case "expense_updated":
-      return `${name} editó "${details?.expenseDescription ?? ""}"`;
+      return `${actorName} ha editado un gasto de ${fmtAmount} (${formatDateTime(event.timestamp)})`;
     case "expense_deleted":
-      return `${name} eliminó "${details?.expenseDescription ?? ""}" (${formatCurrency((details?.amount as number) ?? 0)})`;
+      return `${actorName} ha eliminado un gasto de ${fmtAmount} (${formatDateTime(event.timestamp)})`;
     case "settlement_created":
-      return `${name} saldó ${formatCurrency((details?.amount as number) ?? 0)} con ${details?.toName ?? "alguien"}`;
-    case "member_added":
-      return `${name} añadió a "${details?.memberName ?? ""}" al grupo`;
-    case "member_removed":
-      return `${name} eliminó a "${details?.memberName ?? ""}" del grupo`;
-    case "member_left":
-      return `${name} salió del grupo`;
-    case "member_claimed":
-      return details?.memberName
-        ? `${name} se identificó como "${details.memberName}" en el grupo`
-        : `${name} se identificó en el grupo`;
-    case "group_created":
-      return `${name} creó el grupo`;
-    case "group_updated":
-      return `${name} actualizó el grupo`;
-    case "group_deleted":
-      return `${name} eliminó el grupo`;
+      return `${actorName} ha saldado su deuda de ${fmtAmount} con ${toName ?? "alguien"} (${formatDateTime(event.timestamp)})`;
     default:
-      return `${name} realizó una acción`;
+      return `${actorName} realizó una acción (${formatDateTime(event.timestamp)})`;
   }
 }
 
@@ -100,7 +72,6 @@ export function ActivityLog({ groupId }: { groupId: string }) {
           <span className={styles.icon}>{ICONS[event.type] ?? "📌"}</span>
           <div className={styles.body}>
             <p className={styles.message}>{formatMessage(event)}</p>
-            <span className={styles.time}>{formatTimeAgo(event.timestamp)}</span>
           </div>
         </div>
       ))}
