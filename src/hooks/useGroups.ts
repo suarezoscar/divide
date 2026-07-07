@@ -46,7 +46,7 @@ export function useGroups() {
 
   const create = async (name: string, description: string, members: Member[]) => {
     if (!user) throw new Error("No has iniciado sesión");
-    const g = await groupsService.createGroup(user.uid, name, description, members, user.displayName ?? user.email ?? name);
+    const g = await groupsService.createGroup(user.uid, name, description, members);
     setGroups((prev) => [g, ...prev]);
     return g;
   };
@@ -71,19 +71,13 @@ export function useGroup(groupId: string) {
     return group.members.find((m) => m.userId === user.uid)?.id ?? null;
   }, [group, user]);
 
-  const getActorName = (): string => {
-    if (!user || !group) return "Alguien";
-    const member = group.members.find((m) => m.userId === user.uid);
-    return member?.name ?? "Alguien";
-  };
-
   const updateMembers = async (members: Member[]) => {
     await groupsService.updateGroupMembers(groupId, members);
     setGroup((prev) => (prev ? { ...prev, members } : null));
   };
 
   const removeMember = async (memberId: string) => {
-    await groupsService.removeMemberFromGroup(groupId, memberId, user?.uid, getActorName());
+    await groupsService.removeMemberFromGroup(groupId, memberId);
     setGroup((prev) =>
       prev
         ? { ...prev, members: prev.members.filter((m) => m.id !== memberId) }
@@ -92,18 +86,18 @@ export function useGroup(groupId: string) {
   };
 
   const removeGroup = async () => {
-    await groupsService.deleteGroup(groupId, user?.uid, getActorName(), group?.name);
+    await groupsService.deleteGroup(groupId);
   };
 
   const leaveGroup = async () => {
     if (!user || !linkedMemberId) return;
-    await groupsService.leaveGroup(groupId, user.uid, linkedMemberId, getActorName());
+    await groupsService.leaveGroup(groupId, user.uid, linkedMemberId);
     setGroup(null);
   };
 
   const claimMember = async (memberId: string) => {
     if (!user) return;
-    await groupsService.claimMember(groupId, memberId, user.uid, getActorName());
+    await groupsService.claimMember(groupId, memberId, user.uid);
     setGroup((prev) => {
       if (!prev) return null;
       return {
@@ -117,7 +111,7 @@ export function useGroup(groupId: string) {
   };
 
   const updateGroupInfo = async (name: string, description: string) => {
-    await groupsService.updateGroupInfo(groupId, name, description, user?.uid, getActorName());
+    await groupsService.updateGroupInfo(groupId, name, description);
     setGroup((prev) => (prev ? { ...prev, name, description } : null));
   };
 

@@ -14,7 +14,7 @@ import {
 } from "firebase/firestore";
 import { db } from "./firebase";
 import type { Group, Member } from "../types";
-import { logEvent } from "./auditLog";
+
 
 function docToGroup(id: string, data: DocumentData): Group {
   return {
@@ -34,7 +34,6 @@ export async function createGroup(
   name: string,
   description: string,
   members: Member[],
-  actorName?: string
 ): Promise<Group> {
   if (!members.length) throw new Error("El grupo debe tener al menos un miembro");
   const ref = await addDoc(collection(db, "groups"), {
@@ -44,9 +43,6 @@ export async function createGroup(
     userIds: [userId],
     createdBy: userId,
     createdAt: Timestamp.now(),
-  });
-  logEvent(ref.id, "group_created", userId, actorName ?? userId, {
-    memberName: name,
   });
   return {
     id: ref.id,
@@ -82,8 +78,6 @@ export async function updateGroupMembers(groupId: string, members: Member[]): Pr
 export async function removeMemberFromGroup(
   groupId: string,
   memberId: string,
-  actorUserId?: string,
-  actorName?: string
 ): Promise<void> {
   const snap = await getDoc(doc(db, "groups", groupId));
   const data = snap.data();
@@ -99,19 +93,12 @@ export async function removeMemberFromGroup(
   } else {
     await updateDoc(doc(db, "groups", groupId), { members, userIds });
   }
-  if (actorUserId) {
-    logEvent(groupId, "member_removed", actorUserId, actorName ?? actorUserId, {
-      memberId,
-      memberName: removedMember?.name ?? memberId,
-    });
-  }
 }
 
 export async function leaveGroup(
   groupId: string,
   userId: string,
   memberId: string,
-  memberName?: string
 ): Promise<void> {
   const snap = await getDoc(doc(db, "groups", groupId));
   const data = snap.data();
@@ -119,10 +106,6 @@ export async function leaveGroup(
   const members: Member[] = (data.members ?? []).filter((m: Member) => m.id !== memberId);
   const userIds: string[] = (data.userIds ?? []).filter((uid: string) => uid !== userId);
   await updateDoc(doc(db, "groups", groupId), { members, userIds });
-  logEvent(groupId, "member_left", userId, memberName ?? userId, {
-    memberId,
-    memberName,
-  });
 }
 
 export async function addUserToGroup(
@@ -130,31 +113,20 @@ export async function addUserToGroup(
   userId: string,
   memberNameOrId: string,
   claimExisting = false,
-  actorUserId?: string,
-  actorName?: string
 ): Promise<void> {
-  let addedMemberName: string | undefined;
   if (claimExisting) {
     const snap = await getDoc(doc(db, "groups", groupId));
     const data = snap.data();
     if (!data) return;
-    const existingMember = (data.members ?? []).find((m: Member) => m.id === memberNameOrId);
-    addedMemberName = existingMember?.name;
     const members: Member[] = (data.members ?? []).map((m: Member) =>
       m.id === memberNameOrId ? { ...m, userId } : m
     );
     await updateDoc(doc(db, "groups", groupId), { members, userIds: arrayUnion(userId) });
   } else {
-    addedMemberName = memberNameOrId;
     const member: Member = { id: crypto.randomUUID(), name: memberNameOrId, userId };
     await updateDoc(doc(db, "groups", groupId), {
       userIds: arrayUnion(userId),
       members: arrayUnion(member),
-    });
-  }
-  if (actorUserId) {
-    logEvent(groupId, "member_added", actorUserId, actorName ?? actorUserId, {
-      memberName: addedMemberName ?? memberNameOrId,
     });
   }
 }
@@ -163,20 +135,14 @@ export async function claimMember(
   groupId: string,
   memberId: string,
   userId: string,
-  actorName?: string
 ): Promise<void> {
   const snap = await getDoc(doc(db, "groups", groupId));
   const data = snap.data();
   if (!data) return;
-  const claimedMember = (data.members ?? []).find((m: Member) => m.id === memberId);
   const members: Member[] = (data.members ?? []).map((m: Member) =>
     m.id === memberId ? { ...m, userId } : m
   );
   await updateDoc(doc(db, "groups", groupId), { members, userIds: arrayUnion(userId) });
-  logEvent(groupId, "member_claimed", userId, actorName ?? userId, {
-    memberId,
-    memberName: claimedMember?.name ?? memberId,
-  });
 }
 
 const CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no I, O, 0, 1
@@ -212,22 +178,12 @@ export async function updateGroupInfo(
   groupId: string,
   name: string,
   description: string,
-  actorUserId?: string,
-  actorName?: string
 ): Promise<void> {
   await updateDoc(doc(db, "groups", groupId), { name, description });
-  if (actorUserId) {
-    logEvent(groupId, "group_updated", actorUserId, actorName ?? actorUserId, {
-      memberName: name,
-    });
-  }
 }
 
 export async function deleteGroup(
   groupId: string,
-  actorUserId?: string,
-  actorName?: string,
-  groupName?: string
 ): Promise<void> {
   // 1. Delete all expenses for this group
   const expensesSnap = await getDocs(
@@ -244,9 +200,4 @@ export async function deleteGroup(
   // 3. Wait for all deletions, then delete the group itself
   await Promise.all([...expenseDeletions, ...settlementDeletions]);
   await deleteDoc(doc(db, "groups", groupId));
-  if (actorUserId) {
-    logEvent(groupId, "group_deleted", actorUserId, actorName ?? actorUserId, {
-      memberName: groupName,
-    });
-  }
 }

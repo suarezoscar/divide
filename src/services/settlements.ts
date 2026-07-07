@@ -1,15 +1,39 @@
 import {
   collection,
-  addDoc,
   getDocs,
+  doc,
   query,
   where,
   Timestamp,
+  writeBatch,
   type DocumentData,
 } from "firebase/firestore";
 import { db } from "./firebase";
 import type { Settlement } from "../types";
-import { logEvent } from "./auditLog";
+import type { EventType } from "./auditLog";
+
+function auditRef() {
+  return doc(collection(db, "auditLog"));
+}
+
+function makeAuditEntry(
+  groupId: string,
+  type: EventType,
+  actorName: string,
+  amount: number,
+  description?: string,
+  toName?: string,
+) {
+  return {
+    groupId,
+    type,
+    timestamp: Timestamp.now(),
+    actorName,
+    amount,
+    description: description ?? null,
+    toName: toName ?? null,
+  };
+}
 
 function docToSettlement(id: string, data: DocumentData): Settlement {
   return {
@@ -30,29 +54,35 @@ export async function createSettlement(
   amount: number,
   actorUserId?: string,
   actorName?: string,
-  fromName?: string,
   toName?: string
 ): Promise<Settlement> {
   if (from === to) throw new Error("No puedes saldar una deuda contigo mismo");
   if (amount <= 0) throw new Error("El importe debe ser positivo");
 
-  const ref = await addDoc(collection(db, "settlements"), {
+  const settlementRef = doc(collection(db, "settlements"));
+  const batch = writeBatch(db);
+
+  batch.set(settlementRef, {
     groupId,
     from,
     to,
     amount,
     date: Timestamp.now(),
   });
-  if (actorUserId) {
-    logEvent(groupId, "settlement_created", actorUserId, actorName ?? actorUserId, {
-      amount,
-      memberId: from,
-      memberName: fromName,
-      toName,
-    });
-  }
+
+  batch.set(auditRef(), makeAuditEntry(
+    groupId,
+    "settlement_created",
+    actorName ?? actorUserId ?? "Alguien",
+    amount,
+    undefined,
+    toName,
+  ));
+
+  await batch.commit();
+
   return {
-    id: ref.id,
+    id: settlementRef.id,
     groupId,
     from,
     to,
@@ -68,6 +98,5 @@ export async function getGroupSettlements(groupId: string): Promise<Settlement[]
   );
   const snap = await getDocs(q);
   const settlements = snap.docs.map((d) => docToSettlement(d.id, d.data()));
-  // Sort in client to avoid needing a composite index
   return settlements.toSorted((a, b) => b.date.toMillis() - a.date.toMillis());
 }
