@@ -2,6 +2,24 @@
   command = "pnpm build"
   publish = "dist"
 
+# 🔵 PRODUCCIÓN (master) — Firebase divide-80f33
+[context.production.environment]
+  VITE_FIREBASE_API_KEY = "AIzaSyBc7yE8wxbrvs1_YUwJkG5C0patumhqjAk"
+  VITE_FIREBASE_AUTH_DOMAIN = "divide-80f33.firebaseapp.com"
+  VITE_FIREBASE_PROJECT_ID = "divide-80f33"
+  VITE_FIREBASE_STORAGE_BUCKET = "divide-80f33.firebasestorage.app"
+  VITE_FIREBASE_MESSAGING_SENDER_ID = "43188886274"
+  VITE_FIREBASE_APP_ID = "1:43188886274:web:f2f819d00a600545f2801b"
+
+# 🟢 PRE (ramas no-master) — Firebase divide-pre
+[context.branch-deploy.environment]
+  VITE_FIREBASE_API_KEY = "AIzaSyDZUEksZFyGen7lhYJljuqIr37lwHRxHqQ"
+  VITE_FIREBASE_AUTH_DOMAIN = "divide-pre.firebaseapp.com"
+  VITE_FIREBASE_PROJECT_ID = "divide-pre"
+  VITE_FIREBASE_STORAGE_BUCKET = "divide-pre.firebasestorage.app"
+  VITE_FIREBASE_MESSAGING_SENDER_ID = "948365606250"
+  VITE_FIREBASE_APP_ID = "1:948365606250:web:15c265398a753e07a97913"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
