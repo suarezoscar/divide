@@ -22,7 +22,7 @@ function formatDateTime(timestamp: { toDate: () => Date }): string {
 }
 
 function formatMessage(event: ActivityEvent): string {
-  const { type, actorName, amount, description, toName } = event;
+  const { type, actorName, amount, toName } = event;
   const fmtAmount = formatCurrency(amount);
 
   switch (type) {

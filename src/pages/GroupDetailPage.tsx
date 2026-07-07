@@ -639,9 +639,8 @@ export function GroupDetailPage() {
               debts={debts}
               members={group.members}
               onSettle={async (from, to, amount) => {
-                const fromMember = memberById.get(from);
                 const toMember = memberById.get(to);
-                await addSettlement(from, to, amount, user?.uid, currentMemberName, fromMember?.name, toMember?.name);
+                await addSettlement(from, to, amount, user?.uid, currentMemberName, toMember?.name);
                 showToast("Deuda saldada", "success");
               }}
             />

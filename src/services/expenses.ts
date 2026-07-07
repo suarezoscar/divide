@@ -1,11 +1,8 @@
 import {
   collection,
-  addDoc,
   getDocs,
   doc,
   getDoc,
-  updateDoc,
-  deleteDoc,
   query,
   where,
   Timestamp,

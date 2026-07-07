@@ -1,6 +1,5 @@
 import {
   collection,
-  addDoc,
   getDocs,
   doc,
   query,
@@ -55,7 +54,6 @@ export async function createSettlement(
   amount: number,
   actorUserId?: string,
   actorName?: string,
-  fromName?: string,
   toName?: string
 ): Promise<Settlement> {
   if (from === to) throw new Error("No puedes saldar una deuda contigo mismo");

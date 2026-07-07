@@ -65,9 +65,9 @@ export function JoinByCode({ open, onClose }: Props) {
     setError("");
     try {
       if (selectedMemberId) {
-        await groupsService.addUserToGroup(group.id, user.uid, selectedMemberId, true, user.uid);
+        await groupsService.addUserToGroup(group.id, user.uid, selectedMemberId, true);
       } else if (newMemberName.trim()) {
-        await groupsService.addUserToGroup(group.id, user.uid, newMemberName.trim(), false, user.uid);
+        await groupsService.addUserToGroup(group.id, user.uid, newMemberName.trim(), false);
       } else {
         setJoining(false);
         return;

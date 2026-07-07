@@ -41,11 +41,10 @@ export function useBalances(groupId: string, expenses: Expense[], memberNames: M
     amount: number,
     actorUserId?: string,
     actorName?: string,
-    fromName?: string,
     toName?: string
   ) => {
     // Firestore write; onSnapshot will update settlements automatically
-    await settlementsService.createSettlement(groupId, from, to, amount, actorUserId, actorName, fromName, toName);
+    await settlementsService.createSettlement(groupId, from, to, amount, actorUserId, actorName, toName);
   };
 
   return { settlements, balances, debts, addSettlement, loadingSettlements };
