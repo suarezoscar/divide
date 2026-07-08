@@ -1,7 +1,7 @@
 {
-  "name": "Divide — Split expenses, settle up",
-  "short_name": "Divide",
-  "description": "Divide gastos entre grupos y salda cuentas fácilmente",
+  "name": "Divida — Gastos compartidos, cero complicaciones",
+  "short_name": "Divida",
+  "description": "Reparte gastos con amigos al instante. Sin complicaciones.",
   "start_url": "/dashboard",
   "display": "standalone",
   "orientation": "portrait",

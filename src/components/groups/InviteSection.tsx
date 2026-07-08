@@ -7,7 +7,7 @@ import QRCode from "qrcode";
 import { generateInviteCode } from "../../services/groups";
 import styles from "./InviteSection.module.css";
 
-const BASE_URL = "https://divide-app.netlify.app";
+const BASE_URL = "https://divida.es";
 
 interface Props {
   groupId: string;
