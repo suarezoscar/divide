@@ -112,7 +112,7 @@ export function LoginPage() {
       <Card className={styles.card}>
         <div className={styles.brand}>
           <Divide size={32} color="#07819C" />
-          <h1>Divide</h1>
+          <h1>Divida</h1>
         </div>
 
         <form ref={formRef} onSubmit={handleSubmit} className={styles.form}>

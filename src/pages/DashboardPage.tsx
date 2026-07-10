@@ -91,7 +91,7 @@ export function DashboardPage() {
       {groups.length === 0 ? (
         <Card className={styles.empty}>
           <p style={{ fontSize: 15, marginBottom: 8 }}>Aún no tienes grupos</p>
-          <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 12 }}>Divide gastos con amigos sin hojas de cálculo</p>
+          <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 12 }}>Gestiona gastos compartidos sin complicaciones</p>
           <Button onClick={() => setShowCreate(true)} size="sm">
             <Plus size={16} /> Crear tu primer grupo
           </Button>

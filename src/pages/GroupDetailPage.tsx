@@ -353,7 +353,7 @@ export function GroupDetailPage() {
       `;
       footer.appendChild(divideSvg);
       const label = document.createElement("span");
-      label.textContent = "Divide";
+      label.textContent = "Divida";
       label.style.cssText = `
         font-size: 10px;
         font-weight: 600;

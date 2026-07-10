@@ -25,10 +25,10 @@
   </g>
 
   <!-- Text: Divide -->
-  <text x="440" y="290" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="72" font-weight="700" fill="white">Divide</text>
+  <text x="440" y="290" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="72" font-weight="700" fill="white">Divida</text>
 
   <!-- Text: subtitle -->
-  <text x="440" y="345" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="28" font-weight="400" fill="rgba(255,255,255,0.85)">Gastos en grupo, sin esfuerzo</text>
+  <text x="440" y="345" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="28" font-weight="400" fill="rgba(255,255,255,0.85)">Gastos compartidos, cero complicaciones</text>
 
   <!-- Subtle bottom line -->
   <rect x="440" y="370" width="60" height="4" rx="2" fill="rgba(255,255,255,0.3)"/>

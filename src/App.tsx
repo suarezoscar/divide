@@ -15,7 +15,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   if (loading) return (
     <div className={styles.splash}>
       <Divide size={48} color="#07819C" />
-      <span className={styles.splashText}>Divide</span>
+      <span className={styles.splashText}>Divida</span>
     </div>
   );
   if (!user) return <Navigate to="/login" replace />;

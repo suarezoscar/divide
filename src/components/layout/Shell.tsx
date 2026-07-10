@@ -87,7 +87,7 @@ export function Shell() {
               }}
             >
               <Divide size={22} color="#07819C" />
-              <span>Divide</span>
+              <span>Divida</span>
             </Link>
           )}
         </div>
@@ -107,7 +107,7 @@ export function Shell() {
       </main>
 
       <footer className={styles.footer}>
-        <span>Divide v{APP_VERSION} · Oscar Suarez{IS_PRE && <span style={{ marginLeft: 8, fontSize: 11, background: "#FDE68A", color: "#92400E", padding: "1px 6px", borderRadius: 4, fontWeight: 600 }}>PRE</span>}</span>
+        <span>Divida v{APP_VERSION} · divida.es{IS_PRE && <span style={{ marginLeft: 8, fontSize: 11, background: "#FDE68A", color: "#92400E", padding: "1px 6px", borderRadius: 4, fontWeight: 600 }}>PRE</span>}</span>
       </footer>
 
       <Modal open={showChangePwd} onClose={() => setShowChangePwd(false)} title="Cambiar contraseña">
