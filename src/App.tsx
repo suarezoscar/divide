@@ -7,6 +7,7 @@ import { GroupDetailPage } from "./pages/GroupDetailPage";
 import { AddExpensePage } from "./pages/AddExpensePage";
 import { JoinGroupPage } from "./pages/JoinGroupPage";
 import { ToastContainer } from "./components/ui/Toast";
+import { ErrorBoundary } from "./components/ui/ErrorBoundary";
 import { Divide } from "lucide-react";
 import styles from "./App.module.css";
 
@@ -53,8 +54,10 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
-        <ToastContainer />
+        <ErrorBoundary>
+          <AppRoutes />
+          <ToastContainer />
+        </ErrorBoundary>
       </AuthProvider>
     </BrowserRouter>
   );
