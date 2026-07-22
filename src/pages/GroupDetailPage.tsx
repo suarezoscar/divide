@@ -93,7 +93,7 @@ export function GroupDetailPage() {
 
   // Toggle notifications
   const toggleNotifs = async () => {
-    if (!notifsOn && Notification.permission !== "granted") {
+    if (!notifsOn && typeof Notification !== "undefined" && Notification.permission !== "granted") {
       const granted = await request();
       if (!granted) return;
     }
@@ -106,7 +106,7 @@ export function GroupDetailPage() {
 
   // Watch audit log for remote changes and notify
   useEffect(() => {
-    if (!notifsOn || Notification.permission !== "granted" || !group) return;
+    if (!notifsOn || typeof Notification === "undefined" || Notification.permission !== "granted" || !group) return;
     if (!auditEvents.length) return;
 
     if (lastNotifiedTs.current === 0) {
