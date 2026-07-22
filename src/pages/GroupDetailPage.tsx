@@ -25,6 +25,8 @@ import { Plus, Receipt, Clock, ArrowRightLeft, Share, Share2, Pencil, Trash2, Be
 import { formatCurrency, formatDate } from "../utils/format";
 import { getCategory } from "../utils/categories";
 import { getGroupColorRgba } from "../utils/groupColors";
+import { useAuditLog } from "../hooks/useAuditLog";
+import { ACTIVITY_ICONS, formatActivityMessage } from "../utils/activityFormat";
 import type { Member } from "../types";
 import styles from "./GroupDetailPage.module.css";
 
@@ -35,11 +37,11 @@ export function GroupDetailPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { group, loading, linkedMemberId, updateMembers, removeMember, removeGroup, claimMember, leaveGroup, updateGroupInfo } = useGroup(groupId!);
-  const { expenses, loading: expLoading, remove, changes, clearChanges } = useExpenses(groupId!);
-  const { notify, permission, request } = useNotifications();
+  const { expenses, loading: expLoading, remove } = useExpenses(groupId!);
+  const { events: auditEvents } = useAuditLog(groupId!);
+  const { notify, request } = useNotifications();
   const [notifsOn, setNotifsOn] = useState(() => localStorage.getItem(`notif-${groupId}`) !== "off");
-  const pendingNotifs = useRef<any[]>([]);
-  const notifTimer = useRef<ReturnType<typeof setTimeout>>(null);
+  const lastNotifiedTs = useRef<number>(0);
   const captureRef = useRef<HTMLDivElement>(null);
   const [sharing, setSharing] = useState(false);
 
@@ -91,7 +93,7 @@ export function GroupDetailPage() {
 
   // Toggle notifications
   const toggleNotifs = async () => {
-    if (!notifsOn && permission !== "granted") {
+    if (!notifsOn && Notification.permission !== "granted") {
       const granted = await request();
       if (!granted) return;
     }
@@ -100,50 +102,36 @@ export function GroupDetailPage() {
     localStorage.setItem(`notif-${groupId}`, next ? "on" : "off");
   };
 
-  // Watch for remote changes and notify — debounced, only 'added'
+  const currentMemberName = user ? group?.members.find((m) => m.userId === user.uid)?.name : undefined;
+
+  // Watch audit log for remote changes and notify
   useEffect(() => {
-    if (!changes || !notifsOn || Notification.permission !== "granted") return;
+    if (!notifsOn || Notification.permission !== "granted" || !group) return;
+    if (!auditEvents.length) return;
 
-    const filterSelf = localStorage.getItem(`lastAdded-${groupId}`);
-    const remoteAdded = filterSelf
-      ? changes.added.filter((e) => e.id !== filterSelf)
-      : changes.added;
-
-    if (remoteAdded.length === 0) {
-      clearChanges();
+    if (lastNotifiedTs.current === 0) {
+      lastNotifiedTs.current = auditEvents[0].timestamp.toMillis();
       return;
     }
 
-    // Accumulate pending notifications
-    pendingNotifs.current.push(...remoteAdded);
-    clearChanges();
+    const newEvents = auditEvents.filter(
+      (e) => e.timestamp.toMillis() > lastNotifiedTs.current
+    );
 
-    // Debounce: wait 3s to batch notifications
-    if (notifTimer.current) clearTimeout(notifTimer.current);
-    notifTimer.current = setTimeout(() => {
-      const batch = pendingNotifs.current;
-      pendingNotifs.current = [];
-      if (batch.length === 0) return;
+    if (newEvents.length === 0) return;
 
-      if (batch.length === 1) {
-        const exp = batch[0];
-        const payer = memberById.get(exp.paidBy);
-        notify(
-          `Nuevo gasto en ${group?.name}`,
-          `${payer?.name ?? "(ex-miembro)"} añadió "${exp.description}" (${formatCurrency(exp.amount)})`
-        );
-      } else {
-        notify(
-          `${batch.length} gastos nuevos en ${group?.name}`,
-          batch.map((e) => `• ${e.description}`).join("\n")
-        );
-      }
-    }, 3000);
+    for (let i = newEvents.length - 1; i >= 0; i--) {
+      const event = newEvents[i];
+      if (event.actorName === currentMemberName) continue;
+      const icon = ACTIVITY_ICONS[event.type] ?? "📌";
+      notify(
+        `${group?.name}`,
+        `${icon} ${formatActivityMessage(event)}`
+      );
+    }
 
-    return () => {
-      if (notifTimer.current) clearTimeout(notifTimer.current);
-    };
-  }, [changes, notifsOn, notify, group, groupId, clearChanges, memberById]);
+    lastNotifiedTs.current = newEvents[0].timestamp.toMillis();
+  }, [auditEvents, notifsOn, notify, group, currentMemberName]);
 
   const [tab, setTab] = useState<Tab>("expenses");
 
@@ -439,8 +427,6 @@ export function GroupDetailPage() {
     { key: "balances", label: "Balances", icon: <ArrowRightLeft size={16} /> },
     { key: "activity", label: "Historial", icon: <Clock size={16} /> },
   ];
-
-  const currentMemberName = user ? group.members.find((m) => m.userId === user.uid)?.name : undefined;
 
   const groupColorLight = getGroupColorRgba(group.name, 0.08);
 
