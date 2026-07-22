@@ -123,7 +123,7 @@ export function AddExpensePage() {
         showToast("Gasto actualizado", "success");
       } else {
         const created = await add(description.trim(), numAmount, paidBy, splits, date, cat, user?.uid, currentMemberName);
-        sessionStorage.setItem(`lastAdded-${groupId}`, created.id);
+        localStorage.setItem(`lastAdded-${groupId}`, created.id);
         showToast("Gasto añadido", "success");
       }
       navigate(`/group/${groupId}`);

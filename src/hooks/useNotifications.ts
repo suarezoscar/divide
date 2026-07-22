@@ -21,17 +21,30 @@ export function useNotifications() {
     return result === "granted";
   }, []);
 
-  const notify = useCallback((title: string, body: string) => {
-    if (permission !== "granted" || typeof Notification === "undefined") return;
+  const notify = useCallback(async (title: string, body: string) => {
+    if (typeof Notification === "undefined") return;
+
+    const currentPermission = Notification.permission;
+    if (currentPermission !== "granted") return;
+
+    setPermission(currentPermission);
+
     try {
-      navigator.serviceWorker.ready.then((reg) => {
-        reg.showNotification(title, { body, icon: "/logo.svg", badge: "/logo.svg" });
-      });
+      const reg = await navigator.serviceWorker?.ready;
+      if (reg) {
+        await reg.showNotification(title, { body, icon: "/logo.svg", badge: "/logo.svg" });
+        return;
+      }
     } catch {
-      // Fallback to plain notification if no SW
-      new Notification(title, { body, icon: "/logo.svg" });
+      // service worker not available, fall back to plain Notification
     }
-  }, [permission]);
+
+    try {
+      new Notification(title, { body, icon: "/logo.svg" });
+    } catch {
+      // Notification constructor may also fail in some contexts
+    }
+  }, []);
 
   return { permission, request, notify };
 }
