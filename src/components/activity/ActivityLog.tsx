@@ -40,7 +40,7 @@ function formatMessage(event: ActivityEvent): string {
 }
 
 export function ActivityLog({ groupId }: { groupId: string }) {
-  const { events, loading } = useAuditLog(groupId);
+  const { events, loading, error } = useAuditLog(groupId);
 
   if (loading) {
     return (
@@ -51,6 +51,17 @@ export function ActivityLog({ groupId }: { groupId: string }) {
           </div>
         ))}
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className={styles.empty}>
+        <p style={{ marginBottom: 6, color: "#DC2626" }}>Error al cargar el historial</p>
+        <p style={{ fontSize: 13, color: "#6B7280" }}>
+          Es posible que falte un índice en Firestore. Revisa la consola para más detalles.
+        </p>
+      </Card>
     );
   }
 

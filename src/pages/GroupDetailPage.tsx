@@ -102,9 +102,9 @@ export function GroupDetailPage() {
 
   // Watch for remote changes and notify — debounced, only 'added'
   useEffect(() => {
-    if (!changes || !notifsOn || permission !== "granted") return;
+    if (!changes || !notifsOn || Notification.permission !== "granted") return;
 
-    const filterSelf = sessionStorage.getItem(`lastAdded-${groupId}`);
+    const filterSelf = localStorage.getItem(`lastAdded-${groupId}`);
     const remoteAdded = filterSelf
       ? changes.added.filter((e) => e.id !== filterSelf)
       : changes.added;
@@ -143,7 +143,7 @@ export function GroupDetailPage() {
     return () => {
       if (notifTimer.current) clearTimeout(notifTimer.current);
     };
-  }, [changes, notifsOn, permission, notify, group, groupId, clearChanges, memberById]);
+  }, [changes, notifsOn, notify, group, groupId, clearChanges, memberById]);
 
   const [tab, setTab] = useState<Tab>("expenses");
 
